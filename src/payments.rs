@@ -30,10 +30,9 @@ impl PartialOrd for Order {
 }
 impl Ord for Order {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        let item_order = self.item.cmp(&other.item);
-        match item_order {
-            std::cmp::Ordering::Less | std::cmp::Ordering::Greater => item_order,
+        match self.item.cmp(&other.item) {
             std::cmp::Ordering::Equal => self.unit_price.cmp(&other.unit_price),
+            item_order => item_order,
         }
     }
 }
