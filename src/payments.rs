@@ -13,8 +13,7 @@ pub type MissingElements = HashSet<Element>;
 
 #[derive(Debug)]
 pub enum PaymentError {
-    JsonParseError(serde_json::Error),
-    JsonDumpError(serde_json::Error),
+    Generic(String),
     MissingElements(HashSet<Element>),
 }
 
@@ -87,12 +86,12 @@ pub struct AllPayments {
 
 impl AllPayments {
     pub fn to_json(&self) -> Result<String, PaymentError> {
-        serde_json::to_string(self).map_err(PaymentError::JsonDumpError)
+        serde_json::to_string(self).map_err(|err| PaymentError::Generic(err.to_string()))
     }
 
     pub fn from_json(json: &str) -> Result<Self, PaymentError> {
         let all_payments: AllPayments =
-            serde_json::from_str(json).map_err(PaymentError::JsonParseError)?;
+            serde_json::from_str(json).map_err(|err| PaymentError::Generic(err.to_string()))?;
         let missing_elements = all_payments.validate();
         if missing_elements.is_empty() {
             Ok(all_payments)
@@ -136,7 +135,7 @@ mod tests {
         let wrong_json = r#"{"wrong_json": "12"}"#;
         let payment = AllPayments::from_json(wrong_json);
         println!("{payment:?}");
-        assert!(matches!(payment, Err(PaymentError::JsonParseError(_))));
+        assert!(matches!(payment, Err(PaymentError::Generic(_))));
     }
 
     #[test]
