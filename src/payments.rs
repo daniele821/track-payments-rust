@@ -13,7 +13,8 @@ pub type MissingElements = HashSet<Element>;
 
 #[derive(Debug)]
 pub enum PaymentError {
-    JsonParseError(String),
+    JsonParseError(serde_json::Error),
+    JsonDumpError(serde_json::Error),
     MissingElements(HashSet<Element>),
 }
 
@@ -85,13 +86,13 @@ pub struct AllPayments {
 }
 
 impl AllPayments {
-    pub fn to_json(&self) -> Option<String> {
-        serde_json::to_string(self).ok()
+    pub fn to_json(&self) -> Result<String, PaymentError> {
+        serde_json::to_string(self).map_err(PaymentError::JsonDumpError)
     }
 
     pub fn from_json(json: &str) -> Result<Self, PaymentError> {
-        let all_payments: AllPayments = serde_json::from_str(json)
-            .map_err(|err| PaymentError::JsonParseError(err.to_string()))?;
+        let all_payments: AllPayments =
+            serde_json::from_str(json).map_err(PaymentError::JsonParseError)?;
         let missing_elements = all_payments.validate();
         if missing_elements.is_empty() {
             Ok(all_payments)
@@ -130,12 +131,41 @@ impl AllPayments {
 mod tests {
 
     #[test]
-    fn parse_wrong_json() {
+    fn parse_invalid_json() {
         let wrong_json = r#"{"wrong_json": "12"}"#;
         let payment = super::AllPayments::from_json(wrong_json);
         assert!(matches!(
             payment,
             Err(super::PaymentError::JsonParseError(_))
         ));
+    }
+
+    #[test]
+    fn parse_correct_json() {
+        let correct_json = r#"
+{ "payments": [
+    {
+      "city": "London",
+      "shop": "Bar",
+      "method": "Cash",
+      "date": 12,
+      "orders": [ {
+          "quantity": 1,
+          "unit_price": 120,
+          "item": "Apples"
+        }
+      ]
+    }
+  ],
+  "value_set": {
+    "cities": [ "London" ],
+    "shops": [ "Bar" ],
+    "methods": [ "Cash" ],
+    "items": [ "Apples" ]
+  }
+}
+        "#;
+        let payment = super::AllPayments::from_json(correct_json);
+        assert!(payment.is_ok());
     }
 }
