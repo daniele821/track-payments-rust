@@ -73,11 +73,18 @@ impl AllPayments {
         serde_json::to_string(self).ok()
     }
 
-    pub fn from_json(json: &str) -> Option<Self> {
-        serde_json::from_str(json).ok()
+    pub fn from_json(json: &str) -> Result<Self, PaymentError> {
+        let all_payments: AllPayments = serde_json::from_str(json)
+            .map_err(|err| PaymentError::JsonParseError(err.to_string()))?;
+        let missing_elements = all_payments.validate();
+        if missing_elements.is_empty() {
+            Ok(all_payments)
+        } else {
+            Err(PaymentError::MissingElements(missing_elements))
+        }
     }
 
-    pub fn validate(&self) -> Option<MissingElements> {
+    fn validate(&self) -> MissingElements {
         let mut missing_elements = MissingElements::new();
         for payment in &self.payments {
             let city = &payment.city;
@@ -99,11 +106,7 @@ impl AllPayments {
                 }
             }
         }
-        if missing_elements.is_empty() {
-            None
-        } else {
-            Some(missing_elements)
-        }
+        missing_elements
     }
 }
 
@@ -116,3 +119,9 @@ pub enum Element {
 }
 
 pub type MissingElements = HashSet<Element>;
+
+#[derive(Debug)]
+pub enum PaymentError {
+    JsonParseError(String),
+    MissingElements(HashSet<Element>),
+}
