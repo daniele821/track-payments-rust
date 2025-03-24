@@ -3,14 +3,14 @@ use serde_json;
 use std::collections::{BTreeMap, HashSet};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Order {
+pub struct Order {
     unit_price: u32,
     quantity: u32,
     item: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Payment {
+pub struct Payment {
     city: String,
     method: String,
     shop: String,
@@ -19,7 +19,7 @@ struct Payment {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct AllPayments {
+pub struct AllPayments {
     cities: HashSet<String>,
     shops: HashSet<String>,
     methods: HashSet<String>,
