@@ -28,11 +28,11 @@ pub struct AllPayments {
 }
 
 impl AllPayments {
-    pub fn to_json(&self) -> String {
-        serde_json::to_string(self).expect("failed to convert to json!")
+    pub fn to_json(&self) -> Option<String> {
+        serde_json::to_string(self).ok()
     }
 
-    pub fn from_json(json: &str) -> Self {
-        serde_json::from_str(json).expect("failed to parse json!")
+    pub fn from_json(json: &str) -> Option<Self> {
+        serde_json::from_str(json).ok()
     }
 }
