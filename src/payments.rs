@@ -134,6 +134,7 @@ mod tests {
     fn parse_invalid_json() {
         let wrong_json = r#"{"wrong_json": "12"}"#;
         let payment = super::AllPayments::from_json(wrong_json);
+        println!("{payment:?}");
         assert!(matches!(
             payment,
             Err(super::PaymentError::JsonParseError(_))
@@ -166,6 +167,7 @@ mod tests {
 }
         "#;
         let payment = super::AllPayments::from_json(correct_json);
+        println!("{payment:?}");
         assert!(payment.is_ok());
     }
 }
