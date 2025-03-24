@@ -125,3 +125,17 @@ impl AllPayments {
         missing_elements
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn parse_wrong_json() {
+        let wrong_json = r#"{"wrong_json": "12"}"#;
+        let payment = super::AllPayments::from_json(wrong_json);
+        assert!(matches!(
+            payment,
+            Err(super::PaymentError::JsonParseError(_))
+        ));
+    }
+}
