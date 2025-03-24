@@ -76,4 +76,43 @@ impl AllPayments {
     pub fn from_json(json: &str) -> Option<Self> {
         serde_json::from_str(json).ok()
     }
+
+    pub fn validate(&self) -> Option<MissingElements> {
+        let mut missing_elements = MissingElements::new();
+        for payment in &self.payments {
+            let city = &payment.city;
+            let shop = &payment.shop;
+            let method = &payment.method;
+            if !self.value_set.cities.contains(city) {
+                missing_elements.insert(Element::City(city.clone()));
+            }
+            if !self.value_set.shops.contains(shop) {
+                missing_elements.insert(Element::Shop(shop.clone()));
+            }
+            if !self.value_set.methods.contains(method) {
+                missing_elements.insert(Element::Method(method.clone()));
+            }
+            for order in &payment.orders {
+                let item = &order.item;
+                if !self.value_set.items.contains(item) {
+                    missing_elements.insert(Element::Item(item.clone()));
+                }
+            }
+        }
+        if missing_elements.is_empty() {
+            None
+        } else {
+            Some(missing_elements)
+        }
+    }
 }
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub enum Element {
+    City(String),
+    Shop(String),
+    Method(String),
+    Item(String),
+}
+
+pub type MissingElements = HashSet<Element>;
