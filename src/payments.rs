@@ -1,6 +1,22 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
 
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub enum Element {
+    City(String),
+    Shop(String),
+    Method(String),
+    Item(String),
+}
+
+pub type MissingElements = HashSet<Element>;
+
+#[derive(Debug)]
+pub enum PaymentError {
+    JsonParseError(String),
+    MissingElements(HashSet<Element>),
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct ValueSet {
     cities: HashSet<String>,
@@ -108,20 +124,4 @@ impl AllPayments {
         }
         missing_elements
     }
-}
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-pub enum Element {
-    City(String),
-    Shop(String),
-    Method(String),
-    Item(String),
-}
-
-pub type MissingElements = HashSet<Element>;
-
-#[derive(Debug)]
-pub enum PaymentError {
-    JsonParseError(String),
-    MissingElements(HashSet<Element>),
 }
