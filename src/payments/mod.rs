@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 #[derive(Debug)]
 struct Order {
@@ -18,5 +18,9 @@ struct Payment {
 
 #[derive(Debug)]
 struct AllPayments {
+    cities: HashSet<String>,
+    shops: HashSet<String>,
+    methods: HashSet<String>,
+    items: HashSet<String>,
     payments: BTreeMap<i64, Payment>,
 }
