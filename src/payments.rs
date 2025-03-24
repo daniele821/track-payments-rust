@@ -27,21 +27,12 @@ struct AllPayments {
     payments: BTreeMap<i64, Payment>,
 }
 
-pub fn testing() {
-    let order = Order {
-        unit_price: 34,
-        quantity: 12,
-        item: String::from("12"),
-    };
-    let mut payment = Payment {
-        city: String::from("12"),
-        method: String::from("12"),
-        shop: String::from("12"),
-        date: 0,
-        orders: BTreeMap::new(),
-    };
-    payment.orders.insert("12".to_string(), order);
-    println!("{payment:?}");
-    let payment_json = serde_json::to_string_pretty(&payment).unwrap();
-    println!("{payment_json}");
+impl AllPayments {
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(self).expect("failed to convert to json!")
+    }
+
+    pub fn from_json(json: &str) -> Self {
+        serde_json::from_str(json).expect("failed to parse json!")
+    }
 }
