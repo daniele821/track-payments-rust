@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::collections::{BTreeSet, HashSet};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -19,13 +18,13 @@ pub struct Order {
 
 impl PartialEq for Order {
     fn eq(&self, other: &Self) -> bool {
-        self.item == other.item && self.unit_price == self.unit_price
+        self.item == other.item && self.unit_price == other.unit_price
     }
 }
 impl Eq for Order {}
 impl PartialOrd for Order {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 impl Ord for Order {
@@ -54,7 +53,7 @@ impl PartialEq for Payment {
 impl Eq for Payment {}
 impl PartialOrd for Payment {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 impl Ord for Payment {
