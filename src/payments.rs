@@ -9,8 +9,6 @@ pub enum Element {
     Item(String),
 }
 
-pub type MissingElements = HashSet<Element>;
-
 #[derive(Debug)]
 pub enum PaymentError {
     Generic(String),
@@ -100,8 +98,8 @@ impl AllPayments {
         }
     }
 
-    fn validate(&self) -> MissingElements {
-        let mut missing_elements = MissingElements::new();
+    fn validate(&self) -> HashSet<Element> {
+        let mut missing_elements = HashSet::new();
         for payment in &self.payments {
             let city = &payment.city;
             let shop = &payment.shop;
