@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ValueSet {
+struct ValueSet {
     cities: HashSet<String>,
     shops: HashSet<String>,
     methods: HashSet<String>,
@@ -10,7 +10,7 @@ pub struct ValueSet {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Order {
+struct Order {
     unit_price: u32,
     quantity: u32,
     item: String,
@@ -37,7 +37,7 @@ impl Ord for Order {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Payment {
+struct Payment {
     city: String,
     method: String,
     shop: String,
