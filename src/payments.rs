@@ -77,11 +77,11 @@ impl ValueSet {
         &self.items
     }
 
-    pub fn extend(&mut self, other: &Self) {
-        self.cities.extend(other.cities.iter().cloned());
-        self.shops.extend(other.shops.iter().cloned());
-        self.methods.extend(other.methods.iter().cloned());
-        self.items.extend(other.items.iter().cloned());
+    pub fn extend(&mut self, other: Self) {
+        self.cities.extend(other.cities);
+        self.shops.extend(other.shops);
+        self.methods.extend(other.methods);
+        self.items.extend(other.items);
     }
 }
 
@@ -160,8 +160,12 @@ impl AllPayments {
         &self.payments
     }
 
-    pub fn extend_valueset(&mut self, value_set: &ValueSet) {
+    pub fn extend_valueset(&mut self, value_set: ValueSet) {
         self.value_set.extend(value_set);
+    }
+
+    pub fn add_payment(&mut self, payment: Payment) -> bool {
+        self.payments.insert(payment)
     }
 }
 
@@ -197,6 +201,8 @@ mod tests {
         );
 
         let mut all_payments = AllPayments::new();
-        all_payments.extend_valueset(&value_set);
+        all_payments.extend_valueset(value_set);
+        all_payments.add_payment(payment1);
+        all_payments.add_payment(payment2);
     }
 }
