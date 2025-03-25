@@ -12,10 +12,12 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Derivative, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Serialize, Deserialize, Derivative)]
+#[derivative(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Order {
     item: String,
     unit_price: u32,
+    #[derivative(PartialEq = "ignore", Ord = "ignore", PartialOrd = "ignore")]
     quantity: u32,
 }
 
