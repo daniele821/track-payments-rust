@@ -247,5 +247,10 @@ mod tests {
         let payment = Payment::new("London", "Bar", "Cash", 0);
         let err = all_payments.add_payment(payment);
         assert!(err.is_ok());
+
+        let json_str = all_payments.to_json(false);
+        assert!(json_str.is_ok());
+        let all_payments_parsed = AllPayments::from_json(&json_str.unwrap());
+        assert!(all_payments_parsed.is_ok());
     }
 }
