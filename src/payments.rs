@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct ValueSet {
+pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
     methods: BTreeSet<String>,
@@ -140,5 +140,25 @@ impl Payment {
             acc += order.calculate_price();
         }
         acc
+    }
+}
+
+impl AllPayments {
+    pub fn new() -> Self {
+        Self {
+            value_set: ValueSet::new(),
+            payments: BTreeSet::new(),
+        }
+    }
+
+    pub fn get_valueset(&self) -> &ValueSet {
+        &self.value_set
+    }
+    pub fn get_payments(&self) -> &BTreeSet<Payment> {
+        &self.payments
+    }
+
+    pub fn extend_valueset(&mut self, value_set: &ValueSet) {
+        self.value_set.extend(value_set);
     }
 }
