@@ -90,8 +90,12 @@ pub struct AllPayments {
 }
 
 impl AllPayments {
-    pub fn to_json(&self) -> Result<String, PaymentError> {
-        serde_json::to_string(self).map_err(|err| PaymentError::Generic(err.to_string()))
+    pub fn to_json(&self, pretty: bool) -> Result<String, PaymentError> {
+        if pretty {
+            serde_json::to_string_pretty(self).map_err(|err| PaymentError::Generic(err.to_string()))
+        } else {
+            serde_json::to_string(self).map_err(|err| PaymentError::Generic(err.to_string()))
+        }
     }
 
     pub fn from_json(json: &str) -> Result<Self, PaymentError> {
