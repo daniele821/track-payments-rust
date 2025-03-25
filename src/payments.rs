@@ -48,6 +48,10 @@ impl Order {
         }
     }
 
+    pub fn new_equal(&self) -> Self {
+        Self::new(self.unit_price, 0, &self.item.clone())
+    }
+
     fn validate(&self, value_set: &ValueSet) -> Elements {
         let mut missing_elements = Elements::new();
         let item = &self.item;
@@ -89,6 +93,10 @@ impl Payment {
             date,
             orders: BTreeSet::new(),
         }
+    }
+
+    pub fn new_equal(&self) -> Self {
+        Self::new("", "", "", self.date)
     }
 
     fn validate(&self, value_set: &ValueSet) -> Elements {
