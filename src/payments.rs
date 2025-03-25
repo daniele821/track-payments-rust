@@ -19,9 +19,9 @@ pub type Elements = BTreeSet<Element>;
 pub enum PaymentError {
     Generic(String),
     MissingElements(Elements),
-    DuplicateElements(Elements),
-    DuplicatePayment(Payment),
-    DuplicateOrder(Order),
+    DuplicatedElements(Elements),
+    DuplicatedPayment(Payment),
+    DuplicatedOrder(Order),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -196,8 +196,20 @@ impl AllPayments {
         if duplicates.is_empty() {
             None
         } else {
-            Some(PaymentError::DuplicateElements(duplicates))
+            Some(PaymentError::DuplicatedElements(duplicates))
         }
+    }
+
+    pub fn add_payment(&mut self, payment: Payment) -> Result<(), PaymentError> {
+        if self.payments.contains(&payment) {
+            return Err(PaymentError::DuplicatedPayment(payment));
+        }
+        let missing_elements = payment.validate(&self.value_set);
+        if !missing_elements.is_empty() {
+            return Err(PaymentError::MissingElements(missing_elements));
+        }
+        assert!(self.payments.insert(payment));
+        Ok(())
     }
 
     pub fn get_payments(&self) -> &BTreeSet<Payment> {
