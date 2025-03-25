@@ -19,6 +19,7 @@ pub type Elements = BTreeSet<Element>;
 pub enum PaymentError {
     Generic(String),
     MissingElements(Elements),
+    DuplicateElements(Elements),
     DuplicatePayment(Payment),
     DuplicateOrder(Order),
 }
@@ -180,7 +181,7 @@ impl AllPayments {
         }
     }
 
-    pub fn add_elements(&mut self, elements: &[Element]) -> Elements {
+    pub fn add_elements(&mut self, elements: &[Element]) -> Option<PaymentError> {
         let mut duplicates = Elements::new();
         for element in elements {
             if !match element {
@@ -192,7 +193,11 @@ impl AllPayments {
                 duplicates.insert(element.clone());
             }
         }
-        duplicates
+        if duplicates.is_empty() {
+            None
+        } else {
+            Some(PaymentError::DuplicateElements(duplicates))
+        }
     }
 
     pub fn get_payments(&self) -> &BTreeSet<Payment> {
