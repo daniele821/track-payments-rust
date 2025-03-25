@@ -5,7 +5,7 @@ mod trait_impl;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub enum Element {
     City(String),
     Shop(String),
@@ -13,10 +13,12 @@ pub enum Element {
     Item(String),
 }
 
+pub type Elements = BTreeSet<Element>;
+
 #[derive(Debug)]
 pub enum PaymentError {
     Generic(String),
-    MissingElements(HashSet<Element>),
+    MissingElements(Elements),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -109,8 +111,8 @@ impl AllPayments {
         }
     }
 
-    fn validate(&self) -> HashSet<Element> {
-        let mut missing_elements = HashSet::new();
+    fn validate(&self) -> Elements {
+        let mut missing_elements = Elements::new();
         for payment in &self.payments {
             let city = &payment.city;
             let shop = &payment.shop;
@@ -146,8 +148,8 @@ impl AllPayments {
         }
     }
 
-    pub fn add_elements(&mut self, elements: &[Element]) -> HashSet<Element> {
-        let mut duplicates = HashSet::<Element>::new();
+    pub fn add_elements(&mut self, elements: &[Element]) -> Elements {
+        let mut duplicates = Elements::new();
         for element in elements {
             if !match element {
                 Element::City(city) => self.value_set.cities.insert(String::from(city)),
