@@ -47,6 +47,15 @@ impl Order {
         }
     }
 
+    fn validate(&self, value_set: &ValueSet) -> Elements {
+        let mut missing_elements = Elements::new();
+        let item = &self.item;
+        if !value_set.items.contains(item) {
+            missing_elements.insert(Element::Item(item.clone()));
+        }
+        missing_elements
+    }
+
     pub fn get_unitprice(&self) -> u32 {
         self.unit_price
     }
@@ -79,6 +88,23 @@ impl Payment {
             date,
             orders: BTreeSet::new(),
         }
+    }
+
+    fn validate(&self, value_set: &ValueSet) -> Elements {
+        let mut missing_elements = Elements::new();
+        let city = &self.city;
+        let shop = &self.shop;
+        let method = &self.method;
+        if !value_set.cities.contains(city) {
+            missing_elements.insert(Element::City(city.clone()));
+        }
+        if !value_set.shops.contains(shop) {
+            missing_elements.insert(Element::Shop(shop.clone()));
+        }
+        if !value_set.methods.contains(method) {
+            missing_elements.insert(Element::Method(method.clone()));
+        }
+        missing_elements
     }
 
     pub fn get_city(&self) -> &str {
@@ -134,23 +160,9 @@ impl AllPayments {
     fn validate(&self) -> Elements {
         let mut missing_elements = Elements::new();
         for payment in &self.payments {
-            let city = &payment.city;
-            let shop = &payment.shop;
-            let method = &payment.method;
-            if !self.value_set.cities.contains(city) {
-                missing_elements.insert(Element::City(city.clone()));
-            }
-            if !self.value_set.shops.contains(shop) {
-                missing_elements.insert(Element::Shop(shop.clone()));
-            }
-            if !self.value_set.methods.contains(method) {
-                missing_elements.insert(Element::Method(method.clone()));
-            }
+            missing_elements.append(&mut payment.validate(&self.value_set));
             for order in &payment.orders {
-                let item = &order.item;
-                if !self.value_set.items.contains(item) {
-                    missing_elements.insert(Element::Item(item.clone()));
-                }
+                missing_elements.append(&mut order.validate(&self.value_set));
             }
         }
         missing_elements
@@ -182,14 +194,6 @@ impl AllPayments {
         }
         duplicates
     }
-
-    //pub fn add_payment(&mut self, payment: Payment) -> Result<(), PaymentError> {
-    //    if self.payments.contains(&payment) {
-    //        return Err(PaymentError::DuplicatePayment(payment));
-    //    }
-    //
-    //    Ok(())
-    //}
 
     pub fn get_payments(&self) -> &BTreeSet<Payment> {
         &self.payments
