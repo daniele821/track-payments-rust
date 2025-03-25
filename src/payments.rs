@@ -173,9 +173,9 @@ impl AllPayments {
         for element in elements {
             if !match element {
                 Element::City(city) => self.value_set.cities.insert(String::from(city)),
-                Element::Shop(shop) => self.value_set.cities.insert(String::from(shop)),
-                Element::Method(method) => self.value_set.cities.insert(String::from(method)),
-                Element::Item(item) => self.value_set.cities.insert(String::from(item)),
+                Element::Shop(shop) => self.value_set.shops.insert(String::from(shop)),
+                Element::Method(method) => self.value_set.methods.insert(String::from(method)),
+                Element::Item(item) => self.value_set.items.insert(String::from(item)),
             } {
                 duplicates.insert(element.clone());
             }
