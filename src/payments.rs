@@ -40,11 +40,11 @@ pub struct Order {
 }
 
 impl Order {
-    pub fn new(unit_price: u32, quantity: u32, item: String) -> Self {
+    pub fn new(unit_price: u32, quantity: u32, item: &str) -> Self {
         Self {
             unit_price,
             quantity,
-            item,
+            item: String::from(item),
         }
     }
 
@@ -81,11 +81,11 @@ pub struct Payment {
 }
 
 impl Payment {
-    pub fn new(city: String, method: String, shop: String, date: i64) -> Self {
+    pub fn new(city: &str, method: &str, shop: &str, date: i64) -> Self {
         Self {
-            city,
-            method,
-            shop,
+            city: String::from(city),
+            method: String::from(method),
+            shop: String::from(shop),
             date,
             orders: BTreeSet::new(),
         }
@@ -219,7 +219,7 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use super::{AllPayments, Element, PaymentError};
+    use super::{AllPayments, Element, Payment, PaymentError};
 
     #[test]
     fn parse_invalid_json() {
@@ -262,5 +262,22 @@ mod tests {
         ]);
         println!("{duplicates:?}");
         matches!(duplicates, Some(PaymentError::DuplicatedElements(_)));
+    }
+
+    #[test]
+    fn insert_payment() {
+        let mut payments = AllPayments::new();
+        let duplicates = payments.add_elements(&[
+            Element::City(String::from("London")),
+            Element::Shop(String::from("Bar")),
+            Element::Method(String::from("Cash")),
+        ]);
+        println!("{duplicates:?}");
+        assert!(duplicates.is_none());
+
+        let payment = Payment::new("London", "Cash", "Bar", 0);
+        let opt_err = payments.add_payment(payment);
+        println!("{opt_err:?}");
+        assert!(opt_err.is_ok());
     }
 }
