@@ -258,14 +258,21 @@ mod tests {
         ]);
         println!("{duplicates:?}");
         assert!(duplicates.is_none());
+    }
+
+    #[test]
+    fn insert_duplicated_values() {
+        let mut payments = AllPayments::new();
         let duplicates = payments.add_elements(&[
             Element::City(String::from("City1")),
+            Element::City(String::from("City1")),
             Element::Shop(String::from("Shop1")),
-            Element::Method(String::from("Method1")),
-            Element::Item(String::from("Item1")),
         ]);
         println!("{duplicates:?}");
-        matches!(duplicates, Some(PaymentError::DuplicatedElements(_)));
+        assert!(matches!(
+            duplicates,
+            Some(PaymentError::DuplicatedElements(_))
+        ));
     }
 
     #[test]
