@@ -153,15 +153,13 @@ mod tests {
 
     #[test]
     fn parse_correct_json() {
-        let correct_json = r#"
-{ "payments": [ {
-      "city": "London", "shop": "Bar", "method": "Cash", "date": 12,
-      "orders": [ { "quantity": 1, "unit_price": 120, "item": "Apples" } ]
-    } ],
-  "value_set": {
-    "cities": [ "London" ], "shops": [ "Bar" ], "methods": [ "Cash" ], "items": [ "Apples" ]
-  } }
-        "#;
+        let correct_json = r#" {"payments":[{
+  "city":"London","shop":"Bar","method":"Cash","date":12,
+  "orders":[{"quantity":1,"unit_price":120,"item":"Apples"}]
+}],
+  "value_set":{
+  "cities":["London"],"shops":["Bar"],"methods":["Cash"],"items":["Apples"]
+}} "#;
         let payment = AllPayments::from_json(correct_json);
         println!("{payment:?}");
         assert!(payment.is_ok());
