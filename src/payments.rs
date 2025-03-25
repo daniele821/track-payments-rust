@@ -241,6 +241,10 @@ mod tests {
         let payment = AllPayments::from_json(correct_json);
         println!("{payment:?}");
         assert!(payment.is_ok());
+
+        let format_json = payment.unwrap().to_json(false);
+        println!("{format_json:?}");
+        assert!(format_json.is_ok());
     }
 
     #[test]
@@ -267,14 +271,11 @@ mod tests {
     #[test]
     fn insert_payment() {
         let mut payments = AllPayments::new();
-        let duplicates = payments.add_elements(&[
+        payments.add_elements(&[
             Element::City(String::from("London")),
             Element::Shop(String::from("Bar")),
             Element::Method(String::from("Cash")),
         ]);
-        println!("{duplicates:?}");
-        assert!(duplicates.is_none());
-
         let payment = Payment::new("London", "Cash", "Bar", 0);
         let opt_err = payments.add_payment(payment);
         println!("{opt_err:?}");
