@@ -42,6 +42,9 @@ impl Order {
     pub fn get_item(&self) -> &str {
         &self.item
     }
+    pub fn calculate_price(&self) -> u32 {
+        self.unit_price * self.quantity
+    }
 }
 
 impl PartialEq for Order {
@@ -88,6 +91,13 @@ impl Payment {
     }
     pub fn get_orders(&self) -> &BTreeSet<Order> {
         &self.orders
+    }
+    pub fn calculate_total_price(&self) -> u32 {
+        let mut acc = 0;
+        for order in &self.orders {
+            acc += order.calculate_price();
+        }
+        acc
     }
 }
 
