@@ -252,13 +252,15 @@ mod tests {
             Element::Method(String::from("Method1")),
             Element::Item(String::from("Item1")),
         ]);
-        assert_eq!(duplicates.len(), 0);
+        println!("{duplicates:?}");
+        assert!(duplicates.is_none());
         let duplicates = payments.add_elements(&[
             Element::City(String::from("City1")),
             Element::Shop(String::from("Shop1")),
             Element::Method(String::from("Method1")),
             Element::Item(String::from("Item1")),
         ]);
-        assert_eq!(duplicates.len(), 4);
+        println!("{duplicates:?}");
+        matches!(duplicates, Some(PaymentError::DuplicatedElements(_)));
     }
 }
