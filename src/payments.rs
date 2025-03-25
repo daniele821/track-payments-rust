@@ -165,6 +165,36 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
+    use super::{AllPayments, Order, Payment, ValueSet};
+
     #[test]
-    fn all_payments() {}
+    fn all_payments() {
+        let mut value_set = ValueSet::new();
+        value_set.add_cities(&[String::from("London")]);
+        value_set.add_cities(&[String::from("Paris")]);
+        value_set.add_shops(&[String::from("Pub")]);
+        value_set.add_methods(&[String::from("Cash")]);
+        value_set.add_items(&[String::from("Apples")]);
+        value_set.add_items(&[String::from("Tea")]);
+
+        let mut order1 = Order::new(String::from("Apples"), 220, 1);
+        let mut order2 = Order::new(String::from("Tea"), 500, 2);
+        let mut order3 = Order::new(String::from("Apples"), 200, 3);
+
+        let mut payment1 = Payment::new(
+            1,
+            String::from("London"),
+            String::from("Pub"),
+            String::from("Cash"),
+        );
+        let mut payment2 = Payment::new(
+            2,
+            String::from("Paris"),
+            String::from("Pub"),
+            String::from("Cash"),
+        );
+
+        let mut all_payments = AllPayments::new();
+        all_payments.extend_valueset(&value_set);
+    }
 }
