@@ -162,3 +162,9 @@ impl AllPayments {
         self.value_set.extend(value_set);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn all_payments() {}
+}

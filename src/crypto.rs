@@ -32,7 +32,7 @@ mod tests {
     use super::{decrypt, encrypt};
 
     #[test]
-    fn test_aes256gcm() {
+    fn encryption() {
         let plain_text = "Random text which i want to cipher!";
         let key_str = "12345678901234567890123456789012";
         let cipher_text = encrypt(key_str, plain_text).unwrap();
