@@ -1,28 +1,7 @@
 #![allow(unused)]
 
-mod trait_impl;
-
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
-pub enum Element {
-    City(String),
-    Shop(String),
-    Method(String),
-    Item(String),
-}
-
-pub type Elements = BTreeSet<Element>;
-
-#[derive(Debug)]
-pub enum PaymentError {
-    Generic(String),
-    MissingElements(Elements),
-    DuplicatedElements(Elements),
-    DuplicatedPayment(Payment),
-    DuplicatedOrder(Order),
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ValueSet {
@@ -47,32 +26,6 @@ impl Order {
             item: String::from(item),
         }
     }
-
-    pub fn new_equal(&self) -> Self {
-        Self::new(self.unit_price, 0, &self.item.clone())
-    }
-
-    fn validate(&self, value_set: &ValueSet) -> Elements {
-        let mut missing_elements = Elements::new();
-        let item = &self.item;
-        if !value_set.items.contains(item) {
-            missing_elements.insert(Element::Item(item.clone()));
-        }
-        missing_elements
-    }
-
-    pub fn get_unitprice(&self) -> u32 {
-        self.unit_price
-    }
-    pub fn get_quantity(&self) -> u32 {
-        self.quantity
-    }
-    pub fn get_item(&self) -> &str {
-        &self.item
-    }
-    pub fn calculate_price(&self) -> u32 {
-        self.unit_price * self.quantity
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -94,50 +47,6 @@ impl Payment {
             orders: BTreeSet::new(),
         }
     }
-
-    pub fn new_equal(&self) -> Self {
-        Self::new("", "", "", self.date)
-    }
-
-    fn validate(&self, value_set: &ValueSet) -> Elements {
-        let mut missing_elements = Elements::new();
-        let city = &self.city;
-        let shop = &self.shop;
-        let method = &self.method;
-        if !value_set.cities.contains(city) {
-            missing_elements.insert(Element::City(city.clone()));
-        }
-        if !value_set.shops.contains(shop) {
-            missing_elements.insert(Element::Shop(shop.clone()));
-        }
-        if !value_set.methods.contains(method) {
-            missing_elements.insert(Element::Method(method.clone()));
-        }
-        missing_elements
-    }
-
-    pub fn get_city(&self) -> &str {
-        &self.city
-    }
-    pub fn get_method(&self) -> &str {
-        &self.method
-    }
-    pub fn get_shop(&self) -> &str {
-        &self.shop
-    }
-    pub fn get_date(&self) -> i64 {
-        self.date
-    }
-    pub fn get_orders(&self) -> &BTreeSet<Order> {
-        &self.orders
-    }
-    pub fn calculate_total_price(&self) -> u32 {
-        let mut acc = 0;
-        for order in &self.orders {
-            acc += order.calculate_price();
-        }
-        acc
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -147,110 +56,19 @@ pub struct AllPayments {
 }
 
 impl AllPayments {
-    pub fn to_json(&self, pretty: bool) -> Result<String, PaymentError> {
+    pub fn to_json(&self, pretty: bool) -> Result<String, String> {
         if pretty {
-            serde_json::to_string_pretty(self).map_err(|err| PaymentError::Generic(err.to_string()))
+            serde_json::to_string_pretty(self).map_err(|err| err.to_string())
         } else {
-            serde_json::to_string(self).map_err(|err| PaymentError::Generic(err.to_string()))
+            serde_json::to_string(self).map_err(|err| err.to_string())
         }
     }
 
-    pub fn from_json(json: &str) -> Result<Self, PaymentError> {
-        let all_payments: AllPayments =
-            serde_json::from_str(json).map_err(|err| PaymentError::Generic(err.to_string()))?;
-        let missing_elements = all_payments.validate();
-        if missing_elements.is_empty() {
-            Ok(all_payments)
-        } else {
-            Err(PaymentError::MissingElements(missing_elements))
-        }
-    }
-
-    fn validate(&self) -> Elements {
-        let mut missing_elements = Elements::new();
-        for payment in &self.payments {
-            missing_elements.append(&mut payment.validate(&self.value_set));
-            for order in &payment.orders {
-                missing_elements.append(&mut order.validate(&self.value_set));
-            }
-        }
-        missing_elements
-    }
-
-    pub fn new() -> Self {
-        Self {
-            value_set: ValueSet {
-                cities: BTreeSet::new(),
-                shops: BTreeSet::new(),
-                methods: BTreeSet::new(),
-                items: BTreeSet::new(),
-            },
-            payments: BTreeSet::new(),
-        }
-    }
-
-    pub fn add_elements(&mut self, elements: &[Element]) -> Option<PaymentError> {
-        let mut duplicates = Elements::new();
-        for element in elements {
-            if !match element {
-                Element::City(city) => self.value_set.cities.insert(String::from(city)),
-                Element::Shop(shop) => self.value_set.shops.insert(String::from(shop)),
-                Element::Method(method) => self.value_set.methods.insert(String::from(method)),
-                Element::Item(item) => self.value_set.items.insert(String::from(item)),
-            } {
-                duplicates.insert(element.clone());
-            }
-        }
-        if duplicates.is_empty() {
-            None
-        } else {
-            Some(PaymentError::DuplicatedElements(duplicates))
-        }
-    }
-
-    pub fn add_payment(&mut self, payment: Payment) -> Result<(), PaymentError> {
-        if self.payments.contains(&payment) {
-            return Err(PaymentError::DuplicatedPayment(payment));
-        }
-        let missing_elements = payment.validate(&self.value_set);
-        if !missing_elements.is_empty() {
-            return Err(PaymentError::MissingElements(missing_elements));
-        }
-        assert!(self.payments.insert(payment));
-        Ok(())
+    pub fn from_json(json: &str) -> Result<Self, String> {
+        serde_json::from_str(json).map_err(|err| err.to_string())
     }
 
     pub fn get_payments(&self) -> &BTreeSet<Payment> {
         &self.payments
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{AllPayments, Element, Payment, PaymentError};
-
-    #[test]
-    fn allpayments_init() {
-        let mut all_payments = AllPayments::new();
-        let err = all_payments.add_elements(&[
-            Element::City(String::from("London")),
-            Element::City(String::from("Paris")),
-            Element::Shop(String::from("Bar")),
-            Element::Shop(String::from("Pub")),
-            Element::Method(String::from("Cash")),
-            Element::Method(String::from("Card")),
-            Element::Item(String::from("Tea")),
-            Element::Item(String::from("Apples")),
-        ]);
-        assert!(err.is_none());
-
-        let payment = Payment::new("London", "Bar", "Cash", 0);
-        let err = all_payments.add_payment(payment);
-        assert!(err.is_ok());
-
-        let json_str = all_payments.to_json(false);
-        assert!(json_str.is_ok());
-        let all_payments_parsed = AllPayments::from_json(&json_str.unwrap());
-        assert!(all_payments_parsed.is_ok());
     }
 }
