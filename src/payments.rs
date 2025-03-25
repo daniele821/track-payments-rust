@@ -19,6 +19,8 @@ pub type Elements = BTreeSet<Element>;
 pub enum PaymentError {
     Generic(String),
     MissingElements(Elements),
+    DuplicatePayment(Payment),
+    DuplicateOrder(Order),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,6 +39,14 @@ pub struct Order {
 }
 
 impl Order {
+    pub fn new(unit_price: u32, quantity: u32, item: String) -> Self {
+        Self {
+            unit_price,
+            quantity,
+            item,
+        }
+    }
+
     pub fn get_unitprice(&self) -> u32 {
         self.unit_price
     }
@@ -61,6 +71,16 @@ pub struct Payment {
 }
 
 impl Payment {
+    pub fn new(city: String, method: String, shop: String, date: i64) -> Self {
+        Self {
+            city,
+            method,
+            shop,
+            date,
+            orders: BTreeSet::new(),
+        }
+    }
+
     pub fn get_city(&self) -> &str {
         &self.city
     }
@@ -162,6 +182,14 @@ impl AllPayments {
         }
         duplicates
     }
+
+    //pub fn add_payment(&mut self, payment: Payment) -> Result<(), PaymentError> {
+    //    if self.payments.contains(&payment) {
+    //        return Err(PaymentError::DuplicatePayment(payment));
+    //    }
+    //
+    //    Ok(())
+    //}
 
     pub fn get_payments(&self) -> &BTreeSet<Payment> {
         &self.payments
