@@ -107,4 +107,38 @@ impl Order {
     }
 }
 
-impl Payment {}
+impl Payment {
+    pub fn new(date: i64, city: String, shop: String, method: String) -> Self {
+        Self {
+            date,
+            city,
+            method,
+            shop,
+            orders: BTreeSet::new(),
+        }
+    }
+
+    pub fn get_date(&self) -> i64 {
+        self.date
+    }
+    pub fn get_city(&self) -> &str {
+        &self.city
+    }
+    pub fn get_shop(&self) -> &str {
+        &self.shop
+    }
+    pub fn get_method(&self) -> &str {
+        &self.method
+    }
+    pub fn get_orders(&self) -> &BTreeSet<Order> {
+        &self.orders
+    }
+
+    pub fn calculate_price(&self) -> u32 {
+        let mut acc = 0;
+        for order in &self.orders {
+            acc += order.calculate_price();
+        }
+        acc
+    }
+}
