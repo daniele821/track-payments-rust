@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
 
@@ -24,10 +26,22 @@ struct ValueSet {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Order {
+pub struct Order {
     unit_price: u32,
     quantity: u32,
     item: String,
+}
+
+impl Order {
+    pub fn get_unitprice(&self) -> u32 {
+        self.unit_price
+    }
+    pub fn get_quantity(&self) -> u32 {
+        self.quantity
+    }
+    pub fn get_item(&self) -> &str {
+        &self.item
+    }
 }
 
 impl PartialEq for Order {
@@ -51,12 +65,30 @@ impl Ord for Order {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Payment {
+pub struct Payment {
     city: String,
     method: String,
     shop: String,
     date: i64,
     orders: BTreeSet<Order>,
+}
+
+impl Payment {
+    pub fn get_city(&self) -> &str {
+        &self.city
+    }
+    pub fn get_method(&self) -> &str {
+        &self.method
+    }
+    pub fn get_shop(&self) -> &str {
+        &self.shop
+    }
+    pub fn get_date(&self) -> i64 {
+        self.date
+    }
+    pub fn get_orders(&self) -> &BTreeSet<Order> {
+        &self.orders
+    }
 }
 
 impl PartialEq for Payment {
@@ -148,6 +180,10 @@ impl AllPayments {
             }
         }
         duplicates
+    }
+
+    pub fn get_payments(&self) -> &BTreeSet<Payment> {
+        &self.payments
     }
 }
 
