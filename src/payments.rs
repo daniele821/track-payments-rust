@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashSet};
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Element {
     City(String),
     Shop(String),
@@ -122,6 +122,21 @@ impl AllPayments {
         }
         missing_elements
     }
+
+    pub fn add_elements(&mut self, elements: &[Element]) -> HashSet<Element> {
+        let mut duplicates = HashSet::<Element>::new();
+        for element in elements {
+            if match element {
+                Element::City(city) => self.value_set.cities.insert(String::from(city)),
+                Element::Shop(shop) => self.value_set.cities.insert(String::from(shop)),
+                Element::Method(method) => self.value_set.cities.insert(String::from(method)),
+                Element::Item(item) => self.value_set.cities.insert(String::from(item)),
+            } {
+                duplicates.insert(element.clone());
+            }
+        }
+        duplicates
+    }
 }
 
 #[cfg(test)]
@@ -139,27 +154,13 @@ mod tests {
     #[test]
     fn parse_correct_json() {
         let correct_json = r#"
-{ "payments": [
-    {
-      "city": "London",
-      "shop": "Bar",
-      "method": "Cash",
-      "date": 12,
-      "orders": [ {
-          "quantity": 1,
-          "unit_price": 120,
-          "item": "Apples"
-        }
-      ]
-    }
-  ],
+{ "payments": [ {
+      "city": "London", "shop": "Bar", "method": "Cash", "date": 12,
+      "orders": [ { "quantity": 1, "unit_price": 120, "item": "Apples" } ]
+    } ],
   "value_set": {
-    "cities": [ "London" ],
-    "shops": [ "Bar" ],
-    "methods": [ "Cash" ],
-    "items": [ "Apples" ]
-  }
-}
+    "cities": [ "London" ], "shops": [ "Bar" ], "methods": [ "Cash" ], "items": [ "Apples" ]
+  } }
         "#;
         let payment = AllPayments::from_json(correct_json);
         println!("{payment:?}");
