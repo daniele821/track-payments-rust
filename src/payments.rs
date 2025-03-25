@@ -17,10 +17,10 @@ pub enum PaymentError {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ValueSet {
-    cities: HashSet<String>,
-    shops: HashSet<String>,
-    methods: HashSet<String>,
-    items: HashSet<String>,
+    cities: BTreeSet<String>,
+    shops: BTreeSet<String>,
+    methods: BTreeSet<String>,
+    items: BTreeSet<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -123,10 +123,22 @@ impl AllPayments {
         missing_elements
     }
 
+    pub fn new() -> Self {
+        Self {
+            value_set: ValueSet {
+                cities: BTreeSet::new(),
+                shops: BTreeSet::new(),
+                methods: BTreeSet::new(),
+                items: BTreeSet::new(),
+            },
+            payments: BTreeSet::new(),
+        }
+    }
+
     pub fn add_elements(&mut self, elements: &[Element]) -> HashSet<Element> {
         let mut duplicates = HashSet::<Element>::new();
         for element in elements {
-            if match element {
+            if !match element {
                 Element::City(city) => self.value_set.cities.insert(String::from(city)),
                 Element::Shop(shop) => self.value_set.cities.insert(String::from(shop)),
                 Element::Method(method) => self.value_set.cities.insert(String::from(method)),
@@ -141,7 +153,7 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use super::{AllPayments, PaymentError};
+    use super::{AllPayments, Element, PaymentError};
 
     #[test]
     fn parse_invalid_json() {
@@ -163,5 +175,24 @@ mod tests {
         let payment = AllPayments::from_json(correct_json);
         println!("{payment:?}");
         assert!(payment.is_ok());
+    }
+
+    #[test]
+    fn insert_values() {
+        let mut payments = AllPayments::new();
+        let duplicates = payments.add_elements(&[
+            Element::City(String::from("City1")),
+            Element::Shop(String::from("Shop1")),
+            Element::Method(String::from("Method1")),
+            Element::Item(String::from("Item1")),
+        ]);
+        assert_eq!(duplicates.len(), 0);
+        let duplicates = payments.add_elements(&[
+            Element::City(String::from("City1")),
+            Element::Shop(String::from("Shop1")),
+            Element::Method(String::from("Method1")),
+            Element::Item(String::from("Item1")),
+        ]);
+        assert_eq!(duplicates.len(), 4);
     }
 }
