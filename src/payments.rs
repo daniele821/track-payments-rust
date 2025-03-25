@@ -81,7 +81,7 @@ pub struct Payment {
 }
 
 impl Payment {
-    pub fn new(city: &str, method: &str, shop: &str, date: i64) -> Self {
+    pub fn new(city: &str, shop: &str, method: &str, date: i64) -> Self {
         Self {
             city: String::from(city),
             method: String::from(method),
@@ -283,9 +283,33 @@ mod tests {
             Element::Shop(String::from("Bar")),
             Element::Method(String::from("Cash")),
         ]);
-        let payment = Payment::new("London", "Cash", "Bar", 0);
+        let payment = Payment::new("London", "Bar", "Cash", 0);
         let opt_err = payments.add_payment(payment);
         println!("{opt_err:?}");
         assert!(opt_err.is_ok());
+    }
+
+    #[test]
+    fn insert_wrong_payment() {
+        let mut payments = AllPayments::new();
+        payments.add_elements(&[
+            Element::City(String::from("London")),
+            Element::City(String::from("Paris")),
+            Element::Shop(String::from("Bar")),
+            Element::Shop(String::from("Pub")),
+            Element::Method(String::from("Cash")),
+            Element::Method(String::from("Card")),
+        ]);
+        let payment = Payment::new("London", "Bar", "Cash", 0);
+        let opt_err = payments.add_payment(payment);
+        assert!(opt_err.is_ok());
+
+        let payment = Payment::new("INVALID", "VALUES", "AND DATE", 0);
+        let opt_err = payments.add_payment(payment);
+        assert!(matches!(opt_err, Err(PaymentError::DuplicatedPayment(_))));
+
+        let payment = Payment::new("INVALID", "ONLY", "THE VALUES", 1000);
+        let opt_err = payments.add_payment(payment);
+        assert!(matches!(opt_err, Err(PaymentError::MissingElements(_))));
     }
 }
