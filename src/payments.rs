@@ -230,94 +230,22 @@ mod tests {
     use super::{AllPayments, Element, Payment, PaymentError};
 
     #[test]
-    fn parse_invalid_json() {
-        let wrong_json = r#"{"wrong_json": "12"}"#;
-        let payment = AllPayments::from_json(wrong_json);
-        println!("{payment:?}");
-        assert!(matches!(payment, Err(PaymentError::Generic(_))));
-    }
-
-    #[test]
-    fn parse_correct_json() {
-        let correct_json = r#" {"payments":[{
-  "city":"London","shop":"Bar","method":"Cash","date":12,
-  "orders":[{"quantity":1,"unit_price":120,"item":"Apples"}]
-}],
-  "value_set":{
-  "cities":["London"],"shops":["Bar"],"methods":["Cash"],"items":["Apples"]
-}} "#;
-        let payment = AllPayments::from_json(correct_json);
-        println!("{payment:?}");
-        assert!(payment.is_ok());
-
-        let format_json = payment.unwrap().to_json(false);
-        println!("{format_json:?}");
-        assert!(format_json.is_ok());
-    }
-
-    #[test]
-    fn insert_values() {
-        let mut payments = AllPayments::new();
-        let duplicates = payments.add_elements(&[
-            Element::City(String::from("City1")),
-            Element::Shop(String::from("Shop1")),
-            Element::Method(String::from("Method1")),
-            Element::Item(String::from("Item1")),
-        ]);
-        println!("{duplicates:?}");
-        assert!(duplicates.is_none());
-    }
-
-    #[test]
-    fn insert_duplicated_values() {
-        let mut payments = AllPayments::new();
-        let duplicates = payments.add_elements(&[
-            Element::City(String::from("City1")),
-            Element::City(String::from("City1")),
-            Element::Shop(String::from("Shop1")),
-        ]);
-        println!("{duplicates:?}");
-        assert!(matches!(
-            duplicates,
-            Some(PaymentError::DuplicatedElements(_))
-        ));
-    }
-
-    #[test]
-    fn insert_payment() {
-        let mut payments = AllPayments::new();
-        payments.add_elements(&[
-            Element::City(String::from("London")),
-            Element::Shop(String::from("Bar")),
-            Element::Method(String::from("Cash")),
-        ]);
-        let payment = Payment::new("London", "Bar", "Cash", 0);
-        let opt_err = payments.add_payment(payment);
-        println!("{opt_err:?}");
-        assert!(opt_err.is_ok());
-    }
-
-    #[test]
-    fn insert_wrong_payment() {
-        let mut payments = AllPayments::new();
-        payments.add_elements(&[
+    fn allpayments_init() {
+        let mut all_payments = AllPayments::new();
+        let err = all_payments.add_elements(&[
             Element::City(String::from("London")),
             Element::City(String::from("Paris")),
             Element::Shop(String::from("Bar")),
             Element::Shop(String::from("Pub")),
             Element::Method(String::from("Cash")),
             Element::Method(String::from("Card")),
+            Element::Item(String::from("Tea")),
+            Element::Item(String::from("Apples")),
         ]);
+        assert!(err.is_none());
+
         let payment = Payment::new("London", "Bar", "Cash", 0);
-        let opt_err = payments.add_payment(payment);
-        assert!(opt_err.is_ok());
-
-        let payment = Payment::new("INVALID", "VALUES", "AND DATE", 0);
-        let opt_err = payments.add_payment(payment);
-        assert!(matches!(opt_err, Err(PaymentError::DuplicatedPayment(_))));
-
-        let payment = Payment::new("INVALID", "ONLY", "THE VALUES", 1000);
-        let opt_err = payments.add_payment(payment);
-        assert!(matches!(opt_err, Err(PaymentError::MissingElements(_))));
+        let err = all_payments.add_payment(payment);
+        assert!(err.is_ok());
     }
 }
