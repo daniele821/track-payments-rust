@@ -38,3 +38,34 @@ pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeSet<Payment>,
 }
+
+impl ValueSet {
+    pub fn new() -> Self {
+        Self {
+            cities: BTreeSet::new(),
+            shops: BTreeSet::new(),
+            methods: BTreeSet::new(),
+            items: BTreeSet::new(),
+        }
+    }
+
+    pub fn add_elements(
+        &mut self,
+        cities: &[String],
+        shops: &[String],
+        methods: &[String],
+        items: &[String],
+    ) {
+        self.cities.extend(cities.iter().cloned());
+        self.shops.extend(shops.iter().cloned());
+        self.methods.extend(methods.iter().cloned());
+        self.items.extend(items.iter().cloned());
+    }
+
+    pub fn extend(&mut self, other: &Self) {
+        self.cities.extend(other.cities.iter().cloned());
+        self.shops.extend(other.shops.iter().cloned());
+        self.methods.extend(other.methods.iter().cloned());
+        self.items.extend(other.items.iter().cloned());
+    }
+}
