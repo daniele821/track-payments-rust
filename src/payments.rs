@@ -202,7 +202,7 @@ mod tests {
 
         let mut all_payments = AllPayments::new();
         all_payments.extend_valueset(value_set);
-        all_payments.add_payment(payment1);
-        all_payments.add_payment(payment2);
+        assert!(all_payments.add_payment(payment1));
+        assert!(all_payments.add_payment(payment2));
     }
 }
