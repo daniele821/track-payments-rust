@@ -49,17 +49,30 @@ impl ValueSet {
         }
     }
 
-    pub fn add_elements(
-        &mut self,
-        cities: &[String],
-        shops: &[String],
-        methods: &[String],
-        items: &[String],
-    ) {
+    pub fn add_cities(&mut self, cities: &[String]) {
         self.cities.extend(cities.iter().cloned());
+    }
+    pub fn add_shops(&mut self, shops: &[String]) {
         self.shops.extend(shops.iter().cloned());
+    }
+    pub fn add_methods(&mut self, methods: &[String]) {
         self.methods.extend(methods.iter().cloned());
+    }
+    pub fn add_items(&mut self, items: &[String]) {
         self.items.extend(items.iter().cloned());
+    }
+
+    pub fn get_cities(&self) -> &BTreeSet<String> {
+        &self.cities
+    }
+    pub fn get_shops(&self) -> &BTreeSet<String> {
+        &self.shops
+    }
+    pub fn get_methods(&self) -> &BTreeSet<String> {
+        &self.methods
+    }
+    pub fn get_items(&self) -> &BTreeSet<String> {
+        &self.items
     }
 
     pub fn extend(&mut self, other: &Self) {
@@ -69,3 +82,29 @@ impl ValueSet {
         self.items.extend(other.items.iter().cloned());
     }
 }
+
+impl Order {
+    pub fn new(item: String, unit_price: u32, quantity: u32) -> Self {
+        Self {
+            item,
+            unit_price,
+            quantity,
+        }
+    }
+
+    pub fn get_item(&self) -> &str {
+        &self.item
+    }
+    pub fn get_unitprice(&self) -> u32 {
+        self.unit_price
+    }
+    pub fn get_quantity(&self) -> u32 {
+        self.quantity
+    }
+
+    pub fn calculate_price(&self) -> u32 {
+        self.unit_price * self.quantity
+    }
+}
+
+impl Payment {}
