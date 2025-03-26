@@ -12,7 +12,7 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Derivative)]
+#[derive(Debug, Serialize, Deserialize, Derivative, Clone)]
 #[derivative(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Order {
     item: String,
@@ -21,7 +21,7 @@ pub struct Order {
     quantity: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize, Derivative)]
+#[derive(Debug, Serialize, Deserialize, Derivative, Clone)]
 #[derivative(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Payment {
     date: i64,
@@ -223,17 +223,15 @@ mod tests {
             String::from("Pub"),
             String::from("Cash"),
         );
-        let mut payment2_copy = Payment::new(
-            2,
-            String::from("Paris"),
-            String::from("Pub"),
-            String::from("Cash"),
-        );
 
         let mut all_payments = AllPayments::new();
         all_payments.extend_valueset(value_set);
-        assert!(all_payments.add_payment(payment1).is_ok());
-        assert!(all_payments.add_payment(payment2).is_ok());
-        assert!(all_payments.add_payment(payment2_copy).is_err());
+        assert!(all_payments.add_payment(payment1.clone()).is_ok());
+        assert!(all_payments.add_payment(payment2.clone()).is_ok());
+        assert!(all_payments.add_payment(payment2.clone()).is_err());
+
+        assert!(all_payments.add_order(&payment1, order1).is_ok());
+        assert!(all_payments.add_order(&payment1, order2).is_ok());
+        assert!(all_payments.add_order(&payment2, order3).is_ok());
     }
 }
