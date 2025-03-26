@@ -36,3 +36,17 @@ pub struct AllPayments {
     value_set: ValueSet,
     payments: Vec<Payment>,
 }
+
+impl AllPayments {
+    pub fn from_json(json_str: &str) -> Result<Self, String> {
+        serde_json::from_str(json_str).map_err(|err| err.to_string())
+    }
+
+    pub fn dump_json(&self, fmt: bool) -> Result<String, String> {
+        if fmt {
+            serde_json::to_string_pretty(self).map_err(|err| err.to_string())
+        } else {
+            serde_json::to_string(self).map_err(|err| err.to_string())
+        }
+    }
+}
