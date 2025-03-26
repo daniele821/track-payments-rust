@@ -213,6 +213,17 @@ mod tests {
             Ok(())
         );
 
+        assert_eq!(all_payments1.payments.len(), 1);
+        assert_eq!(
+            all_payments1
+                .payments
+                .get(&payid_copy)
+                .unwrap()
+                .orders
+                .len(),
+            1
+        );
+
         assert!(!all_payments1.get_missing_values().is_empty());
         all_payments1
             .value_set
