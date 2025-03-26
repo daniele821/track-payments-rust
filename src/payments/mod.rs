@@ -47,7 +47,7 @@ pub struct AllPayments {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum AllPaymentsError {
+pub enum PaymentError {
     OrderDuplicated,
     OrderNotFound,
     PaymentDuplicated,
@@ -154,5 +154,38 @@ impl AllPayments {
             }
         }
         missing_values
+    }
+
+    pub fn add_values(&mut self, new_values: ValueSet) {
+        self.value_set.extend(new_values);
+    }
+
+    pub fn add_payment(
+        &mut self,
+        payid: PaymentId,
+        paydetails: PaymentDetail,
+    ) -> Result<(), PaymentError> {
+        if self.payments.contains_key(&payid) {
+            return Err(PaymentError::PaymentDuplicated);
+        }
+        assert!(self.payments.insert(payid, paydetails).is_none());
+        Ok(())
+    }
+
+    pub fn add_order(
+        &mut self,
+        payid: &PaymentId,
+        orderid: OrderId,
+        orderdetails: OrderDetail,
+    ) -> Result<(), PaymentError> {
+        let paydetails = self
+            .payments
+            .get_mut(payid)
+            .ok_or(PaymentError::PaymentNotFound)?;
+        if paydetails.orders.contains_key(&orderid) {
+            return Err(PaymentError::OrderDuplicated);
+        }
+        assert!(paydetails.orders.insert(orderid, orderdetails).is_none());
+        Ok(())
     }
 }
