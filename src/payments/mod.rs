@@ -89,6 +89,14 @@ impl PaymentDetail {
             orders: BTreeMap::new(),
         }
     }
+
+    pub fn total_price(&self) -> u32 {
+        let mut acc = 0;
+        for order in &self.orders {
+            acc += order.0.unit_price * order.1.quantity;
+        }
+        acc
+    }
 }
 
 impl AllPayments {
