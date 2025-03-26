@@ -7,6 +7,9 @@ use std::collections::{BTreeMap, BTreeSet};
 mod json_default;
 mod json_legacy;
 
+pub use json_default::AllPayments as AllPaymentsDefault;
+pub use json_legacy::AllPayments as AllPaymentsLegacy;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Getters)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
