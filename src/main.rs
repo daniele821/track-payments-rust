@@ -2,5 +2,6 @@ mod crypto;
 mod payments;
 
 fn main() {
-    println!("Hello, world!");
+    let i = strsim::jaro_winkler("HI there", "hi there");
+    println!("{i}");
 }
