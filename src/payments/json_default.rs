@@ -1,8 +1,7 @@
 #![allow(unused)]
 
-use derivative::Derivative;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashSet};
+use std::collections::BTreeSet;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValueSet {
