@@ -177,28 +177,6 @@ impl AllPayments {
             .then_some(())
             .ok_or(ModificationError::PaymentDuplicated)
     }
-
-    pub fn add_order(&mut self, payment: &Payment, order: Order) -> Result<(), ModificationError> {
-        let mut payment_value = self
-            .payments
-            .take(payment)
-            .ok_or(ModificationError::PaymentNotFound)?;
-        payment_value
-            .orders
-            .insert(order)
-            .then_some(())
-            .ok_or(ModificationError::OrderDuplicated)?;
-        self.payments.insert(payment_value);
-        Ok(())
-    }
-
-    //pub fn get_missing_values(&self) -> Option<ValueSet> {
-    //    let missings = ValueSet::new();
-    //    for payment in &self.payments {
-    //        for order in &payment.orders {}
-    //    }
-    //    Some(missings)
-    //}
 }
 
 #[cfg(test)]
@@ -237,9 +215,5 @@ mod tests {
         assert!(all_payments.add_payment(payment1.clone()).is_ok());
         assert!(all_payments.add_payment(payment2.clone()).is_ok());
         assert!(all_payments.add_payment(payment2.clone()).is_err());
-
-        assert!(all_payments.add_order(&payment1, order1).is_ok());
-        assert!(all_payments.add_order(&payment1, order2).is_ok());
-        assert!(all_payments.add_order(&payment2, order3).is_ok());
     }
 }
