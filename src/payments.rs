@@ -191,6 +191,14 @@ impl AllPayments {
         self.payments.insert(payment_value);
         Ok(())
     }
+
+    //pub fn get_missing_values(&self) -> Option<ValueSet> {
+    //    let missings = ValueSet::new();
+    //    for payment in &self.payments {
+    //        for order in &payment.orders {}
+    //    }
+    //    Some(missings)
+    //}
 }
 
 #[cfg(test)]
