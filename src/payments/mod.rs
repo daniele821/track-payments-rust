@@ -208,26 +208,16 @@ mod tests {
 
         let mut all_payments1 = AllPayments::new();
         assert_eq!(all_payments1.add_payment(payid, paydetails), Ok(()));
-        assert_eq!(
-            all_payments1.add_order(&payid_copy, orderid, orderdetails),
-            Ok(())
-        );
+        #[rustfmt::skip]
+        assert_eq!(all_payments1.add_order(&payid_copy, orderid, orderdetails),Ok(()));
 
         assert_eq!(all_payments1.payments.len(), 1);
-        assert_eq!(
-            all_payments1
-                .payments
-                .get(&payid_copy)
-                .unwrap()
-                .orders
-                .len(),
-            1
-        );
+        #[rustfmt::skip]
+        assert_eq!(all_payments1.payments.get(&payid_copy).unwrap().orders.len(),1);
 
         assert!(!all_payments1.get_missing_values().is_empty());
-        all_payments1
-            .value_set
-            .extend(all_payments1.get_missing_values());
+        #[rustfmt::skip]
+        all_payments1.value_set.extend(all_payments1.get_missing_values());
         assert!(all_payments1.get_missing_values().is_empty());
     }
 }
