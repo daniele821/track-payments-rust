@@ -20,7 +20,7 @@ pub struct Order {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Payment {
-    date: i64,
+    date: String,
     city: String,
     method: String,
     shop: String,
@@ -63,7 +63,7 @@ mod tests {
   },
   "payments": [
     {
-      "date": 1672531200,
+      "date": "2024/03/26 11:09",
       "city": "New York",
       "method": "Credit",
       "shop": "Shop A",
@@ -76,7 +76,7 @@ mod tests {
       ]
     },
     {
-      "date": 1672617600,
+      "date": "2024/03/28 12:34",
       "city": "London",
       "method": "Cash",
       "shop": "Shop B",
