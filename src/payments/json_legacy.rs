@@ -50,3 +50,60 @@ impl AllPayments {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::AllPayments;
+
+    #[test]
+    fn allpayments_default_json() {
+        let json_string = r#"
+{
+  "valueSet": {
+    "cities": ["New York", "London"],
+    "shops": ["Shop A", "Shop B"],
+    "paymentMethods": ["Credit Card", "Cash"],
+    "items": ["Apple", "Banana"]
+  },
+  "payments": [
+    {
+      "date": "2024/03/27 12:34",
+      "city": "New York",
+      "paymentMethod": "Credit Card",
+      "shop": "Shop A",
+      "orders": [
+        {
+          "item": "Apple",
+          "unitPrice": 100,
+          "quantity": 2
+        }
+      ]
+    },
+    {
+      "date": "2024/03/28 09:15",
+      "city": "London",
+      "paymentMethod": "Cash",
+      "shop": "Shop B",
+      "orders": [
+        {
+          "item": "Banana",
+          "unitPrice": 50,
+          "quantity": 3
+        },
+        {
+          "item": "Apple",
+          "unitPrice": 100,
+          "quantity": 1
+        }
+      ]
+    }
+  ]
+}
+        "#;
+        let all_payments = AllPayments::from_json(json_string).unwrap();
+        let parsed_json = all_payments.dump_json(false);
+        let all_payments2 = AllPayments::from_json(json_string).unwrap();
+
+        //assert_eq!(all_payments, all_payments2);
+    }
+}
