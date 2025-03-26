@@ -2,7 +2,7 @@
 
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashSet};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValueSet {
@@ -39,6 +39,13 @@ pub struct Payment {
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeSet<Payment>,
+}
+
+pub enum ModificationError {
+    PaymentDuplicated,
+    PaymentNotFound,
+    OrderDuplicated,
+    OrderNotFound,
 }
 
 impl ValueSet {
@@ -164,8 +171,25 @@ impl AllPayments {
         self.value_set.extend(value_set);
     }
 
-    pub fn add_payment(&mut self, payment: Payment) -> bool {
-        self.payments.insert(payment)
+    pub fn add_payment(&mut self, payment: Payment) -> Result<(), ModificationError> {
+        self.payments
+            .insert(payment)
+            .then_some(())
+            .ok_or(ModificationError::PaymentDuplicated)
+    }
+
+    pub fn add_order(&mut self, payment: &Payment, order: Order) -> Result<(), ModificationError> {
+        let mut payment_value = self
+            .payments
+            .take(payment)
+            .ok_or(ModificationError::PaymentNotFound)?;
+        payment_value
+            .orders
+            .insert(order)
+            .then_some(())
+            .ok_or(ModificationError::OrderDuplicated)?;
+        self.payments.insert(payment_value);
+        Ok(())
     }
 }
 
@@ -199,10 +223,17 @@ mod tests {
             String::from("Pub"),
             String::from("Cash"),
         );
+        let mut payment2_copy = Payment::new(
+            2,
+            String::from("Paris"),
+            String::from("Pub"),
+            String::from("Cash"),
+        );
 
         let mut all_payments = AllPayments::new();
         all_payments.extend_valueset(value_set);
-        assert!(all_payments.add_payment(payment1));
-        assert!(all_payments.add_payment(payment2));
+        assert!(all_payments.add_payment(payment1).is_ok());
+        assert!(all_payments.add_payment(payment2).is_ok());
+        assert!(all_payments.add_payment(payment2_copy).is_err());
     }
 }
