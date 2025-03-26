@@ -56,7 +56,7 @@ mod tests {
     use super::AllPayments;
 
     #[test]
-    fn allpayments_default_json() {
+    fn allpayments_legacy_json() {
         let json_string = r#"
 {
   "valueSet": {

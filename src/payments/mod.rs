@@ -189,3 +189,9 @@ impl AllPayments {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn all_payments_creation() {}
+}
