@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 mod json_default;
 mod json_legacy;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -19,7 +19,7 @@ pub struct OrderId {
     item: String,
     unit_price: u32,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct OrderDetail {
     quantity: u32,
 }
@@ -28,7 +28,7 @@ pub struct OrderDetail {
 pub struct PaymentId {
     date: i64,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
@@ -36,12 +36,13 @@ pub struct PaymentDetail {
     orders: BTreeMap<OrderId, OrderDetail>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
 }
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AllPaymentsError {
     OrderDuplicated,
     OrderNotFound,
