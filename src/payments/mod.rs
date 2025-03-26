@@ -74,6 +74,10 @@ impl ValueSet {
         self.items.extend(items);
     }
 
+    pub fn extend(&mut self, other: ValueSet) {
+        self.add_values(other.cities, other.shops, other.methods, other.items);
+    }
+
     pub fn is_empty(&self) -> bool {
         self.cities.is_empty()
             && self.shops.is_empty()
