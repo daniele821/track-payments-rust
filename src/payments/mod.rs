@@ -10,7 +10,7 @@ mod json_legacy;
 pub use json_default::AllPayments as AllPaymentsDefault;
 pub use json_legacy::AllPayments as AllPaymentsLegacy;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Getters)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Getters)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -18,21 +18,21 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Getters)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Getters)]
 pub struct OrderId {
     item: String,
     unit_price: u32,
 }
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Getters)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Getters)]
 pub struct OrderDetail {
     quantity: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Getters)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Getters)]
 pub struct PaymentId {
     date: i64,
 }
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Getters)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Getters)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
@@ -40,13 +40,13 @@ pub struct PaymentDetail {
     orders: BTreeMap<OrderId, OrderDetail>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Getters)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Getters)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum PaymentError {
     OrderDuplicated,
     OrderNotFound,
@@ -199,6 +199,7 @@ mod tests {
         let orderid = OrderId::new(String::from("Apple"), 120);
         let orderdetails = OrderDetail::new(2);
         let payid = PaymentId::new(0);
+        let payid_copy = PaymentId::new(0);
         let paydetails = PaymentDetail::new(
             String::from("London"),
             String::from("Market"),
@@ -206,15 +207,20 @@ mod tests {
         );
 
         let mut all_payments1 = AllPayments::new();
+        assert_eq!(all_payments1.add_payment(payid, paydetails), Ok(()));
         assert_eq!(
-            all_payments1.add_payment(payid.clone(), paydetails.clone()),
+            all_payments1.add_order(&payid_copy, orderid, orderdetails),
             Ok(())
         );
+        assert_eq!(all_payments1.payments.len(), 1);
         assert_eq!(
-            all_payments1.add_order(&payid, orderid.clone(), orderdetails.clone()),
-            Ok(())
+            all_payments1
+                .payments
+                .get(&payid_copy)
+                .unwrap()
+                .orders
+                .len(),
+            1
         );
-
-        assert!(all_payments1.add_payment(payid, paydetails).is_err());
     }
 }
