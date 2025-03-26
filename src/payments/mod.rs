@@ -60,6 +60,26 @@ impl ValueSet {
             items: BTreeSet::new(),
         }
     }
+
+    pub fn add_values<Iter: IntoIterator<Item = String>>(
+        &mut self,
+        cities: Iter,
+        shops: Iter,
+        methods: Iter,
+        items: Iter,
+    ) {
+        self.cities.extend(cities);
+        self.shops.extend(shops);
+        self.methods.extend(methods);
+        self.items.extend(items);
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cities.is_empty()
+            && self.shops.is_empty()
+            && self.methods.is_empty()
+            && self.items.is_empty()
+    }
 }
 
 impl OrderId {
@@ -105,5 +125,27 @@ impl AllPayments {
             value_set: ValueSet::new(),
             payments: BTreeMap::new(),
         }
+    }
+
+    pub fn get_missing_values(&self) -> ValueSet {
+        let values = &self.value_set;
+        let mut missing_values = ValueSet::new();
+        for payment in &self.payments {
+            if !values.cities.contains(&payment.1.city) {
+                missing_values.cities.insert(payment.1.city.clone());
+            }
+            if !values.shops.contains(&payment.1.shop) {
+                missing_values.shops.insert(payment.1.shop.clone());
+            }
+            if !values.methods.contains(&payment.1.method) {
+                missing_values.methods.insert(payment.1.method.clone());
+            }
+            for order in &payment.1.orders {
+                if !values.items.contains(&order.0.item) {
+                    missing_values.items.insert(order.0.item.clone());
+                }
+            }
+        }
+        missing_values
     }
 }
