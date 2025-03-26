@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -12,7 +12,7 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Order {
     item: String,
     #[serde(rename = "unitPrice")]
@@ -20,7 +20,7 @@ pub struct Order {
     quantity: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Payment {
     date: String,
     city: String,
@@ -30,7 +30,7 @@ pub struct Payment {
     orders: Vec<Order>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AllPayments {
     #[serde(rename = "valueSet")]
     value_set: ValueSet,
@@ -104,6 +104,6 @@ mod tests {
         let parsed_json = all_payments.dump_json(false);
         let all_payments2 = AllPayments::from_json(json_string).unwrap();
 
-        //assert_eq!(all_payments, all_payments2);
+        assert_eq!(all_payments, all_payments2);
     }
 }
