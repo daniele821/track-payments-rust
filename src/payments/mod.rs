@@ -195,7 +195,6 @@ mod tests {
     use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId};
 
     #[test]
-    #[rustfmt::skip]
     fn all_payments_creation() {
         let orderid = OrderId::new(String::from("Apple"), 120);
         let orderdetails = OrderDetail::new(2);
@@ -209,12 +208,15 @@ mod tests {
 
         let mut all_payments1 = AllPayments::new();
         assert_eq!(all_payments1.add_payment(payid, paydetails), Ok(()));
+        #[rustfmt::skip]
         assert_eq!(all_payments1.add_order(&payid_copy, orderid, orderdetails),Ok(()));
 
-        assert_eq!(all_payments1.payments.len(), 1);  
+        assert_eq!(all_payments1.payments.len(), 1);
+        #[rustfmt::skip]
         assert_eq!(all_payments1.payments.get(&payid_copy).unwrap().orders.len(),1);
 
         assert!(!all_payments1.get_missing_values().is_empty());
+        #[rustfmt::skip]
         all_payments1.value_set.extend(all_payments1.get_missing_values());
         assert!(all_payments1.get_missing_values().is_empty());
     }
