@@ -10,7 +10,7 @@ mod json_legacy;
 pub use json_default::AllPayments as AllPaymentsDefault;
 pub use json_legacy::AllPayments as AllPaymentsLegacy;
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -18,21 +18,21 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderId {
     item: String,
     unit_price: u32,
 }
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderDetail {
     quantity: u32,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentId {
     date: i64,
 }
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
@@ -40,18 +40,18 @@ pub struct PaymentDetail {
     orders: BTreeMap<OrderId, OrderDetail>,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum PaymentError {
-    OrderDuplicated,
-    OrderNotFound,
-    PaymentDuplicated,
-    PaymentNotFound,
+    OrderDuplicated(OrderId),
+    OrderNotFound(OrderId),
+    PaymentDuplicated(PaymentId),
+    PaymentNotFound(PaymentId),
     MissingElements(ValueSet),
     GenericError(String),
 }
@@ -168,7 +168,7 @@ impl AllPayments {
         paydetails: PaymentDetail,
     ) -> Result<(), PaymentError> {
         if self.payments.contains_key(&payid) {
-            return Err(PaymentError::PaymentDuplicated);
+            return Err(PaymentError::PaymentDuplicated(payid));
         }
         let missing_values = paydetails.get_missing_elems(&self.value_set);
         if !missing_values.is_empty() {
@@ -187,9 +187,9 @@ impl AllPayments {
         let paydetails = self
             .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound)?;
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
         if paydetails.orders.contains_key(&orderid) {
-            return Err(PaymentError::OrderDuplicated);
+            return Err(PaymentError::OrderDuplicated(orderid));
         }
         let missing_values = orderid.get_missing_elems(&self.value_set);
         if !missing_values.is_empty() {
