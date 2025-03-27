@@ -157,17 +157,17 @@ impl AllPayments {
     pub fn add_payment(
         &mut self,
         payid: PaymentId,
-        paydetails: PaymentDetail,
+        paydetail: PaymentDetail,
     ) -> Result<(), PaymentError> {
         // checks
         if self.payments.contains_key(&payid) {
             return Err(PaymentError::PaymentDuplicated(payid));
         }
-        paydetails.check_missing_elements(&self.value_set)?;
+        paydetail.check_missing_elements(&self.value_set)?;
 
         // insert payment and empty order list
         self.orders.entry(payid.clone()).or_default();
-        assert!(self.payments.insert(payid, paydetails).is_none());
+        assert!(self.payments.insert(payid, paydetail).is_none());
 
         Ok(())
     }
@@ -202,14 +202,13 @@ mod tests {
     #[test]
     fn all_payments_creation() {
         let payid = PaymentId::new(0);
-        let paydetails = PaymentDetail::new(
+        let paydetail = PaymentDetail::new(
             String::from("London"),
             String::from("Pub"),
             String::from("Card"),
         );
         let orderid = OrderId::new(String::from("Apple"), 120);
-        let orderdetails = OrderDetail::new(2);
-
+        let orderdetail = OrderDetail::new(2);
         let mut values = ValueSet::new();
         values.add_values(
             vec![String::from("London"), String::from("Paris")],
@@ -218,12 +217,17 @@ mod tests {
             vec![String::from("Apple"), String::from("Banana")],
         );
 
+        // insert values
         let mut all_payments = AllPayments::new();
         all_payments.add_values(values);
 
         // insert payment
+        let res = all_payments.add_payment(payid.clone(), paydetail);
+        assert_eq!(res, Ok(()));
 
         // insert order
+        let res = all_payments.add_order(&payid, orderid, orderdetail);
+        assert_eq!(res, Ok(()));
 
         // modify payment
 
