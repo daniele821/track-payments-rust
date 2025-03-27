@@ -297,15 +297,6 @@ mod tests {
         let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2.clone());
         assert_eq!(res, Ok(()));
         assert_eq!(
-            all_payments.payments.first_key_value().unwrap().1,
-            &paydetail2
-        );
-        println!("MODIFIED ORDER: {all_payments:#?}\n");
-
-        // modify payment
-        let res = all_payments.modify_payment(&payid, paydetail2);
-        assert_eq!(res, Ok(()));
-        assert_eq!(
             all_payments
                 .orders
                 .first_key_value()
@@ -316,16 +307,27 @@ mod tests {
                 .1,
             &orderdetail2
         );
+        println!("MODIFIED ORDER: {all_payments:#?}\n");
+
+        // modify payment
+        let res = all_payments.modify_payment(&payid, paydetail2.clone());
+        assert_eq!(res, Ok(()));
+        assert_eq!(
+            all_payments.payments.first_key_value().unwrap().1,
+            &paydetail2
+        );
         println!("MODIFIED PAYMENT: {all_payments:#?}\n");
 
         // remove order
         let res = all_payments.remove_order(&payid, &orderid);
         assert_eq!(res, Ok(()));
+        assert_eq!(all_payments.orders.first_key_value().unwrap().1.len(), 0);
         println!("DELETED ORDER: {all_payments:#?}\n");
 
         // remove payment
         let res = all_payments.remove_payment(&payid);
         assert_eq!(res, Ok(()));
+        assert_eq!(all_payments.payments.len(), 0);
         println!("DELETED PAYMENT: {all_payments:#?}\n");
     }
 }
