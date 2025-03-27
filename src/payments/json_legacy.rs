@@ -58,25 +58,27 @@ impl TryFrom<AllPayments> for AllPaymentsApi {
     type Error = PaymentErrorApi;
 
     fn try_from(value: AllPayments) -> Result<Self, Self::Error> {
-        let mut all_payments = AllPaymentsApi::new();
-        let mut values = ValueSetApi::new();
-        values.add_values(
+        let mut all_payments_api = AllPaymentsApi::new();
+        let mut values_api = ValueSetApi::new();
+        values_api.add_values(
             value.value_set.cities,
             value.value_set.shops,
             value.value_set.methods,
             value.value_set.items,
         );
-        all_payments.add_values(values);
+        all_payments_api.add_values(values_api);
 
-        Ok(all_payments)
+        Ok(all_payments_api)
     }
 }
 
 impl TryFrom<AllPaymentsApi> for AllPayments {
-    type Error = AllPaymentsApi;
+    type Error = PaymentErrorApi;
 
     fn try_from(value: AllPaymentsApi) -> Result<Self, Self::Error> {
-        todo!("implement type conversion")
+        Err(PaymentErrorApi::GenericError(String::from(
+            "implement type conversion",
+        )))
     }
 }
 
