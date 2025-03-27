@@ -241,13 +241,15 @@ mod tests {
 
     #[test]
     fn all_payments_creation() {
-        let orderid = OrderId::new(String::from("Apple"), 120);
-        let orderdetails = OrderDetail::new(2);
-        let payid = PaymentId::new(0);
-        let payid_copy = PaymentId::new(0);
+        let orderid1 = OrderId::new(String::from("Apple"), 120);
+        let orderid2 = OrderId::new(String::from("Banana"), 100);
+        let orderdetails1 = OrderDetail::new(2);
+        let orderdetails2 = OrderDetail::new(1);
+        let payid1 = PaymentId::new(0);
+        let payid2 = PaymentId::new(0);
         let paydetails = PaymentDetail::new(
             String::from("London"),
-            String::from("Market"),
+            String::from("Pub"),
             String::from("Card"),
         );
         let paydetails2 = PaymentDetail::new(
@@ -255,30 +257,38 @@ mod tests {
             String::from("Market"),
             String::from("Cash"),
         );
+
         let mut values = ValueSet::new();
         values.add_values(
             vec![String::from("London"), String::from("Paris")],
-            vec![String::from("Market")],
+            vec![String::from("Market"), String::from("Pub")],
             vec![String::from("Card"), String::from("Cash")],
-            vec![String::from("Apple")],
+            vec![String::from("Apple"), String::from("Banana")],
         );
 
-        // add payment and order
         let mut all_payments = AllPayments::new();
         all_payments.add_values(values);
-        assert_eq!(all_payments.add_payment(payid.clone(), paydetails), Ok(()));
-        let res = all_payments.add_order(&payid_copy, orderid, orderdetails);
-        assert_eq!(res, Ok(()));
+
+        // add payment and order
+        assert_eq!(all_payments.add_payment(payid1.clone(), paydetails), Ok(()));
+        assert!(
+            all_payments
+                .add_order(&payid1, orderid1, orderdetails1)
+                .is_ok()
+        );
 
         // test payment and order were inserted
-        let order = all_payments.payments().get(&payid_copy);
+        let order = all_payments.payments().get(&payid1);
         assert_eq!(all_payments.payments().len(), 1);
         assert_eq!(order.unwrap().orders().len(), 1);
 
         // modify payment and order
         let paydetails2_copy = paydetails2.clone();
-        assert!(all_payments.modify_payment(&payid, paydetails2).is_ok());
-        assert_eq!(*all_payments.get_payment(&payid).unwrap(), paydetails2_copy);
+        assert!(all_payments.modify_payment(&payid1, paydetails2).is_ok());
+        assert_eq!(
+            *all_payments.get_payment(&payid1).unwrap(),
+            paydetails2_copy
+        );
 
         // remove payment and order
     }
