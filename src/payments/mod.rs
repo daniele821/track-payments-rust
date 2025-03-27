@@ -272,51 +272,31 @@ mod tests {
         // insert payment
         let res = all_payments.add_payment(payid.clone(), paydetail.clone());
         assert_eq!(res, Ok(()));
-        assert_eq!(
-            all_payments.payments.first_key_value().unwrap().1,
-            &paydetail
-        );
+        let newval = all_payments.payments.first_key_value().unwrap().1;
+        assert_eq!(newval, &paydetail);
         println!("INSERTED PAYMENT: {all_payments:#?}\n");
 
         // insert order
         let res = all_payments.add_order(&payid, orderid.clone(), orderdetail.clone());
         assert_eq!(res, Ok(()));
-        assert_eq!(
-            all_payments
-                .orders
-                .first_key_value()
-                .unwrap()
-                .1
-                .first_key_value()
-                .unwrap()
-                .1,
-            &orderdetail
-        );
+        let newval = all_payments.orders.first_key_value().unwrap().1;
+        let newval = newval.first_key_value().unwrap().1;
+        assert_eq!(newval, &orderdetail);
         println!("INSERTED ORDER: {all_payments:#?}\n");
 
         // modify order
         let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2.clone());
         assert_eq!(res, Ok(()));
-        assert_eq!(
-            all_payments
-                .orders
-                .first_key_value()
-                .unwrap()
-                .1
-                .first_key_value()
-                .unwrap()
-                .1,
-            &orderdetail2
-        );
+        let newval = all_payments.orders.first_key_value().unwrap().1;
+        let newval = newval.first_key_value().unwrap().1;
+        assert_eq!(newval, &orderdetail2);
         println!("MODIFIED ORDER: {all_payments:#?}\n");
 
         // modify payment
         let res = all_payments.modify_payment(&payid, paydetail2.clone());
         assert_eq!(res, Ok(()));
-        assert_eq!(
-            all_payments.payments.first_key_value().unwrap().1,
-            &paydetail2
-        );
+        let newval = all_payments.payments.first_key_value().unwrap().1;
+        assert_eq!(newval, &paydetail2);
         println!("MODIFIED PAYMENT: {all_payments:#?}\n");
 
         // remove order
