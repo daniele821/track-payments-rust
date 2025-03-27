@@ -229,14 +229,18 @@ mod tests {
         let res = all_payments.add_order(&payid, orderid, orderdetail);
         assert_eq!(res, Ok(()));
 
-        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}");
+        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
 
         // modify payment
 
         // modify order
 
+        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
+
         // remove payment
 
         // remove order
+
+        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
     }
 }
