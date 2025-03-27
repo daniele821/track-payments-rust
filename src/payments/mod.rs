@@ -4,10 +4,8 @@ use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-mod json_default;
 mod json_legacy;
 
-pub use json_default::AllPayments as AllPaymentsDefault;
 pub use json_legacy::AllPayments as AllPaymentsLegacy;
 
 #[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
