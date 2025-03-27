@@ -250,18 +250,23 @@ mod tests {
             String::from("Market"),
             String::from("Card"),
         );
+        let paydetails2 = PaymentDetail::new(
+            String::from("Paris"),
+            String::from("Market"),
+            String::from("Cash"),
+        );
         let mut values = ValueSet::new();
         values.add_values(
-            vec![String::from("London")],
+            vec![String::from("London"), String::from("Paris")],
             vec![String::from("Market")],
-            vec![String::from("Card")],
+            vec![String::from("Card"), String::from("Cash")],
             vec![String::from("Apple")],
         );
 
         // add payment and order
         let mut all_payments = AllPayments::new();
         all_payments.add_values(values);
-        assert_eq!(all_payments.add_payment(payid, paydetails), Ok(()));
+        assert_eq!(all_payments.add_payment(payid.clone(), paydetails), Ok(()));
         let res = all_payments.add_order(&payid_copy, orderid, orderdetails);
         assert_eq!(res, Ok(()));
 
@@ -269,11 +274,12 @@ mod tests {
         let order = all_payments.payments().get(&payid_copy);
         assert_eq!(all_payments.payments().len(), 1);
         assert_eq!(order.unwrap().orders().len(), 1);
+
+        // modify payment and order
+        let paydetails2_copy = paydetails2.clone();
+        assert!(all_payments.modify_payment(&payid, paydetails2).is_ok());
+        assert_eq!(*all_payments.get_payment(&payid).unwrap(), paydetails2_copy);
+
+        // remove payment and order
     }
-
-    #[test]
-    fn all_payments_modification() {}
-
-    #[test]
-    fn all_payments_removal() {}
 }
