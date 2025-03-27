@@ -96,7 +96,7 @@ impl OrderId {
         Self { item, unit_price }
     }
 
-    fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
+    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
         let mut values = ValueSet::new();
         if !valid_values.items.contains(&self.item) {
             values.add_values(vec![], vec![], vec![], vec![self.item.clone()]);
@@ -135,7 +135,7 @@ impl PaymentDetail {
         acc
     }
 
-    fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
+    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
         let mut values = ValueSet::new();
         if !valid_values.cities.contains(&self.city) {
             values.add_values(vec![self.city.clone()], vec![], vec![], vec![]);
