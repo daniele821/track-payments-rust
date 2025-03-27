@@ -287,14 +287,9 @@ mod tests {
                 .is_ok()
         );
         assert_eq!(*all_payments.get_payment(&payid).unwrap(), paydetails2);
-        println!("{all_payments:#?}");
         assert!(
             all_payments
                 .modify_order(&payid, &orderid, orderdetails2.clone())
-                .map_err(|err| {
-                    println!("{err:?}");
-                    err
-                })
                 .is_ok()
         );
         assert_eq!(
