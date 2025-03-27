@@ -1,4 +1,4 @@
-#![allow(unused)]
+// #![allow(unused)]
 
 use super::{
     AllPayments as AllPaymentsApi, OrderDetail as OrderDetailApi, OrderId as OrderIdApi,
@@ -7,7 +7,7 @@ use super::{
 };
 use crate::time::{CUSTOM_FORMAT, format_str, parse_str};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
 
@@ -64,6 +64,25 @@ impl AllPayments {
 
     pub fn to_api(&self) -> Result<AllPaymentsApi, PaymentErrorApi> {
         AllPaymentsApi::try_from(self)
+    }
+
+    pub fn convert_to_valid_legacy(&mut self) {
+        todo!(
+            "make AllPaymentLegacy compatible with the golang track-payments old implementations.
+Specifically, fix:
+- compact multiple orders of same item into a single order. EXAMPLE:
+    - paymentNth: 
+        - order1 : Pizza x2 8.9
+        - order2 : Pizza x1 12.3
+        - order3 : Ticket x2 12.34
+
+    ---- SHOULD BECOME: ----
+
+    - paymentNth:
+        - order1 : Pizza x1 30,1
+        - order2 : Ticket x2 12.34
+"
+        );
     }
 }
 
