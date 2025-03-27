@@ -180,14 +180,14 @@ mod tests {
       "shop": "Shop B",
       "orders": [
         {
-          "item": "Banana",
-          "unitPrice": 50,
-          "quantity": 3
-        },
-        {
           "item": "Apple",
           "unitPrice": 100,
           "quantity": 1
+        },
+        {
+          "item": "Banana",
+          "unitPrice": 50,
+          "quantity": 3
         }
       ]
     }
