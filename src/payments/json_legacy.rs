@@ -57,6 +57,14 @@ impl AllPayments {
             serde_json::to_string(self).map_err(|err| err.to_string())
         }
     }
+
+    pub fn from_api(self_api: &AllPaymentsApi) -> Result<Self, PaymentErrorApi> {
+        Self::try_from(self_api)
+    }
+
+    pub fn to_api(&self) -> Result<AllPaymentsApi, PaymentErrorApi> {
+        AllPaymentsApi::try_from(self)
+    }
 }
 
 impl TryFrom<&AllPayments> for AllPaymentsApi {
