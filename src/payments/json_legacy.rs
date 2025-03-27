@@ -57,19 +57,33 @@ impl AllPayments {
             serde_json::to_string(self).map_err(|err| err.to_string())
         }
     }
+
+    pub fn from_json_to_api(json_str: &str) -> Result<AllPaymentsApi, PaymentErrorApi> {
+        let all_payments = Self::from_json(json_str).map_err(PaymentErrorApi::GenericError)?;
+        AllPaymentsApi::try_from(&all_payments)
+    }
+
+    pub fn dump_json_from_api(
+        self_api: &AllPaymentsApi,
+        fmt: bool,
+    ) -> Result<String, PaymentErrorApi> {
+        AllPayments::try_from(self_api)?
+            .dump_json(fmt)
+            .map_err(PaymentErrorApi::GenericError)
+    }
 }
 
-impl TryFrom<AllPayments> for AllPaymentsApi {
+impl TryFrom<&AllPayments> for AllPaymentsApi {
     type Error = PaymentErrorApi;
 
-    fn try_from(value: AllPayments) -> Result<Self, Self::Error> {
+    fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
         let mut all_payments_api = AllPaymentsApi::new();
         let mut values_api = ValueSetApi::new();
         values_api.add_values(
-            value.value_set.cities,
-            value.value_set.shops,
-            value.value_set.methods,
-            value.value_set.items,
+            value.value_set.cities.clone(),
+            value.value_set.shops.clone(),
+            value.value_set.methods.clone(),
+            value.value_set.items.clone(),
         );
         all_payments_api.add_values(values_api);
 
@@ -97,10 +111,10 @@ impl TryFrom<AllPayments> for AllPaymentsApi {
     }
 }
 
-impl TryFrom<AllPaymentsApi> for AllPayments {
+impl TryFrom<&AllPaymentsApi> for AllPayments {
     type Error = PaymentErrorApi;
 
-    fn try_from(value: AllPaymentsApi) -> Result<Self, Self::Error> {
+    fn try_from(value: &AllPaymentsApi) -> Result<Self, Self::Error> {
         let values = ValueSet {
             cities: value.value_set().cities().clone(),
             shops: value.value_set().shops().clone(),
@@ -200,8 +214,8 @@ mod tests {
 
         assert_eq!(all_payments, all_payments2);
 
-        let all_payment_api = AllPaymentsApi::try_from(all_payments).unwrap();
-        let all_payments3 = AllPayments::try_from(all_payment_api).unwrap();
+        let all_payment_api = AllPaymentsApi::try_from(&all_payments).unwrap();
+        let all_payments3 = AllPayments::try_from(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
     }
