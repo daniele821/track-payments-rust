@@ -5,7 +5,7 @@ use super::{
     PaymentDetail as PaymentDetailApi, PaymentError as PaymentErrorApi, PaymentId as PaymentIdApi,
     ValueSet as ValueSetApi,
 };
-use crate::time::{CUSTOM_FORMAT, parse_str};
+use crate::time::{CUSTOM_FORMAT, format_str, parse_str};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -108,6 +108,36 @@ impl TryFrom<AllPaymentsApi> for AllPayments {
             items: value.value_set().items().clone(),
         };
         let mut payments = vec![];
+        for payment_api in value.payments() {
+            let date_err = format_str(*payment_api.0.date(), DATE_FORMAT);
+            let date = date_err.map_err(PaymentErrorApi::GenericError)?;
+            let city = payment_api.1.city().clone();
+            let shop = payment_api.1.shop().clone();
+            let method = payment_api.1.method().clone();
+            let mut payment = Payment {
+                date,
+                city,
+                shop,
+                method,
+                orders: vec![],
+            };
+
+            for order_api in payment_api.1.orders() {
+                let item = order_api.0.item().clone();
+                let unit_price = *order_api.0.unit_price();
+                let quantity = *order_api.1.quantity();
+                let order = Order {
+                    item,
+                    unit_price,
+                    quantity,
+                };
+
+                payment.orders.push(order);
+            }
+
+            payments.push(payment);
+        }
+
         Ok(AllPayments {
             value_set: values,
             payments,
