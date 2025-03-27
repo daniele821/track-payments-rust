@@ -215,10 +215,23 @@ impl AllPayments {
     pub fn modify_order(
         &mut self,
         payid: &PaymentId,
-        orderid: OrderId,
+        orderid: &OrderId,
         orderdetail: OrderDetail,
     ) -> Result<(), PaymentError> {
-        todo!()
+        // checks
+        let order_map = self
+            .orders
+            .get_mut(payid)
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
+        let orderdetail_mut = order_map
+            .get_mut(orderid)
+            .ok_or(PaymentError::OrderNotFound(orderid.clone()))?;
+        orderid.check_missing_elements(&self.value_set)?;
+
+        // modify order
+        *orderdetail_mut = orderdetail;
+
+        Ok(())
     }
 
     pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<(), PaymentError> {
@@ -294,20 +307,20 @@ mod tests {
         assert_eq!(newval, &orderdetail);
         println!("INSERTED ORDER: {all_payments:#?}\n");
 
-        // modify order
-        // let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2.clone());
-        // assert_eq!(res, Ok(()));
-        // let newval = all_payments.orders.first_key_value().unwrap().1;
-        // let newval = newval.first_key_value().unwrap().1;
-        // assert_eq!(newval, &orderdetail2);
-        // println!("MODIFIED ORDER: {all_payments:#?}\n");
-
         // modify payment
         let res = all_payments.modify_payment(&payid, paydetail2.clone());
         assert_eq!(res, Ok(()));
         let newval = all_payments.payments.first_key_value().unwrap().1;
         assert_eq!(newval, &paydetail2);
         println!("MODIFIED PAYMENT: {all_payments:#?}\n");
+
+        // modify order
+        let res = all_payments.modify_order(&payid, &orderid, orderdetail2.clone());
+        assert_eq!(res, Ok(()));
+        let newval = all_payments.orders.first_key_value().unwrap().1;
+        let newval = newval.first_key_value().unwrap().1;
+        assert_eq!(newval, &orderdetail2);
+        println!("MODIFIED ORDER: {all_payments:#?}\n");
 
         // remove order
         let res = all_payments.remove_order(&payid, &orderid);
