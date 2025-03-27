@@ -212,7 +212,12 @@ impl AllPayments {
     }
 
     pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<(), PaymentError> {
-        todo!()
+        self.payments
+            .remove(payid)
+            .map(|_| {
+                assert!(self.orders.remove(payid).is_some());
+            })
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))
     }
 
     pub fn remove_order(
@@ -259,29 +264,26 @@ mod tests {
         // insert payment
         let res = all_payments.add_payment(payid.clone(), paydetail);
         assert_eq!(res, Ok(()));
-
         // insert order
         let res = all_payments.add_order(&payid, orderid.clone(), orderdetail);
         assert_eq!(res, Ok(()));
 
         println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
 
+        // modify order
+        let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2);
+        assert_eq!(res, Ok(()));
         // modify payment
         let res = all_payments.modify_payment(&payid, paydetail2);
         assert_eq!(res, Ok(()));
 
-        // modify order
-        let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2);
-        assert_eq!(res, Ok(()));
-
         println!("MODIFIED PAYMENT AND ORDER: {all_payments:#?}\n");
-
-        // remove payment
-        let res = all_payments.remove_payment(&payid);
-        assert_eq!(res, Ok(()));
 
         // remove order
         let res = all_payments.remove_order(&payid, &orderid);
+        assert_eq!(res, Ok(()));
+        // remove payment
+        let res = all_payments.remove_payment(&payid);
         assert_eq!(res, Ok(()));
 
         println!("DELETED PAYMENT AND ORDER: {all_payments:#?}\n");
