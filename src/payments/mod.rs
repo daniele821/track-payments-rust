@@ -193,6 +193,35 @@ impl AllPayments {
 
         Ok(())
     }
+
+    pub fn modify_payment(
+        &mut self,
+        payid: &PaymentId,
+        paydetail: PaymentDetail,
+    ) -> Result<(), PaymentError> {
+        todo!()
+    }
+
+    pub fn modify_order(
+        &mut self,
+        payid: &PaymentId,
+        orderid: OrderId,
+        orderdetail: OrderDetail,
+    ) -> Result<(), PaymentError> {
+        todo!()
+    }
+
+    pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<(), PaymentError> {
+        todo!()
+    }
+
+    pub fn remove_order(
+        &mut self,
+        payid: &PaymentId,
+        orderid: &OrderId,
+    ) -> Result<(), PaymentError> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -207,8 +236,14 @@ mod tests {
             String::from("Pub"),
             String::from("Card"),
         );
+        let paydetail2 = PaymentDetail::new(
+            String::from("Paris"),
+            String::from("Market"),
+            String::from("Cash"),
+        );
         let orderid = OrderId::new(String::from("Apple"), 120);
         let orderdetail = OrderDetail::new(2);
+        let orderdetail2 = OrderDetail::new(3);
         let mut values = ValueSet::new();
         values.add_values(
             vec![String::from("London"), String::from("Paris")],
@@ -226,24 +261,28 @@ mod tests {
         assert_eq!(res, Ok(()));
 
         // insert order
-        let res = all_payments.add_order(&payid, orderid, orderdetail);
+        let res = all_payments.add_order(&payid, orderid.clone(), orderdetail);
         assert_eq!(res, Ok(()));
 
         println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
 
         // modify payment
-        todo!("modify payment");
+        let res = all_payments.modify_payment(&payid, paydetail2);
+        assert_eq!(res, Ok(()));
 
         // modify order
-        todo!("modify order");
+        let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2);
+        assert_eq!(res, Ok(()));
 
         println!("MODIFIED PAYMENT AND ORDER: {all_payments:#?}\n");
 
         // remove payment
-        todo!("remove payment");
+        let res = all_payments.remove_payment(&payid);
+        assert_eq!(res, Ok(()));
 
         // remove order
-        todo!("remove order");
+        let res = all_payments.remove_order(&payid, &orderid);
+        assert_eq!(res, Ok(()));
 
         println!("DELETED PAYMENT AND ORDER: {all_payments:#?}\n");
     }
