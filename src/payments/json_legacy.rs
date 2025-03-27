@@ -130,7 +130,12 @@ impl TryFrom<&AllPaymentsApi> for AllPayments {
                 orders: vec![],
             };
 
-            for order_api in payment_api.1.orders() {
+            let orders = value
+                .orders()
+                .get(payment_api.0)
+                .expect("order map missing");
+
+            for order_api in orders {
                 let item = order_api.0.item().clone();
                 let unit_price = *order_api.0.unit_price();
                 let quantity = *order_api.1.quantity();

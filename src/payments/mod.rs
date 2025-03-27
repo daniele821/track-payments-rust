@@ -1,12 +1,12 @@
 #![allow(unused)]
 
-// mod json_legacy;
+mod json_legacy;
 
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-// pub use json_legacy::AllPayments as AllPaymentsLegacy;
+pub use json_legacy::AllPayments as AllPaymentsLegacy;
 
 #[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct ValueSet {
@@ -228,6 +228,8 @@ mod tests {
         // insert order
         let res = all_payments.add_order(&payid, orderid, orderdetail);
         assert_eq!(res, Ok(()));
+
+        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}");
 
         // modify payment
 
