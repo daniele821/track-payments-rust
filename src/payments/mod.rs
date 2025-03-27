@@ -1,10 +1,10 @@
 #![allow(unused)]
 
+mod json_legacy;
+
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-
-mod json_legacy;
 
 pub use json_legacy::AllPayments as AllPaymentsLegacy;
 
