@@ -76,9 +76,17 @@ impl TryFrom<AllPaymentsApi> for AllPayments {
     type Error = PaymentErrorApi;
 
     fn try_from(value: AllPaymentsApi) -> Result<Self, Self::Error> {
-        Err(PaymentErrorApi::GenericError(String::from(
-            "implement type conversion",
-        )))
+        let values = ValueSet {
+            cities: value.value_set().cities().clone(),
+            shops: value.value_set().shops().clone(),
+            methods: value.value_set().methods().clone(),
+            items: value.value_set().items().clone(),
+        };
+        let mut payments = vec![];
+        Ok(AllPayments {
+            value_set: values,
+            payments,
+        })
     }
 }
 
