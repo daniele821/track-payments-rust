@@ -35,13 +35,13 @@ pub struct PaymentDetail {
     city: String,
     shop: String,
     method: String,
-    orders: BTreeMap<OrderId, OrderDetail>,
 }
 
 #[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
+    orders: BTreeMap<PaymentId, BTreeMap<OrderId, OrderDetail>>,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -94,12 +94,15 @@ impl OrderId {
         Self { item, unit_price }
     }
 
-    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
+    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> Result<(), PaymentError> {
         let mut values = ValueSet::new();
         if !valid_values.items.contains(&self.item) {
             values.add_values(vec![], vec![], vec![], vec![self.item.clone()]);
         }
         values
+            .is_empty()
+            .then_some(())
+            .ok_or(PaymentError::MissingElements(values))
     }
 }
 
@@ -117,23 +120,10 @@ impl PaymentId {
 
 impl PaymentDetail {
     pub fn new(city: String, shop: String, method: String) -> Self {
-        Self {
-            city,
-            shop,
-            method,
-            orders: BTreeMap::new(),
-        }
+        Self { city, shop, method }
     }
 
-    pub fn total_price(&self) -> u32 {
-        let mut acc = 0;
-        for order in &self.orders {
-            acc += order.0.unit_price * order.1.quantity;
-        }
-        acc
-    }
-
-    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
+    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> Result<(), PaymentError> {
         let mut values = ValueSet::new();
         if !valid_values.cities.contains(&self.city) {
             values.add_values(vec![self.city.clone()], vec![], vec![], vec![]);
@@ -145,6 +135,9 @@ impl PaymentDetail {
             values.add_values(vec![], vec![], vec![self.method.clone()], vec![]);
         }
         values
+            .is_empty()
+            .then_some(())
+            .ok_or(PaymentError::MissingElements(values))
     }
 }
 
@@ -153,6 +146,7 @@ impl AllPayments {
         Self {
             value_set: ValueSet::new(),
             payments: BTreeMap::new(),
+            orders: BTreeMap::new(),
         }
     }
 
@@ -167,10 +161,11 @@ impl AllPayments {
         payid: &PaymentId,
         orderid: &OrderId,
     ) -> Result<&mut OrderDetail, PaymentError> {
-        self.get_payment(payid)?
+        let i = self
             .orders
-            .get_mut(orderid)
-            .ok_or(PaymentError::OrderNotFound(orderid.clone()))
+            .get_mut(payid)
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
+        todo!()
     }
 
     pub fn add_values(&mut self, new_values: ValueSet) {
