@@ -218,5 +218,10 @@ mod tests {
         let all_payments3 = AllPayments::try_from(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
+
+        assert_eq!(
+            all_payment_api,
+            AllPayments::from_json_to_api(json_string).unwrap()
+        );
     }
 }
