@@ -156,6 +156,23 @@ impl AllPayments {
         }
     }
 
+    fn get_payment(&mut self, payid: &PaymentId) -> Result<&mut PaymentDetail, PaymentError> {
+        self.payments
+            .get_mut(payid)
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))
+    }
+
+    fn get_order(
+        &mut self,
+        payid: &PaymentId,
+        orderid: &OrderId,
+    ) -> Result<&mut OrderDetail, PaymentError> {
+        self.get_payment(payid)?
+            .orders
+            .get_mut(orderid)
+            .ok_or(PaymentError::OrderNotFound(orderid.clone()))
+    }
+
     pub fn add_values(&mut self, new_values: ValueSet) {
         self.value_set.extend(new_values);
     }
@@ -182,17 +199,16 @@ impl AllPayments {
         orderid: OrderId,
         orderdetails: OrderDetail,
     ) -> Result<(), PaymentError> {
-        let paydetails = self
-            .payments
-            .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
+        let missing_values = orderid.get_missing_elems(&self.value_set);
+        let paydetails = self.get_payment(payid)?;
+
         if paydetails.orders.contains_key(&orderid) {
             return Err(PaymentError::OrderDuplicated(orderid));
         }
-        let missing_values = orderid.get_missing_elems(&self.value_set);
         if !missing_values.is_empty() {
             return Err(PaymentError::MissingElements(missing_values));
         }
+
         assert!(paydetails.orders.insert(orderid, orderdetails).is_none());
         Ok(())
     }
