@@ -1,6 +1,8 @@
 #![allow(unused)]
 
-use super::PaymentError;
+use super::AllPayments as AllPaymentsApi;
+use super::PaymentError as PaymentErrorApi;
+use super::ValueSet as ValueSetApi;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -52,9 +54,35 @@ impl AllPayments {
     }
 }
 
+impl TryFrom<AllPayments> for AllPaymentsApi {
+    type Error = PaymentErrorApi;
+
+    fn try_from(value: AllPayments) -> Result<Self, Self::Error> {
+        let mut all_payments = AllPaymentsApi::new();
+        let mut values = ValueSetApi::new();
+        values.add_values(
+            value.value_set.cities,
+            value.value_set.shops,
+            value.value_set.methods,
+            value.value_set.items,
+        );
+        all_payments.add_values(values);
+
+        Ok(all_payments)
+    }
+}
+
+impl TryFrom<AllPaymentsApi> for AllPayments {
+    type Error = AllPaymentsApi;
+
+    fn try_from(value: AllPaymentsApi) -> Result<Self, Self::Error> {
+        todo!("implement type conversion")
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::AllPayments;
+    use super::{AllPayments, AllPaymentsApi};
 
     #[test]
     fn allpayments_legacy_json() {
@@ -106,5 +134,10 @@ mod tests {
         let all_payments2 = AllPayments::from_json(json_string).unwrap();
 
         assert_eq!(all_payments, all_payments2);
+
+        let all_payment_api = AllPaymentsApi::try_from(all_payments).unwrap();
+        let all_payments3 = AllPayments::try_from(all_payment_api).unwrap();
+
+        assert_eq!(all_payments2, all_payments3);
     }
 }
