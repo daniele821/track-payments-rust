@@ -1,12 +1,12 @@
 #![allow(unused)]
 
-mod json_legacy;
+// mod json_legacy;
 
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-pub use json_legacy::AllPayments as AllPaymentsLegacy;
+// pub use json_legacy::AllPayments as AllPaymentsLegacy;
 
 #[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct ValueSet {
@@ -161,11 +161,13 @@ impl AllPayments {
         payid: &PaymentId,
         orderid: &OrderId,
     ) -> Result<&mut OrderDetail, PaymentError> {
-        let i = self
+        let pay_map = self
             .orders
             .get_mut(payid)
             .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
-        todo!()
+        pay_map
+            .get_mut(orderid)
+            .ok_or(PaymentError::OrderNotFound(orderid.clone()))
     }
 
     pub fn add_values(&mut self, new_values: ValueSet) {
@@ -180,52 +182,8 @@ impl AllPayments {
         if self.payments.contains_key(&payid) {
             return Err(PaymentError::PaymentDuplicated(payid));
         }
-        let missing_values = paydetails.get_missing_elems(&self.value_set);
-        if !missing_values.is_empty() {
-            return Err(PaymentError::MissingElements(missing_values));
-        }
+        paydetails.get_missing_elems(&self.value_set)?;
         assert!(self.payments.insert(payid, paydetails).is_none());
-        Ok(())
-    }
-
-    pub fn add_order(
-        &mut self,
-        payid: &PaymentId,
-        orderid: OrderId,
-        orderdetails: OrderDetail,
-    ) -> Result<(), PaymentError> {
-        let missing_values = orderid.get_missing_elems(&self.value_set);
-        let paydetails = self.get_payment(payid)?;
-
-        if paydetails.orders.contains_key(&orderid) {
-            return Err(PaymentError::OrderDuplicated(orderid));
-        }
-        if !missing_values.is_empty() {
-            return Err(PaymentError::MissingElements(missing_values));
-        }
-
-        assert!(paydetails.orders.insert(orderid, orderdetails).is_none());
-        Ok(())
-    }
-
-    pub fn modify_payment(
-        &mut self,
-        payid: &PaymentId,
-        paydetails: PaymentDetail,
-    ) -> Result<(), PaymentError> {
-        let paydetails_mut = self.get_payment(payid)?;
-        *paydetails_mut = paydetails;
-        Ok(())
-    }
-
-    pub fn modify_order(
-        &mut self,
-        payid: &PaymentId,
-        orderid: &OrderId,
-        orderdetails: OrderDetail,
-    ) -> Result<(), PaymentError> {
-        let orderdetails_mut = self.get_order(payid, orderid)?;
-        *orderdetails_mut = orderdetails;
         Ok(())
     }
 }
@@ -261,37 +219,5 @@ mod tests {
 
         let mut all_payments = AllPayments::new();
         all_payments.add_values(values);
-
-        // add payment and order
-        assert_eq!(all_payments.add_payment(payid.clone(), paydetails1), Ok(()));
-        assert!(
-            all_payments
-                .add_order(&payid, orderid.clone(), orderdetails1)
-                .is_ok()
-        );
-
-        // test payment and order were inserted
-        let order = all_payments.payments().get(&payid);
-        assert_eq!(all_payments.payments().len(), 1);
-        assert_eq!(order.unwrap().orders().len(), 1);
-
-        // modify payment and order
-        assert!(
-            all_payments
-                .modify_payment(&payid, paydetails2.clone())
-                .is_ok()
-        );
-        assert_eq!(*all_payments.get_payment(&payid).unwrap(), paydetails2);
-        assert!(
-            all_payments
-                .modify_order(&payid, &orderid, orderdetails2.clone())
-                .is_ok()
-        );
-        assert_eq!(
-            *all_payments.get_order(&payid, &orderid).unwrap(),
-            orderdetails2
-        );
-
-        // remove payment and order
     }
 }
