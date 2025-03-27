@@ -1,8 +1,11 @@
 #![allow(unused)]
 
-use super::AllPayments as AllPaymentsApi;
-use super::PaymentError as PaymentErrorApi;
-use super::ValueSet as ValueSetApi;
+use super::{
+    AllPayments as AllPaymentsApi, OrderDetail as OrderDetailApi, OrderId as OrderIdApi,
+    PaymentDetail as PaymentDetailApi, PaymentError as PaymentErrorApi, PaymentId as PaymentIdApi,
+    ValueSet as ValueSetApi,
+};
+use crate::time::{CUSTOM_FORMAT, parse_str};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -70,6 +73,26 @@ impl TryFrom<AllPayments> for AllPaymentsApi {
         );
         all_payments_api.add_values(values_api);
 
+        for payment in &value.payments {
+            let date_err = parse_str(&payment.date, DATE_FORMAT);
+            let date = date_err.map_err(PaymentErrorApi::GenericError)?;
+            let payid = PaymentIdApi::new(date);
+            let city = payment.city.clone();
+            let shop = payment.shop.clone();
+            let method = payment.method.clone();
+            let paydetails = PaymentDetailApi::new(city, shop, method);
+            all_payments_api.add_payment(payid, paydetails)?;
+
+            for order in &payment.orders {
+                let payid = PaymentIdApi::new(date);
+                let item = order.item.clone();
+                let unitprice = order.unit_price;
+                let quantity = order.quantity;
+                let orderid = OrderIdApi::new(item, unitprice);
+                let orderdetails = OrderDetailApi::new(quantity);
+                all_payments_api.add_order(&payid, orderid, orderdetails)?;
+            }
+        }
         Ok(all_payments_api)
     }
 }
