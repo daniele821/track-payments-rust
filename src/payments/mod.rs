@@ -182,7 +182,7 @@ impl AllPayments {
         if !self.payments.contains_key(payid) {
             return Err(PaymentError::PaymentNotFound(payid.clone()));
         }
-        let mut order_map = self.orders.get_mut(payid).expect("order map missing!");
+        let order_map = self.orders.get_mut(payid).expect("order map missing!");
         if order_map.contains_key(&orderid) {
             return Err(PaymentError::OrderDuplicated(orderid.clone()));
         }
