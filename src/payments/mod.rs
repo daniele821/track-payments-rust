@@ -150,26 +150,6 @@ impl AllPayments {
         }
     }
 
-    fn get_payment(&mut self, payid: &PaymentId) -> Result<&mut PaymentDetail, PaymentError> {
-        self.payments
-            .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))
-    }
-
-    fn get_order(
-        &mut self,
-        payid: &PaymentId,
-        orderid: &OrderId,
-    ) -> Result<&mut OrderDetail, PaymentError> {
-        let pay_map = self
-            .orders
-            .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
-        pay_map
-            .get_mut(orderid)
-            .ok_or(PaymentError::OrderNotFound(orderid.clone()))
-    }
-
     pub fn add_values(&mut self, new_values: ValueSet) {
         self.value_set.extend(new_values);
     }
@@ -179,12 +159,38 @@ impl AllPayments {
         payid: PaymentId,
         paydetails: PaymentDetail,
     ) -> Result<(), PaymentError> {
+        // checks
         if self.payments.contains_key(&payid) {
             return Err(PaymentError::PaymentDuplicated(payid));
         }
         paydetails.check_missing_elements(&self.value_set)?;
+
+        // insert payment and empty order list
         self.orders.entry(payid.clone()).or_default();
         assert!(self.payments.insert(payid, paydetails).is_none());
+
+        Ok(())
+    }
+
+    pub fn add_order(
+        &mut self,
+        payid: &PaymentId,
+        orderid: OrderId,
+        orderdetail: OrderDetail,
+    ) -> Result<(), PaymentError> {
+        // checks
+        if !self.payments.contains_key(payid) {
+            return Err(PaymentError::PaymentNotFound(payid.clone()));
+        }
+        let mut order_map = self.orders.get_mut(payid).expect("order map missing!");
+        if order_map.contains_key(&orderid) {
+            return Err(PaymentError::OrderDuplicated(orderid.clone()));
+        }
+        orderid.check_missing_elements(&self.value_set)?;
+
+        // insert order
+        assert!(order_map.insert(orderid, orderdetail).is_none());
+
         Ok(())
     }
 }
