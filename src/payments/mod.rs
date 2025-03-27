@@ -232,14 +232,18 @@ mod tests {
         println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
 
         // modify payment
+        todo!("modify payment");
 
         // modify order
+        todo!("modify order");
 
         println!("MODIFIED PAYMENT AND ORDER: {all_payments:#?}\n");
 
         // remove payment
+        todo!("remove payment");
 
         // remove order
+        todo!("remove order");
 
         println!("DELETED PAYMENT AND ORDER: {all_payments:#?}\n");
     }
