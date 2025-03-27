@@ -212,6 +212,27 @@ impl AllPayments {
         assert!(paydetails.orders.insert(orderid, orderdetails).is_none());
         Ok(())
     }
+
+    pub fn modify_payment(
+        &mut self,
+        payid: &PaymentId,
+        paydetails: PaymentDetail,
+    ) -> Result<(), PaymentError> {
+        let paydetails_mut = self.get_payment(payid)?;
+        *paydetails_mut = paydetails;
+        Ok(())
+    }
+
+    pub fn modify_order(
+        &mut self,
+        payid: &PaymentId,
+        orderid: &OrderId,
+        orderdetails: OrderDetail,
+    ) -> Result<(), PaymentError> {
+        let orderdetails_mut = self.get_order(payid, orderid)?;
+        *orderdetails_mut = orderdetails;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -238,15 +259,21 @@ mod tests {
         );
 
         // add payment and order
-        let mut all_payments1 = AllPayments::new();
-        all_payments1.add_values(values);
-        assert_eq!(all_payments1.add_payment(payid, paydetails), Ok(()));
-        let res = all_payments1.add_order(&payid_copy, orderid, orderdetails);
+        let mut all_payments = AllPayments::new();
+        all_payments.add_values(values);
+        assert_eq!(all_payments.add_payment(payid, paydetails), Ok(()));
+        let res = all_payments.add_order(&payid_copy, orderid, orderdetails);
         assert_eq!(res, Ok(()));
 
         // test payment and order were inserted
-        let order = all_payments1.payments().get(&payid_copy);
-        assert_eq!(all_payments1.payments().len(), 1);
+        let order = all_payments.payments().get(&payid_copy);
+        assert_eq!(all_payments.payments().len(), 1);
         assert_eq!(order.unwrap().orders().len(), 1);
     }
+
+    #[test]
+    fn all_payments_modification() {}
+
+    #[test]
+    fn all_payments_removal() {}
 }
