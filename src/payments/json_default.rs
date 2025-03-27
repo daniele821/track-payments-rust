@@ -47,18 +47,6 @@ impl AllPayments {
     }
 }
 
-impl From<AllPayments> for super::AllPayments {
-    fn from(value: AllPayments) -> Self {
-        todo!()
-    }
-}
-
-impl From<super::AllPayments> for AllPayments {
-    fn from(value: super::AllPayments) -> Self {
-        todo!()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::AllPayments;

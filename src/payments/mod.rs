@@ -53,6 +53,7 @@ pub enum PaymentError {
     PaymentDuplicated,
     PaymentNotFound,
     MissingElements(ValueSet),
+    GenericError(String),
 }
 
 impl ValueSet {

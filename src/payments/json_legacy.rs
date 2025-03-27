@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use super::PaymentError;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -48,18 +49,6 @@ impl AllPayments {
         } else {
             serde_json::to_string(self).map_err(|err| err.to_string())
         }
-    }
-}
-
-impl From<AllPayments> for super::AllPayments {
-    fn from(value: AllPayments) -> Self {
-        todo!()
-    }
-}
-
-impl From<super::AllPayments> for AllPayments {
-    fn from(value: super::AllPayments) -> Self {
-        todo!()
     }
 }
 
