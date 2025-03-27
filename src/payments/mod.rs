@@ -94,7 +94,7 @@ impl OrderId {
         Self { item, unit_price }
     }
 
-    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> Result<(), PaymentError> {
+    pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<(), PaymentError> {
         let mut values = ValueSet::new();
         if !valid_values.items.contains(&self.item) {
             values.add_values(vec![], vec![], vec![], vec![self.item.clone()]);
@@ -123,7 +123,7 @@ impl PaymentDetail {
         Self { city, shop, method }
     }
 
-    pub fn get_missing_elems(&self, valid_values: &ValueSet) -> Result<(), PaymentError> {
+    pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<(), PaymentError> {
         let mut values = ValueSet::new();
         if !valid_values.cities.contains(&self.city) {
             values.add_values(vec![self.city.clone()], vec![], vec![], vec![]);
@@ -182,7 +182,7 @@ impl AllPayments {
         if self.payments.contains_key(&payid) {
             return Err(PaymentError::PaymentDuplicated(payid));
         }
-        paydetails.get_missing_elems(&self.value_set)?;
+        paydetails.check_missing_elements(&self.value_set)?;
         self.orders.entry(payid.clone()).or_default();
         assert!(self.payments.insert(payid, paydetails).is_none());
         Ok(())
