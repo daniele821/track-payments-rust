@@ -5,7 +5,7 @@ use aes_gcm::{
     aead::{Aead, AeadCore, KeyInit, OsRng},
 };
 
-fn encrypt(key_str: &str, plaintext: &str) -> Result<String, ()> {
+pub fn encrypt(key_str: &str, plaintext: &str) -> Result<String, ()> {
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
     let cipher = Aes256Gcm::new(key);
@@ -17,7 +17,7 @@ fn encrypt(key_str: &str, plaintext: &str) -> Result<String, ()> {
     Ok(hex::encode(encrypted_data))
 }
 
-fn decrypt(key_str: &str, encrypted_data: &str) -> Result<String, ()> {
+pub fn decrypt(key_str: &str, encrypted_data: &str) -> Result<String, ()> {
     let encrypted_data = hex::decode(encrypted_data).expect("failed to decode hex string into vec");
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
     let (nonce_arr, ciphered_data) = encrypted_data.split_at(12);
