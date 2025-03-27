@@ -183,6 +183,7 @@ impl AllPayments {
             return Err(PaymentError::PaymentDuplicated(payid));
         }
         paydetails.get_missing_elems(&self.value_set)?;
+        self.orders.entry(payid.clone()).or_default();
         assert!(self.payments.insert(payid, paydetails).is_none());
         Ok(())
     }
@@ -195,19 +196,13 @@ mod tests {
     #[test]
     fn all_payments_creation() {
         let payid = PaymentId::new(0);
-        let paydetails1 = PaymentDetail::new(
+        let paydetails = PaymentDetail::new(
             String::from("London"),
             String::from("Pub"),
             String::from("Card"),
         );
-        let paydetails2 = PaymentDetail::new(
-            String::from("Paris"),
-            String::from("Market"),
-            String::from("Cash"),
-        );
         let orderid = OrderId::new(String::from("Apple"), 120);
-        let orderdetails1 = OrderDetail::new(2);
-        let orderdetails2 = OrderDetail::new(1);
+        let orderdetails = OrderDetail::new(2);
 
         let mut values = ValueSet::new();
         values.add_values(
@@ -219,5 +214,17 @@ mod tests {
 
         let mut all_payments = AllPayments::new();
         all_payments.add_values(values);
+
+        // insert payment
+
+        // insert order
+
+        // modify payment
+
+        // modify order
+
+        // remove payment
+
+        // remove order
     }
 }
