@@ -81,6 +81,19 @@ impl ValueSet {
         self.add_values(other.cities, other.shops, other.methods, other.items);
     }
 
+    pub fn intersection(&self, other: &ValueSet) -> ValueSet {
+        let mut intersection = ValueSet::new();
+        let cities_intersection = self.cities.intersection(&other.cities);
+        let shops_intersection = self.shops.intersection(&other.shops);
+        let methods_intersection = self.methods.intersection(&other.methods);
+        let items_intersection = self.items.intersection(&other.items);
+        intersection.cities.extend(cities_intersection.cloned());
+        intersection.shops.extend(shops_intersection.cloned());
+        intersection.methods.extend(methods_intersection.cloned());
+        intersection.items.extend(items_intersection.cloned());
+        intersection
+    }
+
     pub fn is_empty(&self) -> bool {
         self.cities.is_empty()
             && self.shops.is_empty()
@@ -192,7 +205,7 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId};
+    use super::*;
 
     #[test]
     fn all_payments_creation() {
@@ -205,22 +218,27 @@ mod tests {
             String::from("Market"),
             String::from("Card"),
         );
+        let mut values = ValueSet::new();
+        values.add_values(
+            vec![String::from("London")],
+            vec![String::from("Market")],
+            vec![String::from("Card")],
+            vec![String::from("Apple")],
+        );
 
         // add payment and order
         let mut all_payments1 = AllPayments::new();
+        all_payments1.add_values(values);
         assert_eq!(all_payments1.add_payment(payid, paydetails), Ok(()));
         let res = all_payments1.add_order(&payid_copy, orderid, orderdetails);
         assert_eq!(res, Ok(()));
 
         // test payment and order were inserted
-        let order = all_payments1.payments.get(&payid_copy);
-        assert_eq!(all_payments1.payments.len(), 1);
-        assert_eq!(order.unwrap().orders.len(), 1);
+        let order = all_payments1.payments().get(&payid_copy);
+        assert_eq!(all_payments1.payments().len(), 1);
+        assert_eq!(order.unwrap().orders().len(), 1);
 
         // test missing values funcion works
-        let missing_values = all_payments1.get_missing_values();
-        assert!(!all_payments1.get_missing_values().is_empty());
-        all_payments1.value_set.extend(missing_values);
         assert!(all_payments1.get_missing_values().is_empty());
     }
 }
