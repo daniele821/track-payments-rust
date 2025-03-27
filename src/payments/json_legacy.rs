@@ -57,20 +57,6 @@ impl AllPayments {
             serde_json::to_string(self).map_err(|err| err.to_string())
         }
     }
-
-    pub fn from_json_to_api(json_str: &str) -> Result<AllPaymentsApi, PaymentErrorApi> {
-        let all_payments = Self::from_json(json_str).map_err(PaymentErrorApi::GenericError)?;
-        AllPaymentsApi::try_from(&all_payments)
-    }
-
-    pub fn dump_json_from_api(
-        self_api: &AllPaymentsApi,
-        fmt: bool,
-    ) -> Result<String, PaymentErrorApi> {
-        AllPayments::try_from(self_api)?
-            .dump_json(fmt)
-            .map_err(PaymentErrorApi::GenericError)
-    }
 }
 
 impl TryFrom<&AllPayments> for AllPaymentsApi {
@@ -218,10 +204,5 @@ mod tests {
         let all_payments3 = AllPayments::try_from(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
-
-        assert_eq!(
-            all_payment_api,
-            AllPayments::from_json_to_api(json_string).unwrap()
-        );
     }
 }
