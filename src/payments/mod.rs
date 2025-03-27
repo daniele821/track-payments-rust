@@ -235,12 +235,12 @@ mod tests {
 
         // modify order
 
-        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
+        println!("MODIFIED PAYMENT AND ORDER: {all_payments:#?}\n");
 
         // remove payment
 
         // remove order
 
-        println!("INSERTED PAYMENT AND ORDER: {all_payments:#?}\n");
+        println!("DELETED PAYMENT AND ORDER: {all_payments:#?}\n");
     }
 }
