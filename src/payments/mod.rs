@@ -279,14 +279,14 @@ mod tests {
         println!("INSERTED ORDER: {all_payments:#?}\n");
 
         // modify order
-        // let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2);
-        // assert_eq!(res, Ok(()));
-        // println!("MODIFIED ORDER: {all_payments:#?}\n");
+        let res = all_payments.modify_order(&payid, orderid.clone(), orderdetail2);
+        assert_eq!(res, Ok(()));
+        println!("MODIFIED ORDER: {all_payments:#?}\n");
 
         // modify payment
-        // let res = all_payments.modify_payment(&payid, paydetail2);
-        // assert_eq!(res, Ok(()));
-        // println!("MODIFIED PAYMENT: {all_payments:#?}\n");
+        let res = all_payments.modify_payment(&payid, paydetail2);
+        assert_eq!(res, Ok(()));
+        println!("MODIFIED PAYMENT: {all_payments:#?}\n");
 
         // remove order
         let res = all_payments.remove_order(&payid, &orderid);
