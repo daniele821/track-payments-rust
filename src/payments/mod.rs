@@ -52,6 +52,7 @@ pub enum PaymentError {
     OrderNotFound,
     PaymentDuplicated,
     PaymentNotFound,
+    MissingElements(ValueSet),
 }
 
 impl ValueSet {
@@ -81,19 +82,6 @@ impl ValueSet {
         self.add_values(other.cities, other.shops, other.methods, other.items);
     }
 
-    pub fn intersection(&self, other: &ValueSet) -> ValueSet {
-        let mut intersection = ValueSet::new();
-        let cities_intersection = self.cities.intersection(&other.cities);
-        let shops_intersection = self.shops.intersection(&other.shops);
-        let methods_intersection = self.methods.intersection(&other.methods);
-        let items_intersection = self.items.intersection(&other.items);
-        intersection.cities.extend(cities_intersection.cloned());
-        intersection.shops.extend(shops_intersection.cloned());
-        intersection.methods.extend(methods_intersection.cloned());
-        intersection.items.extend(items_intersection.cloned());
-        intersection
-    }
-
     pub fn is_empty(&self) -> bool {
         self.cities.is_empty()
             && self.shops.is_empty()
@@ -105,6 +93,14 @@ impl ValueSet {
 impl OrderId {
     pub fn new(item: String, unit_price: u32) -> Self {
         Self { item, unit_price }
+    }
+
+    fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
+        let mut values = ValueSet::new();
+        if !valid_values.items.contains(&self.item) {
+            values.add_values(vec![], vec![], vec![], vec![self.item.clone()]);
+        }
+        values
     }
 }
 
@@ -137,6 +133,20 @@ impl PaymentDetail {
         }
         acc
     }
+
+    fn get_missing_elems(&self, valid_values: &ValueSet) -> ValueSet {
+        let mut values = ValueSet::new();
+        if !valid_values.cities.contains(&self.city) {
+            values.add_values(vec![self.city.clone()], vec![], vec![], vec![]);
+        }
+        if !valid_values.shops.contains(&self.shop) {
+            values.add_values(vec![], vec![self.shop.clone()], vec![], vec![]);
+        }
+        if !valid_values.methods.contains(&self.method) {
+            values.add_values(vec![], vec![], vec![self.method.clone()], vec![]);
+        }
+        values
+    }
 }
 
 impl AllPayments {
@@ -145,28 +155,6 @@ impl AllPayments {
             value_set: ValueSet::new(),
             payments: BTreeMap::new(),
         }
-    }
-
-    pub fn get_missing_values(&self) -> ValueSet {
-        let values = &self.value_set;
-        let mut missing_values = ValueSet::new();
-        for payment in &self.payments {
-            if !values.cities.contains(&payment.1.city) {
-                missing_values.cities.insert(payment.1.city.clone());
-            }
-            if !values.shops.contains(&payment.1.shop) {
-                missing_values.shops.insert(payment.1.shop.clone());
-            }
-            if !values.methods.contains(&payment.1.method) {
-                missing_values.methods.insert(payment.1.method.clone());
-            }
-            for order in &payment.1.orders {
-                if !values.items.contains(&order.0.item) {
-                    missing_values.items.insert(order.0.item.clone());
-                }
-            }
-        }
-        missing_values
     }
 
     pub fn add_values(&mut self, new_values: ValueSet) {
@@ -180,6 +168,10 @@ impl AllPayments {
     ) -> Result<(), PaymentError> {
         if self.payments.contains_key(&payid) {
             return Err(PaymentError::PaymentDuplicated);
+        }
+        let missing_values = paydetails.get_missing_elems(&self.value_set);
+        if !missing_values.is_empty() {
+            return Err(PaymentError::MissingElements(missing_values));
         }
         assert!(self.payments.insert(payid, paydetails).is_none());
         Ok(())
@@ -197,6 +189,10 @@ impl AllPayments {
             .ok_or(PaymentError::PaymentNotFound)?;
         if paydetails.orders.contains_key(&orderid) {
             return Err(PaymentError::OrderDuplicated);
+        }
+        let missing_values = orderid.get_missing_elems(&self.value_set);
+        if !missing_values.is_empty() {
+            return Err(PaymentError::MissingElements(missing_values));
         }
         assert!(paydetails.orders.insert(orderid, orderdetails).is_none());
         Ok(())
@@ -237,8 +233,5 @@ mod tests {
         let order = all_payments1.payments().get(&payid_copy);
         assert_eq!(all_payments1.payments().len(), 1);
         assert_eq!(order.unwrap().orders().len(), 1);
-
-        // test missing values funcion works
-        assert!(all_payments1.get_missing_values().is_empty());
     }
 }
