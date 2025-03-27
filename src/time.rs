@@ -22,9 +22,7 @@ pub fn parse_str(time_str: &str, format: &str) -> Result<i64, String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::time::parse_str;
-
-    use super::{CUSTOM_FORMAT, format_str};
+    use super::{CUSTOM_FORMAT, format_str, parse_str};
 
     #[test]
     pub fn parse_format_time() {

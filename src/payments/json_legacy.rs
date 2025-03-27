@@ -6,6 +6,8 @@ use super::ValueSet as ValueSetApi;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
+pub const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
