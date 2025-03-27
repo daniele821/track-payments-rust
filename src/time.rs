@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
@@ -15,8 +15,8 @@ pub fn format_str(timestamp: i64, format: &str) -> Result<String, String> {
 }
 
 pub fn parse_str(time_str: &str, format: &str) -> Result<i64, String> {
-    DateTime::parse_from_str(time_str, format)
-        .map(|timestamp| timestamp.timestamp())
+    NaiveDateTime::parse_from_str(time_str, format)
+        .map(|res| res.and_utc().timestamp())
         .map_err(|err| err.to_string())
 }
 
