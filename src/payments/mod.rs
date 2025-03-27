@@ -266,7 +266,8 @@ mod tests {
 
         // insert values
         let mut all_payments = AllPayments::new();
-        all_payments.add_values(values);
+        all_payments.add_values(values.clone());
+        assert_eq!(all_payments.value_set, values);
 
         // insert payment
         let res = all_payments.add_payment(payid.clone(), paydetail.clone());
