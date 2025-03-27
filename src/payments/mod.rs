@@ -213,13 +213,13 @@ mod tests {
         assert_eq!(res, Ok(()));
 
         // test payment and order were inserted
-        assert_eq!(all_payments1.payments.len(), 1);
         let order = all_payments1.payments.get(&payid_copy);
+        assert_eq!(all_payments1.payments.len(), 1);
         assert_eq!(order.unwrap().orders.len(), 1);
 
         // test missing values funcion works
-        assert!(!all_payments1.get_missing_values().is_empty());
         let missing_values = all_payments1.get_missing_values();
+        assert!(!all_payments1.get_missing_values().is_empty());
         all_payments1.value_set.extend(missing_values);
         assert!(all_payments1.get_missing_values().is_empty());
     }
