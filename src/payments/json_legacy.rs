@@ -1,4 +1,4 @@
-// #![allow(unused)]
+#![allow(unused)]
 
 use super::{
     AllPayments as AllPaymentsApi, OrderDetail as OrderDetailApi, OrderId as OrderIdApi,
