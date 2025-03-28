@@ -66,21 +66,29 @@ impl AllPayments {
         AllPaymentsApi::try_from(self)
     }
 
-    fn has_duplicates(orders: &Vec<Order>) -> bool {
-        let mut strings = BTreeSet::<&str>::new();
-        for item in orders {
-            if strings.insert(&item.item) {
-                return true;
-            }
-        }
-        false
-    }
-
     pub fn convert_to_valid_legacy(&mut self) {
         for payment in &mut self.payments {
-            if Self::has_duplicates(&payment.orders) {
-                for order in &mut payment.orders {}
-                // payment.orders.clear();
+            let mut fixed_orders = BTreeMap::<String, (u32, u32)>::new();
+            for order in &mut payment.orders {
+                let mut final_price = order.unit_price;
+                let mut final_quantity = order.quantity;
+                if let Some(&(price, quant)) = fixed_orders.get(&order.item) {
+                    if final_price == price {
+                        final_quantity += quant;
+                    } else {
+                        final_price = final_price * final_quantity + price * quant;
+                        final_quantity = 1;
+                    }
+                }
+                fixed_orders.insert(order.item.clone(), (final_price, final_quantity));
+            }
+            payment.orders.clear();
+            for (item, (unit_price, quantity)) in fixed_orders {
+                payment.orders.push(Order {
+                    item: item.to_string(),
+                    unit_price,
+                    quantity,
+                });
             }
         }
     }
