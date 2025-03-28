@@ -225,7 +225,8 @@ mod tests {
     { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
       "orders": [ { "item": "Apples", "unitPrice": 150, "quantity": 1 },
                   { "item": "Apples", "unitPrice": 50, "quantity": 3 },
-                  { "item": "Banana", "unitPrice": 100, "quantity": 2 }
+                  { "item": "Banana", "unitPrice": 100, "quantity": 2 },
+                  { "item": "Banana", "unitPrice": 100, "quantity": 1 }
       ] } ] }
         "#;
         let json_string_fixed = r#"
@@ -236,7 +237,7 @@ mod tests {
       "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
     { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
       "orders": [ { "item": "Apples", "unitPrice": 300, "quantity": 1 },
-                  { "item": "Banana", "unitPrice": 100, "quantity": 2 }
+                  { "item": "Banana", "unitPrice": 100, "quantity": 3 }
       ] } ] }
         "#;
         let mut all_payments = AllPayments::from_json(json_string).unwrap();
