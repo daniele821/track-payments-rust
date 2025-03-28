@@ -249,6 +249,10 @@ mod tests {
                   { "item": "Banana", "unitPrice": 100, "quantity": 2 }
       ] } ] }
         "#;
-        todo!("TEST THIS GETS FIXED TO BE VALID WITH LEGACY PROGRAM!");
+        let mut all_payments = AllPayments::from_json(json_string).unwrap();
+        all_payments.convert_to_valid_legacy();
+        let all_payments_fixed = AllPayments::from_json(json_string_fixed).unwrap();
+
+        assert_eq!(all_payments, all_payments_fixed);
     }
 }
