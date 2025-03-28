@@ -66,7 +66,24 @@ impl AllPayments {
         AllPaymentsApi::try_from(self)
     }
 
+    fn has_duplicates(orders: &Vec<Order>) -> bool {
+        let mut strings = BTreeSet::<&str>::new();
+        for item in orders {
+            if strings.insert(&item.item) {
+                return true;
+            }
+        }
+        false
+    }
+
     pub fn convert_to_valid_legacy(&mut self) {
+        for payment in &mut self.payments {
+            if Self::has_duplicates(&payment.orders) {
+                for order in &mut payment.orders {}
+                payment.orders.clear();
+                payment.orders = Vec::new();
+            }
+        }
         todo!(
             "make AllPaymentLegacy compatible with the golang track-payments old implementations.
 Specifically, fix:
@@ -184,47 +201,15 @@ mod tests {
     #[test]
     fn allpayments_legacy_json() {
         let json_string = r#"
-{
-  "valueSet": {
-    "cities": ["New York", "London"],
-    "shops": ["Shop A", "Shop B"],
-    "paymentMethods": ["Credit Card", "Cash"],
-    "items": ["Apple", "Banana"]
-  },
+{ "valueSet": { "cities": ["New York", "London"], "shops": ["Shop A", "Shop B"],
+    "paymentMethods": ["Credit Card", "Cash"], "items": ["Apple", "Banana"] },
   "payments": [
-    {
-      "date": "2024/03/27 12:34",
-      "city": "New York",
-      "paymentMethod": "Credit Card",
-      "shop": "Shop A",
-      "orders": [
-        {
-          "item": "Apple",
-          "unitPrice": 100,
-          "quantity": 2
-        }
-      ]
-    },
-    {
-      "date": "2024/03/28 09:15",
-      "city": "London",
-      "paymentMethod": "Cash",
-      "shop": "Shop B",
-      "orders": [
-        {
-          "item": "Apple",
-          "unitPrice": 100,
-          "quantity": 1
-        },
-        {
-          "item": "Banana",
-          "unitPrice": 50,
-          "quantity": 3
-        }
-      ]
-    }
-  ]
-}
+    { "date": "2024/03/27 12:34", "city": "New York", "paymentMethod": "Credit Card", "shop": "Shop A",
+      "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
+    { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
+      "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 1 },
+                  { "item": "Banana", "unitPrice": 50, "quantity": 3 }
+      ] } ] }
         "#;
         let all_payments = AllPayments::from_json(json_string).unwrap();
         let parsed_json = all_payments.dump_json(false);
@@ -236,5 +221,34 @@ mod tests {
         let all_payments3 = AllPayments::try_from(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
+    }
+
+    #[test]
+    fn allpayments_legacy_json_fixed() {
+        let json_string = r#"
+{ "valueSet": { "cities": ["New York", "London"], "shops": ["Shop A", "Shop B"],
+    "paymentMethods": ["Credit Card", "Cash"], "items": ["Apple", "Banana"] },
+  "payments": [
+    { "date": "2024/03/27 12:34", "city": "New York", "paymentMethod": "Credit Card", "shop": "Shop A",
+      "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
+    { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
+      "orders": [ { "item": "Apples", "unitPrice": 150, "quantity": 1 },
+                  { "item": "Apples", "unitPrice": 50, "quantity": 3 },
+                  { "item": "Banana", "unitPrice": 100, "quantity": 2 }
+      ] } ] }
+        "#;
+        let json_string_fixed = r#"
+{ "valueSet": { "cities": ["New York", "London"], "shops": ["Shop A", "Shop B"],
+    "paymentMethods": ["Credit Card", "Cash"], "items": ["Apple", "Banana"] },
+  "payments": [
+    { "date": "2024/03/27 12:34", "city": "New York", "paymentMethod": "Credit Card", "shop": "Shop A",
+      "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
+    { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
+      "orders": [ { "item": "Apples", "unitPrice": 150, "quantity": 1 },
+                  { "item": "Apples", "unitPrice": 50, "quantity": 3 },
+                  { "item": "Banana", "unitPrice": 100, "quantity": 2 }
+      ] } ] }
+        "#;
+        todo!("TEST THIS GETS FIXED TO BE VALID WITH LEGACY PROGRAM!");
     }
 }
