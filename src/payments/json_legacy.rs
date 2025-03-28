@@ -80,26 +80,9 @@ impl AllPayments {
         for payment in &mut self.payments {
             if Self::has_duplicates(&payment.orders) {
                 for order in &mut payment.orders {}
-                payment.orders.clear();
-                payment.orders = Vec::new();
+                // payment.orders.clear();
             }
         }
-        todo!(
-            "make AllPaymentLegacy compatible with the golang track-payments old implementations.
-Specifically, fix:
-- compact multiple orders of same item into a single order. EXAMPLE:
-    - paymentNth: 
-        - order1 : Pizza x2 8.9
-        - order2 : Pizza x1 12.3
-        - order3 : Ticket x2 12.34
-
-    ---- SHOULD BECOME: ----
-
-    - paymentNth:
-        - order1 : Pizza x1 30,1
-        - order2 : Ticket x2 12.34
-"
-        );
     }
 }
 
@@ -244,14 +227,16 @@ mod tests {
     { "date": "2024/03/27 12:34", "city": "New York", "paymentMethod": "Credit Card", "shop": "Shop A",
       "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
     { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
-      "orders": [ { "item": "Apples", "unitPrice": 150, "quantity": 1 },
-                  { "item": "Apples", "unitPrice": 50, "quantity": 3 },
+      "orders": [ { "item": "Apples", "unitPrice": 300, "quantity": 1 },
                   { "item": "Banana", "unitPrice": 100, "quantity": 2 }
       ] } ] }
         "#;
         let mut all_payments = AllPayments::from_json(json_string).unwrap();
         all_payments.convert_to_valid_legacy();
         let all_payments_fixed = AllPayments::from_json(json_string_fixed).unwrap();
+
+        println!("{all_payments:#?}");
+        println!("{all_payments_fixed:#?}");
 
         assert_eq!(all_payments, all_payments_fixed);
     }
