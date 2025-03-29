@@ -6,7 +6,7 @@ use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-pub use json_legacy::AllPayments as AllPaymentsLegacy;
+pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
 #[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct ValueSet {
