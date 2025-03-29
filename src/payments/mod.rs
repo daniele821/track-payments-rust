@@ -59,7 +59,6 @@ pub enum PaymentError {
 }
 
 impl ValueSet {
-    /// Creates a new value.
     #[must_use]
     pub fn new() -> Self {
         Self::default()
