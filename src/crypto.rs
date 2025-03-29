@@ -9,7 +9,7 @@ use aes_gcm::{
 
 /// Encrypt plaintext.
 ///
-/// See also [`decrypt`] for decryption
+/// See also `decrypt` for decryption
 #[must_use]
 pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
@@ -21,7 +21,7 @@ pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     Some(hex::encode(encrypted_data))
 }
 
-/// Decrypt text encrypted with [`encrypt`].
+/// Decrypt text encrypted with `encrypt`.
 ///
 /// # Panics
 ///

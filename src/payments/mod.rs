@@ -61,14 +61,10 @@ pub enum PaymentError {
 }
 
 impl ValueSet {
+    /// Creates a new value.
     #[must_use]
     pub fn new() -> Self {
-        Self {
-            cities: BTreeSet::new(),
-            shops: BTreeSet::new(),
-            methods: BTreeSet::new(),
-            items: BTreeSet::new(),
-        }
+        Self::default()
     }
 
     pub fn add_values<Iter: IntoIterator<Item = String>>(
@@ -150,11 +146,7 @@ impl PaymentDetail {
 impl AllPayments {
     #[must_use]
     pub fn new() -> Self {
-        Self {
-            value_set: ValueSet::new(),
-            payments: BTreeMap::new(),
-            orders: BTreeMap::new(),
-        }
+        Self::default()
     }
 
     pub fn add_values(&mut self, new_values: ValueSet) {
