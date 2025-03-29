@@ -1,3 +1,5 @@
+//! Standard interface for all payments data structure.
+
 #![allow(unused)]
 
 mod json_legacy;
@@ -8,7 +10,9 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(
+    Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Default,
+)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -37,7 +41,9 @@ pub struct PaymentDetail {
     method: String,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(
+    Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Default,
+)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
@@ -55,6 +61,7 @@ pub enum PaymentError {
 }
 
 impl ValueSet {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             cities: BTreeSet::new(),
@@ -81,6 +88,7 @@ impl ValueSet {
         self.add_values(other.cities, other.shops, other.methods, other.items);
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.cities.is_empty()
             && self.shops.is_empty()
@@ -90,6 +98,7 @@ impl ValueSet {
 }
 
 impl OrderId {
+    #[must_use]
     pub fn new(item: String, unit_price: u32) -> Self {
         Self { item, unit_price }
     }
@@ -104,18 +113,21 @@ impl OrderId {
 }
 
 impl OrderDetail {
+    #[must_use]
     pub fn new(quantity: u32) -> Self {
         Self { quantity }
     }
 }
 
 impl PaymentId {
+    #[must_use]
     pub fn new(date: i64) -> Self {
         Self { date }
     }
 }
 
 impl PaymentDetail {
+    #[must_use]
     pub fn new(city: String, shop: String, method: String) -> Self {
         Self { city, shop, method }
     }
@@ -136,6 +148,7 @@ impl PaymentDetail {
 }
 
 impl AllPayments {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             value_set: ValueSet::new(),
