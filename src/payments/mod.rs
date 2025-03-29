@@ -1,6 +1,4 @@
-//! Standard interface for all payments data structure.
-
-#![allow(unused)]
+#![allow(unused, clippy::missing_errors_doc, clippy::missing_panics_doc)]
 
 mod json_legacy;
 
@@ -244,9 +242,7 @@ impl AllPayments {
     pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<(), PaymentError> {
         self.payments
             .remove(payid)
-            .map(|_| {
-                assert!(self.orders.remove(payid).is_some());
-            })
+            .map(|_| assert!(self.orders.remove(payid).is_some()))
             .ok_or(PaymentError::PaymentNotFound(payid.clone()))
     }
 

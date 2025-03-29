@@ -1,4 +1,4 @@
-#![allow(unused)]
+#![allow(unused, clippy::missing_errors_doc)]
 
 use super::{
     AllPayments as AllPaymentsApi, OrderDetail as OrderDetailApi, OrderId as OrderIdApi,

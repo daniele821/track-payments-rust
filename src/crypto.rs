@@ -1,13 +1,10 @@
-//! Crypto related utility functions.
-
-#![allow(unused)]
+#![allow(unused, clippy::missing_errors_doc)]
 
 use aes_gcm::{
     Aes256Gcm, Key, Nonce,
     aead::{Aead, AeadCore, KeyInit, OsRng},
 };
 
-/// Encrypt plaintext.
 #[must_use]
 pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
@@ -19,20 +16,15 @@ pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     Some(hex::encode(encrypted_data))
 }
 
-/// Decrypt text encrypted.
-///
-/// # Panics
-///
-/// Panics if input string is encrypted incorrectly, or for internal failures.
 #[must_use]
 pub fn decrypt(key_str: &str, encrypted_data: &str) -> Option<String> {
-    let encrypted_data = hex::decode(encrypted_data).expect("failed to decode hex string into vec");
+    let encrypted_data = hex::decode(encrypted_data).ok()?;
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
     let (nonce_arr, ciphered_data) = encrypted_data.split_at(12);
     let nonce = Nonce::from_slice(nonce_arr);
     let cipher = Aes256Gcm::new(key);
     let plaintext = cipher.decrypt(nonce, ciphered_data).ok()?;
-    Some(String::from_utf8(plaintext).expect("failed to convert vector of bytes to string"))
+    String::from_utf8(plaintext).ok()
 }
 
 #[cfg(test)]
