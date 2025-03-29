@@ -16,7 +16,7 @@ pub fn now_fake_utc() -> i64 {
 ///
 /// # Errors
 ///
-/// This function will return an error if string parsing fails.
+/// This function will return an error if string formatting fails.
 pub fn format_str(timestamp: i64, format: &str) -> Result<String, String> {
     DateTime::from_timestamp(timestamp, 0)
         .map(|date| date.format(format).to_string())
@@ -27,7 +27,7 @@ pub fn format_str(timestamp: i64, format: &str) -> Result<String, String> {
 ///
 /// # Errors
 ///
-/// This function will return an error if .
+/// This function will return an error if string parsing fails.
 pub fn parse_str(time_str: &str, format: &str) -> Result<i64, String> {
     NaiveDateTime::parse_from_str(time_str, format)
         .map(|res| res.and_utc().timestamp())
