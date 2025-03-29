@@ -1,3 +1,5 @@
+//! Crypto related utility functions.
+
 #![allow(unused)]
 
 use aes_gcm::{
@@ -5,26 +7,34 @@ use aes_gcm::{
     aead::{Aead, AeadCore, KeyInit, OsRng},
 };
 
-pub fn encrypt(key_str: &str, plaintext: &str) -> Result<String, ()> {
+/// Encrypt plaintext.
+///
+/// See also [`decrypt`] for decryption
+#[must_use]
+pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
     let cipher = Aes256Gcm::new(key);
-    let ciphered_data = cipher
-        .encrypt(&nonce, plaintext.as_bytes())
-        .map_err(|_| ())?;
+    let ciphered_data = cipher.encrypt(&nonce, plaintext.as_bytes()).ok()?;
     let mut encrypted_data: Vec<u8> = nonce.to_vec();
     encrypted_data.extend_from_slice(&ciphered_data);
-    Ok(hex::encode(encrypted_data))
+    Some(hex::encode(encrypted_data))
 }
 
-pub fn decrypt(key_str: &str, encrypted_data: &str) -> Result<String, ()> {
+/// Decrypt text encrypted with [`encrypt`].
+///
+/// # Panics
+///
+/// Panics if input string is encrypted incorrectly, or for internal failures.
+#[must_use]
+pub fn decrypt(key_str: &str, encrypted_data: &str) -> Option<String> {
     let encrypted_data = hex::decode(encrypted_data).expect("failed to decode hex string into vec");
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
     let (nonce_arr, ciphered_data) = encrypted_data.split_at(12);
     let nonce = Nonce::from_slice(nonce_arr);
     let cipher = Aes256Gcm::new(key);
-    let plaintext = cipher.decrypt(nonce, ciphered_data).map_err(|_| ())?;
-    Ok(String::from_utf8(plaintext).expect("failed to convert vector of bytes to string"))
+    let plaintext = cipher.decrypt(nonce, ciphered_data).ok()?;
+    Some(String::from_utf8(plaintext).expect("failed to convert vector of bytes to string"))
 }
 
 #[cfg(test)]

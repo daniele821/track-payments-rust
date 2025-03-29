@@ -1,4 +1,4 @@
-//! time related utility functions.
+//! Time related utility functions.
 
 #![allow(unused)]
 
