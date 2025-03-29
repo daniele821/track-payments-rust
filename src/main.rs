@@ -1,5 +1,3 @@
-mod crypto;
-mod payments;
-mod time;
-
-fn main() {}
+fn main() {
+    println!("ciao!");
+}
