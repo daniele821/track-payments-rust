@@ -1,9 +1,7 @@
 #![allow(unused, clippy::missing_errors_doc)]
 
-use aes_gcm::{
-    Aes256Gcm, Key, Nonce,
-    aead::{Aead, AeadCore, KeyInit, OsRng},
-};
+use aes_gcm::aead::{Aead, AeadCore, KeyInit, OsRng};
+use aes_gcm::{Aes256Gcm, Key, Nonce};
 
 #[must_use]
 pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
