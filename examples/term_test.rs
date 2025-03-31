@@ -1,34 +1,80 @@
 use crossterm::{
-    event::{self, KeyCode, KeyModifiers},
-    terminal::{EnterAlternateScreen, disable_raw_mode, enable_raw_mode},
+    event::{self, Event, KeyCode, MouseEvent, MouseEventKind},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode},
 };
+use std::io::{self, stdout};
 
-fn main() {
-    enable_raw_mode().unwrap();
-    let mut stdout = std::io::stdout();
-    crossterm::execute!(stdout, EnterAlternateScreen).unwrap();
+fn main() -> io::Result<()> {
+    // Enable raw mode for direct event handling
+    enable_raw_mode()?;
+
+    // Enable mouse capture
+    execute!(stdout(), crossterm::event::EnableMouseCapture)?;
+
+    println!("Move your mouse or click in the terminal. Press 'q' to quit.");
+
     loop {
-        if event::poll(std::time::Duration::from_millis(100)).unwrap() {
-            if let event::Event::Key(key_event) = event::read().unwrap() {
-                println!("Key pressed: {:?}\r", key_event.code);
-                if key_event.code == KeyCode::Esc {
-                    break;
-                }
-                if key_event.code == KeyCode::Char('?') {
-                    println!(
-                        "{:?}:{:?}\r",
-                        crossterm::terminal::size(),
-                        crossterm::terminal::window_size()
-                    );
-                }
-                if key_event.code == KeyCode::Char('c')
-                    && key_event.modifiers.contains(KeyModifiers::CONTROL)
-                {
-                    println!("Ctrl+C detected. Exiting...");
+        match event::read()? {
+            Event::Key(key_event) => {
+                if key_event.code == KeyCode::Char('q') {
                     break;
                 }
             }
+            Event::Mouse(mouse_event) => {
+                handle_mouse_event(mouse_event);
+            }
+            _ => {} // Ignore other events
         }
     }
-    disable_raw_mode().unwrap();
+
+    // Cleanup (this code won't actually run in this example due to the infinite loop)
+    disable_raw_mode()?;
+    execute!(stdout(), crossterm::event::DisableMouseCapture)?;
+    Ok(())
+}
+
+fn handle_mouse_event(mouse_event: MouseEvent) {
+    match mouse_event.kind {
+        MouseEventKind::Down(button) => {
+            println!(
+                "Mouse button {:?} pressed at {:?}\r",
+                button,
+                (mouse_event.column, mouse_event.row)
+            );
+        }
+        MouseEventKind::Up(button) => {
+            println!(
+                "Mouse button {:?} released at {:?}\r",
+                button,
+                (mouse_event.column, mouse_event.row)
+            );
+        }
+        MouseEventKind::Drag(button) => {
+            println!(
+                "Mouse dragged with {:?} to {:?}\r",
+                button,
+                (mouse_event.column, mouse_event.row)
+            );
+        }
+        MouseEventKind::Moved => {
+            println!(
+                "Mouse moved to {:?}\r",
+                (mouse_event.column, mouse_event.row)
+            );
+        }
+        MouseEventKind::ScrollUp => {
+            println!(
+                "Mouse scrolled up at {:?}\r",
+                (mouse_event.column, mouse_event.row)
+            );
+        }
+        MouseEventKind::ScrollDown => {
+            println!(
+                "Mouse scrolled down at {:?}\r",
+                (mouse_event.column, mouse_event.row)
+            );
+        }
+        _ => {}
+    }
 }
