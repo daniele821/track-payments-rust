@@ -1,7 +1,9 @@
 use crossterm::{
-    event::{self, Event, KeyCode, MouseEvent, MouseEventKind},
+    event::{
+        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
+    },
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use std::io::{self, stdout};
 
@@ -10,7 +12,7 @@ fn main() -> io::Result<()> {
     enable_raw_mode()?;
 
     // Enable mouse capture
-    execute!(stdout(), crossterm::event::EnableMouseCapture)?;
+    execute!(stdout(), EnableMouseCapture, EnterAlternateScreen)?;
 
     println!("Move your mouse or click in the terminal. Press 'q' to quit.");
 
@@ -30,7 +32,7 @@ fn main() -> io::Result<()> {
 
     // Cleanup (this code won't actually run in this example due to the infinite loop)
     disable_raw_mode()?;
-    execute!(stdout(), crossterm::event::DisableMouseCapture)?;
+    execute!(stdout(), DisableMouseCapture, LeaveAlternateScreen)?;
     Ok(())
 }
 
