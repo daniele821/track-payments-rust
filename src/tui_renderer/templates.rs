@@ -7,7 +7,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32) -> Vec<String
     for i in (1..=height).rev() {
         let mut str = String::with_capacity(len);
         for j in values {
-            if f64::from(i - 1) < f64::from(*j) * unit_heigh {
+            if f64::from(i - 1) < f64::from(*j) * unit_heigh - 0.5 {
                 str.push('@');
             } else {
                 str.push(' ');
@@ -16,17 +16,4 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32) -> Vec<String
         lines.push(str);
     }
     lines
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::tui_renderer::templates::bar_graph_vertical;
-
-    #[test]
-    pub fn bar_graph() {
-        let graph = bar_graph_vertical(&[1, 2, 3, 0, 2, 4, 1, 2], 8, 10);
-        for line in graph {
-            println!("{line}");
-        }
-    }
 }
