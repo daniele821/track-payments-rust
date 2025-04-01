@@ -1,4 +1,4 @@
 pub mod crypto;
 pub mod payments;
-pub mod renderer;
 pub mod time;
+pub mod tui_renderer;
