@@ -4,12 +4,11 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32) -> Vec<String
     let len = values.len();
     let unit_heigh = f64::from(height) / f64::from(max);
     let mut lines = Vec::with_capacity(height as usize);
-    for i in 0..height {
+    for i in (1..=height).rev() {
         let mut str = String::with_capacity(len);
         for j in values {
-            print!("{j},{i} | ");
-            if f64::from(*j) * unit_heigh < f64::from(i + 1) {
-                str.push('x');
+            if f64::from(i - 1) * unit_heigh < f64::from(*j) {
+                str.push('@');
             } else {
                 str.push(' ');
             }
