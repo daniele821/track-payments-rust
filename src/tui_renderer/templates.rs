@@ -7,7 +7,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32) -> Vec<String
     for i in (1..=height).rev() {
         let mut str = String::with_capacity(len);
         for j in values {
-            if f64::from(i - 1) * unit_heigh < f64::from(*j) {
+            if f64::from(i - 1) < f64::from(*j) * unit_heigh {
                 str.push('@');
             } else {
                 str.push(' ');
@@ -24,7 +24,7 @@ mod tests {
 
     #[test]
     pub fn bar_graph() {
-        let graph = bar_graph_vertical(&[1, 2, 3, 0, 2, 4, 1, 2], 8, 4);
+        let graph = bar_graph_vertical(&[1, 2, 3, 0, 2, 4, 1, 2], 8, 10);
         for line in graph {
             println!("{line}");
         }
