@@ -1,4 +1,5 @@
 use crossterm::{
+    cursor::{Hide, Show},
     event::{
         self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
     },
@@ -19,10 +20,12 @@ fn main() -> io::Result<()> {
         stdout(),
         EnableMouseCapture,
         EnterAlternateScreen,
-        DisableLineWrap
+        DisableLineWrap,
+        Hide,
+        crossterm::cursor::MoveTo(0, 0),
     )?;
 
-    println!("Move your mouse or click in the terminal. Press 'q' to quit.");
+    println!("Move your mouse or click in the terminal. Press 'q' to quit.\r");
 
     loop {
         match event::read()? {
@@ -45,6 +48,7 @@ fn main() -> io::Result<()> {
         DisableMouseCapture,
         LeaveAlternateScreen,
         EnableLineWrap,
+        Show,
     )?;
     Ok(())
 }
