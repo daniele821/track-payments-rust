@@ -244,9 +244,6 @@ mod tests {
         all_payments.convert_to_valid_legacy();
         let all_payments_fixed = AllPayments::from_json(json_string_fixed).unwrap();
 
-        println!("{all_payments:#?}");
-        println!("{all_payments_fixed:#?}");
-
         assert_eq!(all_payments, all_payments_fixed);
     }
 }
