@@ -39,11 +39,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
                 str.push_str(&tmp_str);
                 prev = true;
             } else if i == 1 {
-                if *j == 0 {
-                    str.push_str(&"▁".repeat(factor).with(Color::DarkBlue).to_string());
-                } else {
-                    str.push_str(&"▂".repeat(factor).with(Color::DarkGreen).to_string());
-                }
+                str.push_str(&"▁".repeat(factor).with(Color::DarkGreen).to_string());
             } else {
                 let mut sep = "▏";
                 if !prev {
