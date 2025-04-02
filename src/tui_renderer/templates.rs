@@ -2,15 +2,19 @@ use crossterm::style::{Color, Stylize};
 
 #[must_use]
 pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) -> Vec<String> {
+    let empty_line = " ".repeat(width as usize);
+    let mut lines = Vec::with_capacity(height as usize);
     if values.is_empty() {
-        todo!("return empty result!");
+        for _ in 0..height {
+            lines.push(empty_line.clone());
+        }
+        return lines;
     }
     let max = u32::max(1, *values.iter().max().unwrap_or(&0));
     let len = values.len();
     let actual_len = usize::max(len, width as usize / len * len);
     let factor = actual_len / len;
     let unit_heigh = f64::from(height) / f64::from(max);
-    let mut lines = Vec::with_capacity(height as usize);
     let mut prev;
     let cached_spaces = " ".repeat(factor - 1);
     for i in (1..=height).rev() {
