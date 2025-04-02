@@ -22,7 +22,7 @@ fn main() -> io::Result<()> {
         EnableMouseCapture,
         EnterAlternateScreen,
         DisableLineWrap,
-        // Hide,
+        Hide,
         crossterm::cursor::MoveTo(0, 0),
     )?;
 
