@@ -1,6 +1,6 @@
 fn main() {
     let width = crossterm::terminal::size().unwrap().0;
-    let width = u32::from(width);
+    let width = u32::from(width - 2);
     let height = 30;
     let graph = track_payments_rust::tui_renderer::templates::bar_graph_vertical(
         &[
@@ -12,6 +12,6 @@ fn main() {
         1000,
     );
     for line in &graph {
-        println!("{line}");
+        println!("|{line}|");
     }
 }
