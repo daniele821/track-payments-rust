@@ -5,7 +5,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
     if values.is_empty() {
         todo!("return empty result!");
     }
-    let max = *values.iter().max().unwrap_or(&0);
+    let max = u32::max(1, *values.iter().max().unwrap_or(&0));
     let len = values.len();
     let actual_len = usize::max(len, width as usize / len * len);
     let factor = actual_len / len;
