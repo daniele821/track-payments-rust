@@ -1,9 +1,19 @@
 use crossterm::style::{Color, Stylize};
 
+fn correct_sizes(mut lines: Vec<String>, width: u32, height: u32) -> Vec<String> {
+    let empty_line = " ".repeat(width as usize);
+    let height_usize = height as usize;
+    for _ in lines.len()..=height_usize {
+        lines.push(empty_line.clone());
+    }
+    lines
+}
+
 #[must_use]
 pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) -> Vec<String> {
-    // if values.len() == 0, returns empty strings of correct len
-    // assert result is ALWAYS of size equal to width and height passed as input
+    if values.is_empty() {
+        return correct_sizes(vec![], width, height);
+    }
     let max = *values.iter().max().unwrap_or(&0);
     let len = values.len();
     let actual_len = usize::max(len, width as usize / len * len);
@@ -41,5 +51,5 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
         }
         lines.push(str);
     }
-    lines
+    correct_sizes(lines, width, height)
 }
