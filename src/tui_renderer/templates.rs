@@ -1,46 +1,9 @@
 use crossterm::style::{Color, Stylize};
 
-#[derive(Clone, Copy)]
-pub enum Align {
-    Left,
-    Center,
-    Right,
-}
-
-fn correct_sizes(
-    mut lines: Vec<String>,
-    width: u32,
-    height: u32,
-    horiz_align: Align,
-) -> Vec<String> {
-    let empty_line = " ".repeat(width as usize);
-    let height_usize = height as usize;
-    for _ in lines.len()..=height_usize {
-        lines.push(empty_line.clone());
-    }
-    lines.truncate(height_usize);
-    lines
-}
-
-#[must_use]
-pub fn are_sizes_valid(lines: &[String], width: u32, height: u32) -> bool {
-    let height_usize = height as usize;
-    let width_usize = width as usize;
-    if lines.len() != height_usize {
-        return false;
-    }
-    for line in lines {
-        if line.len() != width_usize {
-            return false;
-        }
-    }
-    true
-}
-
 #[must_use]
 pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) -> Vec<String> {
     if values.is_empty() {
-        return correct_sizes(vec![], width, height, Align::Center);
+        todo!("return empty result!");
     }
     let max = *values.iter().max().unwrap_or(&0);
     let len = values.len();
@@ -79,5 +42,5 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
         }
         lines.push(str);
     }
-    correct_sizes(lines, width, height, Align::Center)
+    lines
 }
