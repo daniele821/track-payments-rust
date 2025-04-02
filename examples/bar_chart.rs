@@ -11,7 +11,7 @@ fn main() {
         height,
         1000,
     );
-    for line in graph {
+    for line in &graph {
         println!("{line}");
     }
     assert!(track_payments_rust::tui_renderer::templates::are_sizes_valid(&graph, width, height));
