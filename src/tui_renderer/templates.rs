@@ -14,7 +14,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
     let max = u32::max(1, *values.iter().max().unwrap_or(&0));
     let len = values.len();
     let actual_len = usize::max(len, width as usize / len * len);
-    let rem = width as usize - actual_len;
+    let rem = usize::saturating_sub(width as usize, actual_len);
     let rem_left = " ".repeat(rem / 2);
     let rem_right = " ".repeat(rem / 2 + rem % 2);
     let factor = actual_len / len;
