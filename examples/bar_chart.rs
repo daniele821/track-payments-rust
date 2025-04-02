@@ -6,6 +6,7 @@ fn main() {
         ],
         31 * 6,
         30,
+        1000,
     );
     for line in graph {
         println!("{line}");
