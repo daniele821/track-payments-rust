@@ -1,16 +1,22 @@
 use crossterm::style::{Color, Stylize};
 
 #[must_use]
-pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) -> Vec<String> {
+pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> Vec<String> {
     let mut lines = Vec::with_capacity(height as usize);
+    let empty_line = elem.repeat(width as usize);
+    for _ in 0..height {
+        lines.push(empty_line.clone());
+    }
+    lines
+}
+
+#[must_use]
+pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) -> Vec<String> {
     if values.is_empty() {
-        let empty_line = " ".repeat(width as usize);
-        for _ in 0..height {
-            lines.push(empty_line.clone());
-        }
-        return lines;
+        return simple_rectangle(" ", width, height);
     }
 
+    let mut lines = Vec::with_capacity(height as usize);
     let max = u32::max(1, *values.iter().max().unwrap_or(&0));
     let len = values.len();
     let actual_len = usize::max(len, width as usize / len * len);
