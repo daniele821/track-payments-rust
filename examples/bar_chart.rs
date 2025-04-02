@@ -1,12 +1,10 @@
 use crossterm::{
-    cursor::{Hide, Show},
-    event::{
-        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
-    },
+    cursor::{Hide, MoveTo, Show},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
     terminal::{
-        DisableLineWrap, EnableLineWrap, EnterAlternateScreen, LeaveAlternateScreen,
-        disable_raw_mode, enable_raw_mode,
+        Clear, ClearType, DisableLineWrap, EnableLineWrap, EnterAlternateScreen,
+        LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
     },
 };
 use std::{
@@ -16,7 +14,6 @@ use std::{
 };
 
 fn main() -> io::Result<()> {
-    // Enable raw mode for direct event handling
     enable_raw_mode()?;
 
     // Enable mouse capture
@@ -25,7 +22,7 @@ fn main() -> io::Result<()> {
         EnableMouseCapture,
         EnterAlternateScreen,
         DisableLineWrap,
-        Hide,
+        // Hide,
         crossterm::cursor::MoveTo(0, 0),
     )?;
 
@@ -42,7 +39,6 @@ fn main() -> io::Result<()> {
         }
     }
 
-    // Cleanup (this code won't actually run in this example due to the infinite loop)
     disable_raw_mode()?;
     execute!(
         stdout(),
@@ -67,7 +63,14 @@ fn render() {
         height,
         1000,
     );
-    for line in &graph {
-        print!("|{line}|\n\r");
-    }
+    execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
+    let mut index = 0;
+    (0..graph.len()).for_each(|line| {
+        index += 1;
+        if index < graph.len() {
+            print!("|{}|\n\r", graph[line]);
+        } else {
+            print!("|{}|\r", graph[line]);
+        }
+    });
 }
