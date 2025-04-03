@@ -56,8 +56,9 @@ fn render() {
     let symbols = [
         ["━", "┃", "┏", "┓", "┗", "┛"],
         ["─", "│", "┌", "┐", "└", "┘"],
+        ["═", "║", "╔", "╗", "╚", "╝"],
     ];
-    let box_sym = symbols[1];
+    let box_sym = symbols[2];
     let width = crossterm::terminal::size().unwrap().0 - 2;
     let height = crossterm::terminal::size().unwrap().1 - 2;
     let graph = track_payments_rust::tui_renderer::templates::bar_graph_vertical(
