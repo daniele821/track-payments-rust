@@ -1,6 +1,6 @@
 #![allow(unused, clippy::missing_errors_doc)]
 
-use chrono::{DateTime, Local, NaiveDateTime};
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
@@ -9,10 +9,12 @@ pub fn now_fake_utc() -> i64 {
     Local::now().naive_local().and_utc().timestamp()
 }
 
+pub fn get_fields(timestamp: i64) -> Result<DateTime<Utc>, String> {
+    DateTime::from_timestamp(timestamp, 0).ok_or(format!("unable to parse timestamp: {timestamp}"))
+}
+
 pub fn format_str(timestamp: i64, format: &str) -> Result<String, String> {
-    DateTime::from_timestamp(timestamp, 0)
-        .map(|date| date.format(format).to_string())
-        .ok_or(format!("unable to parse timestamp: {timestamp}"))
+    get_fields(timestamp).map(|date| date.format(format).to_string())
 }
 
 pub fn parse_str(time_str: &str, format: &str) -> Result<i64, String> {
@@ -23,7 +25,20 @@ pub fn parse_str(time_str: &str, format: &str) -> Result<i64, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CUSTOM_FORMAT, format_str, parse_str};
+    use chrono::{Datelike, Timelike};
+
+    use super::{CUSTOM_FORMAT, format_str, get_fields, parse_str};
+
+    #[test]
+    pub fn time_fields() {
+        let timestamp = 1_743_044_280;
+        let fields = get_fields(timestamp).unwrap();
+        assert_eq!(fields.year(), 2025);
+        assert_eq!(fields.month(), 3);
+        assert_eq!(fields.day(), 27);
+        assert_eq!(fields.hour(), 2);
+        assert_eq!(fields.minute(), 58);
+    }
 
     #[test]
     pub fn parse_format_time() {
