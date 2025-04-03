@@ -2,6 +2,7 @@ use crossterm::{
     cursor::{Hide, MoveTo, Show},
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
+    style::{Color, Stylize},
     terminal::{
         Clear, ClearType, DisableLineWrap, EnableLineWrap, EnterAlternateScreen,
         LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
@@ -61,13 +62,16 @@ fn main() -> io::Result<()> {
 }
 
 fn render() {
+    let white = &" ".on(Color::White).to_string();
+    let white2 = &"  ".on(Color::White).to_string();
     let symbols = [
         ["━", "┃", "┏", "┓", "┗", "┛"],
         ["─", "│", "┌", "┐", "└", "┘"],
         ["═", "║", "╔", "╗", "╚", "╝"],
+        [white, white2, white2, white2, white2, white2],
     ];
-    let box_sym = symbols[2];
-    let width = crossterm::terminal::size().unwrap().0 - 2;
+    let box_sym = symbols[3];
+    let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
     let graph = track_payments_rust::tui_renderer::templates::bar_graph_vertical(
         &[
@@ -78,14 +82,15 @@ fn render() {
         u32::from(height),
         1000,
     );
+    let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
     print!("{}", box_sym[2]);
     for _ in 0..width {
         print!("{}", box_sym[0]);
     }
     print!("{}\n\r", box_sym[3]);
-    (0..graph.len()).for_each(|line| {
-        print!("{}{}{}\n\r", box_sym[1], graph[line], box_sym[1]);
+    (0..graph.area.len()).for_each(|line| {
+        print!("{}{}{}\n\r", box_sym[1], graph.area[line], box_sym[1]);
     });
     print!("{}", box_sym[4]);
     for _ in 0..width {
