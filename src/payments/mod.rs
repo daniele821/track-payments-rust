@@ -8,9 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
-#[derive(
-    Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -23,7 +21,7 @@ pub struct OrderId {
     item: String,
     unit_price: u32,
 }
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone)]
 pub struct OrderDetail {
     quantity: u32,
 }
@@ -32,23 +30,21 @@ pub struct OrderDetail {
 pub struct PaymentId {
     date: i64,
 }
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
     method: String,
 }
 
-#[derive(
-    Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
     orders: BTreeMap<PaymentId, BTreeMap<OrderId, OrderDetail>>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum PaymentError {
     OrderDuplicated(OrderId),
     OrderNotFound(OrderId),
