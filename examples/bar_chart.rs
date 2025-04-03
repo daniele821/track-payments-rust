@@ -45,6 +45,7 @@ fn main() -> io::Result<()> {
         }
         if crossterm::terminal::size().unwrap() != (x, y) {
             render();
+            (x, y) = crossterm::terminal::size().unwrap();
         }
     }
 
