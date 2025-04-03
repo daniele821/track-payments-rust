@@ -5,7 +5,7 @@ use super::{
     PaymentDetail as PaymentDetailApi, PaymentError as PaymentErrorApi, PaymentId as PaymentIdApi,
     ValueSet as ValueSetApi,
 };
-use crate::time::CUSTOM_FORMAT;
+use crate::time::{CUSTOM_FORMAT, FakeUtcTime};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -98,38 +98,37 @@ impl TryFrom<&AllPayments> for AllPaymentsApi {
     type Error = PaymentErrorApi;
 
     fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
-        // let mut all_payments_api = AllPaymentsApi::new();
-        // let mut values_api = ValueSetApi::new();
-        // values_api.add_values(
-        //     value.value_set.cities.clone(),
-        //     value.value_set.shops.clone(),
-        //     value.value_set.methods.clone(),
-        //     value.value_set.items.clone(),
-        // );
-        // all_payments_api.add_values(values_api);
-        //
-        // for payment in &value.payments {
-        //     let date_err = parse_str(&payment.date, DATE_FORMAT);
-        //     let date = date_err.map_err(PaymentErrorApi::GenericError)?;
-        //     let payid = PaymentIdApi::new(date);
-        //     let city = payment.city.clone();
-        //     let shop = payment.shop.clone();
-        //     let method = payment.method.clone();
-        //     let paydetails = PaymentDetailApi::new(city, shop, method);
-        //     all_payments_api.add_payment(payid, paydetails)?;
-        //
-        //     for order in &payment.orders {
-        //         let payid = PaymentIdApi::new(date);
-        //         let item = order.item.clone();
-        //         let unitprice = order.unit_price;
-        //         let quantity = order.quantity;
-        //         let orderid = OrderIdApi::new(item, unitprice);
-        //         let orderdetails = OrderDetailApi::new(quantity);
-        //         all_payments_api.add_order(&payid, orderid, orderdetails)?;
-        //     }
-        // }
-        // Ok(all_payments_api)
-        todo!()
+        let mut all_payments_api = AllPaymentsApi::new();
+        let mut values_api = ValueSetApi::new();
+        values_api.add_values(
+            value.value_set.cities.clone(),
+            value.value_set.shops.clone(),
+            value.value_set.methods.clone(),
+            value.value_set.items.clone(),
+        );
+        all_payments_api.add_values(values_api);
+
+        for payment in &value.payments {
+            let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)
+                .map_err(PaymentErrorApi::GenericError)?;
+            let payid = PaymentIdApi::new(date);
+            let city = payment.city.clone();
+            let shop = payment.shop.clone();
+            let method = payment.method.clone();
+            let paydetails = PaymentDetailApi::new(city, shop, method);
+            all_payments_api.add_payment(payid, paydetails)?;
+
+            for order in &payment.orders {
+                let payid = PaymentIdApi::new(date);
+                let item = order.item.clone();
+                let unitprice = order.unit_price;
+                let quantity = order.quantity;
+                let orderid = OrderIdApi::new(item, unitprice);
+                let orderdetails = OrderDetailApi::new(quantity);
+                all_payments_api.add_order(&payid, orderid, orderdetails)?;
+            }
+        }
+        Ok(all_payments_api)
     }
 }
 
@@ -137,53 +136,53 @@ impl TryFrom<&AllPaymentsApi> for AllPayments {
     type Error = PaymentErrorApi;
 
     fn try_from(value: &AllPaymentsApi) -> Result<Self, Self::Error> {
-        //     let values = ValueSet {
-        //         cities: value.value_set().cities().clone(),
-        //         shops: value.value_set().shops().clone(),
-        //         methods: value.value_set().methods().clone(),
-        //         items: value.value_set().items().clone(),
-        //     };
-        //     let mut payments = vec![];
-        //     for payment_api in value.payments() {
-        //         let date_err = format_str(*payment_api.0.date(), DATE_FORMAT);
-        //         let date = date_err.map_err(PaymentErrorApi::GenericError)?;
-        //         let city = payment_api.1.city().clone();
-        //         let shop = payment_api.1.shop().clone();
-        //         let method = payment_api.1.method().clone();
-        //         let mut payment = Payment {
-        //             date,
-        //             city,
-        //             shop,
-        //             method,
-        //             orders: vec![],
-        //         };
-        //
-        //         let orders = value
-        //             .orders()
-        //             .get(payment_api.0)
-        //             .expect("order map missing");
-        //
-        //         for order_api in orders {
-        //             let item = order_api.0.item().clone();
-        //             let unit_price = *order_api.0.unit_price();
-        //             let quantity = *order_api.1.quantity();
-        //             let order = Order {
-        //                 item,
-        //                 unit_price,
-        //                 quantity,
-        //             };
-        //
-        //             payment.orders.push(order);
-        //         }
-        //
-        //         payments.push(payment);
-        //     }
-        //
-        //     Ok(AllPayments {
-        //         value_set: values,
-        //         payments,
-        //     })
-        todo!()
+        let values = ValueSet {
+            cities: value.value_set().cities().clone(),
+            shops: value.value_set().shops().clone(),
+            methods: value.value_set().methods().clone(),
+            items: value.value_set().items().clone(),
+        };
+        let mut payments = vec![];
+        for payment_api in value.payments() {
+            let date = (*payment_api.0.date())
+                .format_str(DATE_FORMAT)
+                .map_err(PaymentErrorApi::GenericError)?;
+            let city = payment_api.1.city().clone();
+            let shop = payment_api.1.shop().clone();
+            let method = payment_api.1.method().clone();
+            let mut payment = Payment {
+                date,
+                city,
+                shop,
+                method,
+                orders: vec![],
+            };
+
+            let orders = value
+                .orders()
+                .get(payment_api.0)
+                .expect("order map missing");
+
+            for order_api in orders {
+                let item = order_api.0.item().clone();
+                let unit_price = *order_api.0.unit_price();
+                let quantity = *order_api.1.quantity();
+                let order = Order {
+                    item,
+                    unit_price,
+                    quantity,
+                };
+
+                payment.orders.push(order);
+            }
+
+            payments.push(payment);
+        }
+
+        Ok(AllPayments {
+            value_set: values,
+            payments,
+        })
     }
 }
 

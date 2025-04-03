@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FakeUtcTime {
     timestamp: i64,
 }

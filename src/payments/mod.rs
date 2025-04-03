@@ -8,6 +8,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
+use crate::time::FakeUtcTime;
+
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
@@ -28,7 +30,7 @@ pub struct OrderDetail {
 
 #[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentId {
-    date: i64,
+    date: FakeUtcTime,
 }
 #[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
@@ -110,7 +112,7 @@ impl OrderDetail {
 
 impl PaymentId {
     #[must_use]
-    pub fn new(date: i64) -> Self {
+    pub fn new(date: FakeUtcTime) -> Self {
         Self { date }
     }
 }
@@ -263,7 +265,7 @@ mod tests {
 
     #[test]
     fn all_payments_creation() {
-        let payid = PaymentId::new(0);
+        let payid = PaymentId::new(0.into());
         let paydetail = PaymentDetail::new(
             String::from("London"),
             String::from("Pub"),
