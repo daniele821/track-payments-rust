@@ -49,15 +49,25 @@ impl BarChart {
             // Get color (cycle through colors if needed)
             let color = self.colors[i % self.colors.len()];
 
-            // Print the bar
+            // Print the bar with the value at the beginning
             print!("{color}");
-            for _ in 0..bar_width {
+
+            // Print the value at the start of the bar
+            print!(" {value:.1}");
+
+            // Fill the rest of the bar with spaces
+            let value_length = format!(" {value:.1}").len();
+            let remaining_width = if bar_width > value_length {
+                bar_width - value_length
+            } else {
+                0
+            };
+            for _ in 0..remaining_width {
                 print!(" ");
             }
-            print!("{reset_color}");
 
-            // Print the value on the right side
-            println!(" {value:.1}");
+            print!("{reset_color}");
+            println!();
         }
     }
 }
