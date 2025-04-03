@@ -84,6 +84,19 @@ pub fn bar_graph_vertical(
     DrawnArea::new(lines, actual_len as u32, max_height)
 }
 
+#[must_use]
+pub fn bar_graph_horizontal(
+    values: &[u32],
+    max_width: u32,
+    max_height: u32,
+    cutout: u32,
+) -> DrawnArea {
+    if values.is_empty() || max_width == 0 || max_height == 0 {
+        return simple_rectangle(" ", max_width, max_height);
+    }
+    todo!()
+}
+
 #[cfg(test)]
 mod tests {
     use super::downscale_to_biggest_factor;
