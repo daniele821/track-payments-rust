@@ -37,8 +37,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
                 let tmp_str = cached_spaces.to_string().on(color).to_string();
                 str.push_str(&tmp_str);
             } else {
-                let tmp_str = cached_spaces.to_string().with(Color::Black).to_string();
-                str.push_str(&tmp_str);
+                str.push_str(&cached_spaces);
             }
         }
         str.push_str(&rem_str);
