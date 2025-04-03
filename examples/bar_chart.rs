@@ -8,7 +8,7 @@ use crossterm::{
     },
 };
 use std::{
-    io::{self, stdout},
+    io::{self, Write, stdout},
     thread::sleep,
     time::Duration,
 };
@@ -51,9 +51,8 @@ fn main() -> io::Result<()> {
 }
 
 fn render() {
-    let width = crossterm::terminal::size().unwrap().0;
-    let width = u32::from(width - 2);
-    let height = crossterm::terminal::size().unwrap().1 as u32;
+    let width = crossterm::terminal::size().unwrap().0 as u32 - 2;
+    let height = crossterm::terminal::size().unwrap().1 as u32 - 2;
     let graph = track_payments_rust::tui_renderer::templates::bar_graph_vertical(
         &[
             0, 752, 707, 2787, 1019, 864, 890, 2853, 0, 0, 841, 989, 678, 990, 1812, 0, 733, 714,
@@ -64,13 +63,15 @@ fn render() {
         1000,
     );
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
-    let mut index = 0;
+    for _ in 0..width + 2 {
+        print!("-");
+    }
+    println!("\r");
     (0..graph.len()).for_each(|line| {
-        index += 1;
-        if index < graph.len() {
-            print!("|{}|\n\r", graph[line]);
-        } else {
-            print!("|{}|\r", graph[line]);
-        }
+        print!("|{}|\n\r", graph[line]);
     });
+    for _ in 0..width + 2 {
+        print!("-");
+    }
+    std::io::stdout().flush().unwrap();
 }
