@@ -1,11 +1,12 @@
 #![allow(unused, clippy::missing_errors_doc)]
 
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Getters, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FakeUtcTime {
     timestamp: i64,
 }
