@@ -53,6 +53,11 @@ fn main() -> io::Result<()> {
 }
 
 fn render() {
+    let symbols = [
+        ["━", "┃", "┏", "┓", "┗", "┛"],
+        ["─", "│", "┌", "┐", "└", "┘"],
+    ];
+    let box_sym = symbols[1];
     let width = crossterm::terminal::size().unwrap().0 - 2;
     let height = crossterm::terminal::size().unwrap().1 - 2;
     let graph = track_payments_rust::tui_renderer::templates::bar_graph_vertical(
@@ -65,18 +70,18 @@ fn render() {
         1000,
     );
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
-    print!("┏");
+    print!("{}", box_sym[2]);
     for _ in 0..width {
-        print!("━");
+        print!("{}", box_sym[0]);
     }
-    print!("┓\n\r");
+    print!("{}\n\r", box_sym[3]);
     (0..graph.len()).for_each(|line| {
-        print!("┃{}┃\n\r", graph[line]);
+        print!("{}{}{}\n\r", box_sym[1], graph[line], box_sym[1]);
     });
-    print!("┗");
+    print!("{}", box_sym[4]);
     for _ in 0..width {
-        print!("━");
+        print!("{}", box_sym[0]);
     }
-    print!("┛");
+    print!("{}", box_sym[5]);
     std::io::stdout().flush().unwrap();
 }
