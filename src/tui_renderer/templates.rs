@@ -40,7 +40,7 @@ pub fn bar_graph_vertical(
     // TODO: when space is smaller then data, then compact it:
     //      - by integer factors: /2, /3, /4, ...
 
-    if values.is_empty() {
+    if values.is_empty() || max_width == 0 || max_height == 0 {
         return simple_rectangle(" ", max_width, max_height);
     }
 
