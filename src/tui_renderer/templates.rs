@@ -1,5 +1,3 @@
-#![allow(unused, clippy::missing_panics_doc)]
-
 use crossterm::style::{Color, Stylize};
 
 #[derive(Debug)]
@@ -20,6 +18,18 @@ impl DrawnArea {
     }
 }
 
+fn downsize_to_biggest_factor(values: &[u32], max_width: u32) -> Vec<u32> {
+    let mut scaling_factor = values.len() / max_width as usize;
+    while scaling_factor * (max_width as usize) < values.len() {
+        scaling_factor += 1;
+    }
+    #[allow(clippy::cast_possible_truncation)]
+    return values
+        .chunks(scaling_factor)
+        .map(|chunk| chunk.iter().sum::<u32>() / chunk.len() as u32)
+        .collect::<Vec<u32>>();
+}
+
 #[must_use]
 pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> DrawnArea {
     let mut lines = Vec::with_capacity(height as usize);
@@ -37,11 +47,13 @@ pub fn bar_graph_vertical(
     max_height: u32,
     cutout: u32,
 ) -> DrawnArea {
-    // TODO: when space is smaller then data, then compact it:
-    //      - by integer factors: /2, /3, /4, ...
-
     if values.is_empty() || max_width == 0 || max_height == 0 {
         return simple_rectangle(" ", max_width, max_height);
+    }
+
+    if values.len() > max_width as usize {
+        let compacted_data = downsize_to_biggest_factor(values, max_width);
+        return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
@@ -68,5 +80,6 @@ pub fn bar_graph_vertical(
         }
         lines.push(str);
     }
-    DrawnArea::new(lines, u32::try_from(actual_len).unwrap(), max_height)
+    #[allow(clippy::cast_possible_truncation)]
+    DrawnArea::new(lines, actual_len as u32, max_height)
 }
