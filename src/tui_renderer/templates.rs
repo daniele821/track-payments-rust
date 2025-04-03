@@ -25,11 +25,9 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
     let rem_right = " ".repeat(rem / 2 + rem % 2);
     let factor = actual_len / len;
     let unit_heigh = f64::from(height) / f64::from(max);
-    let mut prev;
-    let cached_spaces = " ".repeat(factor - 1);
+    let cached_spaces = " ".repeat(factor);
 
     for i in (1..=height).rev() {
-        prev = false;
         let mut str = String::with_capacity(actual_len);
         str.push_str(&rem_left);
         for j in values {
@@ -38,24 +36,13 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
                 if *j >= cutout {
                     color = Color::DarkRed;
                 }
-                let tmp_str = format!("▏{cached_spaces}")
-                    .on(color)
-                    .with(Color::Black)
-                    .to_string();
+                let tmp_str = cached_spaces.to_string().on(color).to_string();
                 str.push_str(&tmp_str);
-                prev = true;
             } else if i == 1 {
                 str.push_str(&"▁".repeat(factor).with(Color::DarkGreen).to_string());
             } else {
-                let mut sep = "▏";
-                if !prev {
-                    sep = " ";
-                }
-                let tmp_str = format!("{sep}{cached_spaces}")
-                    .with(Color::Black)
-                    .to_string();
+                let tmp_str = cached_spaces.to_string().with(Color::Black).to_string();
                 str.push_str(&tmp_str);
-                prev = false;
             }
         }
         str.push_str(&rem_right);
