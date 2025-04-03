@@ -18,7 +18,7 @@ impl DrawnArea {
     }
 }
 
-fn downsize_to_biggest_factor(values: &[u32], max_width: u32) -> Vec<u32> {
+fn downscale_to_biggest_factor(values: &[u32], max_width: u32) -> Vec<u32> {
     let mut scaling_factor = values.len() / max_width as usize;
     while scaling_factor * (max_width as usize) < values.len() {
         scaling_factor += 1;
@@ -52,7 +52,7 @@ pub fn bar_graph_vertical(
     }
 
     if values.len() > max_width as usize {
-        let compacted_data = downsize_to_biggest_factor(values, max_width);
+        let compacted_data = downscale_to_biggest_factor(values, max_width);
         return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
     }
 
@@ -82,4 +82,15 @@ pub fn bar_graph_vertical(
     }
     #[allow(clippy::cast_possible_truncation)]
     DrawnArea::new(lines, actual_len as u32, max_height)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::downscale_to_biggest_factor;
+
+    #[test]
+    pub fn downscale_data() {
+        let data = [1, 3, 5, 9, 10];
+        assert_eq!(vec![2, 7, 10], downscale_to_biggest_factor(&data, 4));
+    }
 }
