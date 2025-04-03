@@ -65,15 +65,18 @@ fn render() {
         1000,
     );
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
-    for _ in 0..width + 2 {
-        print!("-");
+    print!("┏");
+    for _ in 0..width {
+        print!("━");
     }
-    println!("\r");
+    print!("┓\n\r");
     (0..graph.len()).for_each(|line| {
-        print!("|{}|\n\r", graph[line]);
+        print!("┃{}┃\n\r", graph[line]);
     });
-    for _ in 0..width + 2 {
-        print!("-");
+    print!("┗");
+    for _ in 0..width {
+        print!("━");
     }
+    print!("┛");
     std::io::stdout().flush().unwrap();
 }
