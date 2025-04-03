@@ -2,13 +2,12 @@
 
 mod json_legacy;
 
+use crate::time::FakeUtcTime;
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
-
-use crate::time::FakeUtcTime;
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
@@ -261,7 +260,11 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{
+        AllPayments, AllPaymentsJsonLegacy, BTreeMap, BTreeSet, Deserialize, FakeUtcTime, Getters,
+        OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, Serialize, ValueSet,
+        json_legacy,
+    };
 
     #[test]
     fn all_payments_creation() {
