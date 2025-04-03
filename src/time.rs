@@ -62,11 +62,9 @@ impl From<FakeUtcFields> for FakeUtcTime {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
-
-    use chrono::{Datelike, Days, TimeDelta, Timelike};
-
     use super::{CUSTOM_FORMAT, FakeUtcTime};
+    use chrono::{Datelike, Days, TimeDelta, Timelike};
+    use std::time::Duration;
 
     #[test]
     pub fn time_fields() {
