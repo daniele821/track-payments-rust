@@ -16,6 +16,7 @@ pub fn bar_graph_vertical(values: &[u32], width: u32, height: u32, cutout: u32) 
     //      - by integer factors: /2, /3, /4, ...
     // IDEA: when space is not a multiple of the data len, WHAT TO DO?
     //      - maybe return a tuple with the actual drawn height and width?
+    //      - rename width/height as new_width/new_height
     if values.is_empty() {
         return simple_rectangle(" ", width, height);
     }
