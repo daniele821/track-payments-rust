@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -16,28 +16,28 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderId {
     item: String,
     unit_price: u32,
 }
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct OrderDetail {
     quantity: u32,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentId {
     date: i64,
 }
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
     method: String,
 }
 
-#[derive(Serialize, Deserialize, Getters, Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PaymentDetail>,
