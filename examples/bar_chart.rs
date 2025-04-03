@@ -45,7 +45,6 @@ fn main() -> io::Result<()> {
         }
         if crossterm::terminal::size().unwrap() != (x, y) {
             render();
-            panic!("REMOVE: JUST FOR TESTING!");
         }
     }
 
