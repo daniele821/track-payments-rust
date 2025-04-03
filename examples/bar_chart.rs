@@ -27,6 +27,7 @@ fn main() -> io::Result<()> {
 
     render();
 
+    let (mut x, mut y) = (0, 0);
     loop {
         if event::poll(Duration::from_millis(100)).unwrap() {
             match event::read()? {
@@ -35,9 +36,16 @@ fn main() -> io::Result<()> {
                         break;
                     }
                 }
-                Event::Resize(_, _) => render(),
+                Event::Resize(new_x, new_y) => {
+                    render();
+                    (x, y) = (new_x, new_y);
+                }
                 _ => {}
             }
+        }
+        if crossterm::terminal::size().unwrap() != (x, y) {
+            render();
+            panic!("REMOVE: JUST FOR TESTING!");
         }
     }
 
