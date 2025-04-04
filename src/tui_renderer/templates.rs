@@ -131,7 +131,9 @@ pub fn bar_graph_horizontal_label(
     cutout: u32,
 ) -> DrawnArea {
     const MIN_GRAPH_SIZE: usize = 5;
-    let values = downscale_to_biggest_factor(values, max_height);
+    if (max_height as usize) < values.len() {
+        return bar_graph_horizontal(values, max_width, max_height, cutout);
+    }
 
     let max_index_len = values.len().to_string().len();
     let left_len = max_index_len + 2;
@@ -142,14 +144,25 @@ pub fn bar_graph_horizontal_label(
     let max_value_len = max_value.len() + 1;
     let right_len = max_value_len + 2;
 
-    let mut actual_max_width = max_width as usize;
-    if actual_max_width >= left_len + right_len + MIN_GRAPH_SIZE {
-        actual_max_width -= left_len + right_len;
+    let label_len = left_len + right_len;
+
+    if (max_width as usize) < label_len + MIN_GRAPH_SIZE {
+        return bar_graph_horizontal(values, max_width, max_height, cutout);
     }
 
-    let mut graph = bar_graph_horizontal(&values, actual_max_width as u32, max_height, cutout);
-    // TODO
-    graph.width += (left_len + right_len) as u32;
+    // TODO: handle when the scale factor > 1
+
+    let actual_max_width = max_width as usize - label_len;
+    let mut graph = bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout);
+    for (index, line) in graph.area.iter_mut().enumerate() {
+        let index_fmt = format!(" {:>2} ", index + 1);
+        let len = max_value.len();
+        let tmp_fmt = format!("{:>len$}", format!("{:03}", values[index]));
+        let tmp = tmp_fmt.len() - 2;
+        let value_fmt = format!(" {}.{}\u{20ac} ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
+        *line = format!("{index_fmt}{line}{value_fmt}");
+    }
+    graph.width += label_len as u32;
 
     graph
 }
