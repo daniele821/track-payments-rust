@@ -73,7 +73,7 @@ fn render() {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let graph = track_payments_rust::tui_renderer::templates::bar_graph_vertical(
+    let graph = track_payments_rust::tui_renderer::templates::bar_graph_horizontal(
         &[
             0, 752, 707, 2787, 1019, 864, 890, 2853, 0, 0, 841, 989, 678, 990, 1812, 0, 733, 714,
             782, 931, 1722, 1803, 862, 1278, 1079, 857, 558, 1450, 536, 857, 649,

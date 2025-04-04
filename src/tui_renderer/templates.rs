@@ -97,7 +97,7 @@ pub fn bar_graph_horizontal(
 
     if values.len() > max_height as usize {
         let compacted_data = downscale_to_biggest_factor(values, max_height);
-        return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
+        return bar_graph_horizontal(&compacted_data, max_width, max_height, cutout);
     }
 
     let mut lines = vec![];
