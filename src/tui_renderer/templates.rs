@@ -197,7 +197,10 @@ pub fn bar_graph_horizontal_label(
     let actual_max_width = max_width as usize - label_len;
     let mut graph =
         bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout, ignored);
-    let empty = "----€ ".with(Color::DarkGrey).bold();
+    let e1 = "----€ ".with(Color::DarkGrey).bold();
+    let e2 = "- ".with(Color::DarkGrey).bold();
+    let e3 = " ".repeat(right_len - 6);
+    let e4 = " ".repeat(left_len - 2);
     for (index, &value) in values.iter().enumerate() {
         let mut color = Color::Green;
         if value >= cutout {
@@ -211,7 +214,8 @@ pub fn bar_graph_horizontal_label(
         let value_fmt = value_fmt.with(color).bold();
         if let Some(line) = graph.area.get_mut(index * factor) {
             if ignored.contains(&(index as u32)) {
-                *line = format!("{index_fmt}{line}{}{}", " ".repeat(right_len - 6), empty);
+                let index_len = index_fmt.to_string().len();
+                *line = format!("{e4}{e2}{line}{e3}{e1}");
             } else {
                 *line = format!("{index_fmt}{line}{value_fmt}");
             }
