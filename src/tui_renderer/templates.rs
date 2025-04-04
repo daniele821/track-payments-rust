@@ -1,5 +1,7 @@
 #![allow(unused, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 
+use std::collections::HashSet;
+
 use crossterm::style::{Color, Stylize};
 
 #[derive(Debug)]
@@ -90,6 +92,7 @@ pub fn bar_graph_horizontal(
     max_width: u32,
     max_height: u32,
     cutout: u32,
+    ignored: &[u32],
 ) -> DrawnArea {
     if values.is_empty() || max_width == 0 || max_height == 0 {
         return simple_rectangle(" ", max_width, max_height);
@@ -97,7 +100,7 @@ pub fn bar_graph_horizontal(
 
     if values.len() > max_height as usize {
         let compacted_data = downscale_to_biggest_factor(values, max_height);
-        return bar_graph_horizontal(&compacted_data, max_width, max_height, cutout);
+        return bar_graph_horizontal(&compacted_data, max_width, max_height, cutout, ignored);
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
@@ -107,7 +110,15 @@ pub fn bar_graph_horizontal(
     let factor = actual_height / len;
     let unit_width = f64::from(max_width) / f64::from(max);
 
-    for &val in values {
+    for (index, &val) in values.iter().enumerate() {
+        if ignored.contains(&(index as u32)) {
+            lines.push(
+                " ".repeat(max_width as usize)
+                    .on(Color::DarkGrey)
+                    .to_string(),
+            );
+            continue;
+        }
         let mut color = Color::Green;
         if val >= cutout {
             color = Color::Red;
@@ -129,10 +140,11 @@ pub fn bar_graph_horizontal_label(
     max_width: u32,
     max_height: u32,
     cutout: u32,
+    ignored: &[u32],
 ) -> DrawnArea {
     const MIN_GRAPH_SIZE: usize = 5;
     if (max_height as usize) < values.len() {
-        return bar_graph_horizontal(values, max_width, max_height, cutout);
+        return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
     }
 
     let max_index_len = values.len().to_string().len();
@@ -147,7 +159,7 @@ pub fn bar_graph_horizontal_label(
     let label_len = left_len + right_len;
 
     if (max_width as usize) < label_len + MIN_GRAPH_SIZE {
-        return bar_graph_horizontal(values, max_width, max_height, cutout);
+        return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
     }
 
     let factor = (max_height as usize) / values.len();
@@ -155,7 +167,8 @@ pub fn bar_graph_horizontal_label(
     let cached_right = " ".repeat(right_len);
 
     let actual_max_width = max_width as usize - label_len;
-    let mut graph = bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout);
+    let mut graph =
+        bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout, ignored);
     for (index, &value) in values.iter().enumerate() {
         let mut color = Color::Green;
         if value >= cutout {
@@ -168,7 +181,11 @@ pub fn bar_graph_horizontal_label(
         let value_fmt = format!("{}.{}\u{20ac} ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
         let value_fmt = value_fmt.with(color).bold();
         if let Some(line) = graph.area.get_mut(index * factor) {
-            *line = format!("{index_fmt}{line}{value_fmt}");
+            if ignored.contains(&(index as u32)) {
+                *line = format!("{index_fmt}{line}{}", " ".repeat(right_len));
+            } else {
+                *line = format!("{index_fmt}{line}{value_fmt}");
+            }
         }
         for i in 1..factor {
             if let Some(line) = graph.area.get_mut(index * factor + i) {
