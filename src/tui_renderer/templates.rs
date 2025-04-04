@@ -18,9 +18,9 @@ impl DrawnArea {
     }
 }
 
-fn downscale_to_biggest_factor(values: &[u32], max_width: u32) -> Vec<u32> {
-    let mut scaling_factor = values.len() / max_width as usize;
-    while scaling_factor * (max_width as usize) < values.len() {
+fn downscale_to_biggest_factor(values: &[u32], max_length: u32) -> Vec<u32> {
+    let mut scaling_factor = values.len() / max_length as usize;
+    while scaling_factor * (max_length as usize) < values.len() {
         scaling_factor += 1;
     }
     #[allow(clippy::cast_possible_truncation)]
