@@ -113,7 +113,9 @@ pub fn bar_graph_horizontal(
     for (index, &val) in values.iter().enumerate() {
         if ignored.contains(&(index as u32)) {
             let str = " ".repeat(max_width as usize).on(Color::DarkGrey);
-            lines.push(str.to_string());
+            for i in 0..factor {
+                lines.push(str.to_string());
+            }
             continue;
         }
         let mut color = Color::Green;
