@@ -156,12 +156,17 @@ pub fn bar_graph_horizontal_label(
 
     let actual_max_width = max_width as usize - label_len;
     let mut graph = bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout);
-    for (index, value) in values.iter().enumerate() {
-        let index_fmt = format!(" {:>2} ", index + 1);
+    for (index, &value) in values.iter().enumerate() {
+        let mut color = Color::Green;
+        if value >= cutout {
+            color = Color::Red;
+        }
+        let index_fmt = format!(" {:>2} ", index + 1).with(Color::White).bold();
         let len = max_value.len();
         let tmp_fmt = format!("{:>len$}", format!("{:03}", values[index]));
         let tmp = tmp_fmt.len() - 2;
         let value_fmt = format!("{}.{}\u{20ac} ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
+        let value_fmt = value_fmt.with(color).bold();
         if let Some(line) = graph.area.get_mut(index * factor) {
             *line = format!("{index_fmt}{line}{value_fmt}");
         }
