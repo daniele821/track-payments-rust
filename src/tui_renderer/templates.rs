@@ -170,26 +170,30 @@ pub fn bar_graph_horizontal(
             STR_EMPTY.repeat(bar_len).on(color),
             STR_EMPTY.repeat(rem_len)
         );
+        // add cutout line
         if cutout_line < max_width as usize {
-            match cutout_line.cmp(&bar_len) {
-                std::cmp::Ordering::Less => {
-                    str = format!(
-                        "{}{}{}{}",
-                        STR_EMPTY.repeat(cutout_line).on(color),
-                        STR_CUTOUT_VERT.with(COLOR_CUTOUT).on(color),
-                        STR_EMPTY.repeat(bar_len - cutout_line - 1).on(color),
-                        STR_EMPTY.repeat(rem_len)
-                    );
+            if cutout_line.cmp(&bar_len) == std::cmp::Ordering::Less {
+                str = format!(
+                    "{}{}{}{}",
+                    STR_EMPTY.repeat(cutout_line).on(color),
+                    STR_CUTOUT_VERT.with(COLOR_CUTOUT).on(color),
+                    STR_EMPTY.repeat(bar_len - cutout_line - 1).on(color),
+                    STR_EMPTY.repeat(rem_len)
+                );
+            } else {
+                // fix with floating point math problem, which causes a bad
+                // bar to not go over the cutout line!
+                let mut cutout_str = STR_CUTOUT_VERT.with(COLOR_CUTOUT);
+                if color == COLOR_BAD {
+                    cutout_str = cutout_str.on(color);
                 }
-                _ => {
-                    str = format!(
-                        "{}{}{}{}",
-                        STR_EMPTY.repeat(bar_len).on(color),
-                        STR_EMPTY.repeat(cutout_line - bar_len),
-                        STR_CUTOUT_VERT.with(COLOR_CUTOUT),
-                        STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
-                    );
-                }
+                str = format!(
+                    "{}{}{}{}",
+                    STR_EMPTY.repeat(bar_len).on(color),
+                    STR_EMPTY.repeat(cutout_line - bar_len),
+                    cutout_str,
+                    STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
+                );
             }
         }
         for i in 0..factor {
