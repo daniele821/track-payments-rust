@@ -77,14 +77,15 @@ pub fn bar_graph_vertical(
     max_width: u32,
     max_height: u32,
     cutout: u32,
+    ignored: &[u32],
 ) -> DrawnArea {
     if values.is_empty() || max_width == 0 || max_height == 0 {
         return simple_rectangle(" ", max_width, max_height);
     }
 
     if values.len() > max_width as usize {
-        let (compacted_data, ignored) = downscale_to_biggest_factor(values, &[], max_width);
-        return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
+        let (data, ignored) = downscale_to_biggest_factor(values, &[], max_width);
+        return bar_graph_vertical(&data, max_width, max_height, cutout, &ignored);
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
@@ -127,15 +128,8 @@ pub fn bar_graph_horizontal(
     }
 
     if values.len() > max_height as usize {
-        let (compacted_data, compacted_ignored) =
-            downscale_to_biggest_factor(values, ignored, max_height);
-        return bar_graph_horizontal(
-            &compacted_data,
-            max_width,
-            max_height,
-            cutout,
-            &compacted_ignored,
-        );
+        let (data, ignored) = downscale_to_biggest_factor(values, ignored, max_height);
+        return bar_graph_horizontal(&data, max_width, max_height, cutout, &ignored);
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
