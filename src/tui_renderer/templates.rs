@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crossterm::style::{Color, Stylize};
 
 #[derive(Debug)]
@@ -100,9 +102,26 @@ pub fn bar_graph_horizontal(
         return bar_graph_horizontal(&compacted_data, max_width, max_height, cutout);
     }
 
-    let mut lines = vec![];
-    let len = values.len();
+    let mut lines = Vec::with_capacity(max_height as usize);
     let max = u32::max(1, *values.iter().max().unwrap_or(&0));
+    let len = values.len();
+    let actual_height = max_height as usize / len * len;
+    let factor = actual_height / len;
+    let unit_width = f64::from(max_width) / f64::from(max);
+
+    for &val in values {
+        let mut color = Color::Green;
+        if val >= cutout {
+            color = Color::Red;
+        }
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let bar_len = (f64::from(val) * unit_width).trunc() as usize;
+        let rem_len = max_width as usize - bar_len;
+        let str = format!("{}{}", " ".repeat(bar_len).on(color), " ".repeat(rem_len));
+        for i in 0..factor {
+            lines.push(str.clone());
+        }
+    }
 
     DrawnArea::new(lines, max_width, max_height)
 }
