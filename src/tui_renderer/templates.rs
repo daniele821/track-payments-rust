@@ -59,13 +59,13 @@ pub fn bar_graph_vertical(
     let mut lines = Vec::with_capacity(max_height as usize);
     let max = u32::max(1, *values.iter().max().unwrap_or(&0));
     let len = values.len();
-    let actual_len = usize::max(len, max_width as usize / len * len);
-    let factor = actual_len / len;
+    let actual_width = usize::max(len, max_width as usize / len * len);
+    let factor = actual_width / len;
     let unit_heigh = f64::from(max_height) / f64::from(max);
     let cached_spaces = " ".repeat(factor);
 
     for i in (1..=max_height).rev() {
-        let mut str = String::with_capacity(actual_len);
+        let mut str = String::with_capacity(actual_width);
         for j in values {
             if f64::from(i - 1) < f64::from(*j) * unit_heigh - 0.5 {
                 let mut color = Color::DarkGreen;
@@ -81,7 +81,7 @@ pub fn bar_graph_vertical(
         lines.push(str);
     }
     #[allow(clippy::cast_possible_truncation)]
-    DrawnArea::new(lines, actual_len as u32, max_height)
+    DrawnArea::new(lines, actual_width as u32, max_height)
 }
 
 #[must_use]
@@ -100,7 +100,11 @@ pub fn bar_graph_horizontal(
         return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
     }
 
-    todo!()
+    let mut lines = vec![];
+    let len = values.len();
+    let max = u32::max(1, *values.iter().max().unwrap_or(&0));
+
+    DrawnArea::new(lines, max_width, max_height)
 }
 
 #[cfg(test)]
