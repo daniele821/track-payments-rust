@@ -66,10 +66,10 @@ pub fn bar_graph_vertical(
 
     for i in (1..=max_height).rev() {
         let mut str = String::with_capacity(actual_width);
-        for j in values {
-            if f64::from(i - 1) < f64::from(*j) * unit_heigh - 0.5 {
+        for &j in values {
+            if f64::from(i - 1) < f64::from(j) * unit_heigh - 0.5 {
                 let mut color = Color::DarkGreen;
-                if *j >= cutout {
+                if j >= cutout {
                     color = Color::DarkRed;
                 }
                 let tmp_str = cached_spaces.to_string().on(color).to_string();
