@@ -109,14 +109,18 @@ pub fn bar_graph_vertical(
         .with(COLOR_CUTOUT)
         .to_string();
 
+    let mut is_cutout_line = false;
+
     for i in (1..=max_height).rev() {
         let mut str = String::with_capacity(actual_width);
         for (index, &j) in values.iter().enumerate() {
             let mut cached = &cached_spaces;
+            is_cutout_line = false;
             if f64::from(i - 1) >= f64::from(cutout) * unit_heigh
                 && f64::from(i - 2) < f64::from(cutout) * unit_heigh
             {
                 cached = &cached_cutout;
+                is_cutout_line = true;
             }
             if ignored.contains(&(index as u32)) {
                 str.push_str(&cached_spaces.to_string().on(COLOR_EMPTY).to_string());
@@ -127,6 +131,8 @@ pub fn bar_graph_vertical(
                 }
                 let tmp_str = cached.to_string().on(color).to_string();
                 str.push_str(&tmp_str);
+            } else if is_cutout_line && j >= cutout {
+                str.push_str(&cached.clone().on(COLOR_BAD).to_string());
             } else {
                 str.push_str(cached);
             }
