@@ -20,13 +20,15 @@ impl DrawnArea {
     }
 }
 
-const BORDER_COLOR: Color = Color::White;
-const TEXT_COLOR: Color = Color::White;
-const GOOD_COLOR: Color = Color::DarkGreen;
-const BAD_COLOR: Color = Color::DarkRed;
-const EMPTY_COLOR: Color = Color::DarkGrey;
+const COLOR_BORDER: Color = Color::White;
+const COLOR_TEXT: Color = Color::White;
+const COLOR_GOOD: Color = Color::DarkGreen;
+const COLOR_BAD: Color = Color::DarkRed;
+const COLOR_EMPTY: Color = Color::DarkGrey;
 
-const EMPTY_STR: &str = " ";
+const STR_EMPTY: &str = " ";
+const STR_CUTOUT_VERT: &str = " ";
+const STR_CUTOUT_HORIZ: &str = " ";
 
 fn downscale_to_biggest_factor(
     values: &[u32],
@@ -86,7 +88,7 @@ pub fn bar_graph_vertical(
     ignored: &[u32],
 ) -> DrawnArea {
     if values.is_empty() || max_width == 0 || max_height == 0 {
-        return simple_rectangle(EMPTY_STR, max_width, max_height);
+        return simple_rectangle(STR_EMPTY, max_width, max_height);
     }
 
     if values.len() > max_width as usize {
@@ -100,17 +102,17 @@ pub fn bar_graph_vertical(
     let actual_width = usize::max(len, max_width as usize / len * len);
     let factor = actual_width / len;
     let unit_heigh = f64::from(max_height) / f64::from(max);
-    let cached_spaces = EMPTY_STR.repeat(factor);
+    let cached_spaces = STR_EMPTY.repeat(factor);
 
     for i in (1..=max_height).rev() {
         let mut str = String::with_capacity(actual_width);
         for (index, &j) in values.iter().enumerate() {
             if ignored.contains(&(index as u32)) {
-                str.push_str(&cached_spaces.to_string().on(EMPTY_COLOR).to_string());
+                str.push_str(&cached_spaces.to_string().on(COLOR_EMPTY).to_string());
             } else if f64::from(i - 1) < f64::from(j) * unit_heigh - 0.5 {
-                let mut color = GOOD_COLOR;
+                let mut color = COLOR_GOOD;
                 if j >= cutout {
-                    color = BAD_COLOR;
+                    color = COLOR_BAD;
                 }
                 let tmp_str = cached_spaces.to_string().on(color).to_string();
                 str.push_str(&tmp_str);
@@ -132,7 +134,7 @@ pub fn bar_graph_horizontal(
     ignored: &[u32],
 ) -> DrawnArea {
     if values.is_empty() || max_width == 0 || max_height == 0 {
-        return simple_rectangle(EMPTY_STR, max_width, max_height);
+        return simple_rectangle(STR_EMPTY, max_width, max_height);
     }
 
     if values.len() > max_height as usize {
@@ -149,22 +151,22 @@ pub fn bar_graph_horizontal(
 
     for (index, &val) in values.iter().enumerate() {
         if ignored.contains(&(index as u32)) {
-            let str = EMPTY_STR.repeat(max_width as usize).on(EMPTY_COLOR);
+            let str = STR_EMPTY.repeat(max_width as usize).on(COLOR_EMPTY);
             for i in 0..factor {
                 lines.push(str.to_string());
             }
             continue;
         }
-        let mut color = GOOD_COLOR;
+        let mut color = COLOR_GOOD;
         if val >= cutout {
-            color = BAD_COLOR;
+            color = COLOR_BAD;
         }
         let bar_len = (f64::from(val) * unit_width).trunc() as usize;
         let rem_len = max_width as usize - bar_len;
         let str = format!(
             "{}{}",
-            EMPTY_STR.repeat(bar_len).on(color),
-            EMPTY_STR.repeat(rem_len)
+            STR_EMPTY.repeat(bar_len).on(color),
+            STR_EMPTY.repeat(rem_len)
         );
         for i in 0..factor {
             lines.push(str.clone());
@@ -203,22 +205,22 @@ pub fn bar_graph_horizontal_label(
     }
 
     let factor = (max_height as usize) / values.len();
-    let cached_left = EMPTY_STR.repeat(left_len);
-    let cached_right = EMPTY_STR.repeat(right_len);
+    let cached_left = STR_EMPTY.repeat(left_len);
+    let cached_right = STR_EMPTY.repeat(right_len);
 
     let actual_max_width = max_width as usize - label_len;
     let mut graph =
         bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout, ignored);
-    let e1 = "----€ ".with(EMPTY_COLOR).bold();
-    let e2 = "- ".with(EMPTY_COLOR).bold();
-    let e3 = EMPTY_STR.repeat(right_len - 6);
-    let e4 = EMPTY_STR.repeat(left_len - 2);
+    let e1 = "----€ ".with(COLOR_EMPTY).bold();
+    let e2 = "- ".with(COLOR_EMPTY).bold();
+    let e3 = STR_EMPTY.repeat(right_len - 6);
+    let e4 = STR_EMPTY.repeat(left_len - 2);
     for (index, &value) in values.iter().enumerate() {
-        let mut color = GOOD_COLOR;
+        let mut color = COLOR_GOOD;
         if value >= cutout {
-            color = BAD_COLOR;
+            color = COLOR_BAD;
         }
-        let index_fmt = format!(" {:>2} ", index + 1).with(TEXT_COLOR).bold();
+        let index_fmt = format!(" {:>2} ", index + 1).with(COLOR_TEXT).bold();
         let len = max_value.len();
         let tmp_fmt = format!("{:>len$}", format!("{:03}", values[index]));
         let tmp = tmp_fmt.len() - 2;
