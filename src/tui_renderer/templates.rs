@@ -104,21 +104,31 @@ pub fn bar_graph_vertical(
     let factor = actual_width / len;
     let unit_heigh = f64::from(max_height) / f64::from(max);
     let cached_spaces = STR_EMPTY.repeat(factor);
+    let cached_cutout = STR_CUTOUT_HORIZ
+        .repeat(factor)
+        .with(COLOR_CUTOUT)
+        .to_string();
 
     for i in (1..=max_height).rev() {
         let mut str = String::with_capacity(actual_width);
         for (index, &j) in values.iter().enumerate() {
+            let mut cached = &cached_spaces;
+            if f64::from(i - 1) >= f64::from(cutout) * unit_heigh
+                && f64::from(i - 2) < f64::from(cutout) * unit_heigh
+            {
+                cached = &cached_cutout;
+            }
             if ignored.contains(&(index as u32)) {
                 str.push_str(&cached_spaces.to_string().on(COLOR_EMPTY).to_string());
-            } else if f64::from(i - 1) < f64::from(j) * unit_heigh - 0.5 {
+            } else if f64::from(i - 1) < f64::from(j) * unit_heigh {
                 let mut color = COLOR_GOOD;
                 if j >= cutout {
                     color = COLOR_BAD;
                 }
-                let tmp_str = cached_spaces.to_string().on(color).to_string();
+                let tmp_str = cached.to_string().on(color).to_string();
                 str.push_str(&tmp_str);
             } else {
-                str.push_str(&cached_spaces);
+                str.push_str(cached);
             }
         }
         lines.push(str);
