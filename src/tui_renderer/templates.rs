@@ -22,8 +22,8 @@ impl DrawnArea {
 
 const BORDER_COLOR: Color = Color::White;
 const TEXT_COLOR: Color = Color::White;
-const GOOD_COLOR: Color = Color::Green;
-const BAD_COLOR: Color = Color::Red;
+const GOOD_COLOR: Color = Color::DarkGreen;
+const BAD_COLOR: Color = Color::DarkRed;
 const EMPTY_COLOR: Color = Color::DarkGrey;
 
 const EMPTY_STR: &str = " ";
