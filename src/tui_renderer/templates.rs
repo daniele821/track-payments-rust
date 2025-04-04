@@ -1,7 +1,5 @@
 #![allow(unused, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 
-use std::collections::HashSet;
-
 use crossterm::style::{Color, Stylize};
 
 #[derive(Debug)]
@@ -84,7 +82,7 @@ pub fn bar_graph_vertical(
     }
 
     if values.len() > max_width as usize {
-        let (data, ignored) = downscale_to_biggest_factor(values, &[], max_width);
+        let (data, ignored) = downscale_to_biggest_factor(values, ignored, max_width);
         return bar_graph_vertical(&data, max_width, max_height, cutout, &ignored);
     }
 
@@ -98,8 +96,10 @@ pub fn bar_graph_vertical(
 
     for i in (1..=max_height).rev() {
         let mut str = String::with_capacity(actual_width);
-        for &j in values {
-            if f64::from(i - 1) < f64::from(j) * unit_heigh - 0.5 {
+        for (index, &j) in values.iter().enumerate() {
+            if ignored.contains(&(index as u32)) {
+                str.push_str(&cached_spaces.to_string().on(Color::DarkGrey).to_string());
+            } else if f64::from(i - 1) < f64::from(j) * unit_heigh - 0.5 {
                 let mut color = Color::DarkGreen;
                 if j >= cutout {
                     color = Color::DarkRed;
