@@ -150,17 +150,26 @@ pub fn bar_graph_horizontal_label(
         return bar_graph_horizontal(values, max_width, max_height, cutout);
     }
 
-    // TODO: handle when the scale factor > 1
+    let factor = (max_height as usize) / values.len();
+    let cached_left = " ".repeat(left_len);
+    let cached_right = " ".repeat(right_len);
 
     let actual_max_width = max_width as usize - label_len;
     let mut graph = bar_graph_horizontal(values, actual_max_width as u32, max_height, cutout);
-    for (index, line) in graph.area.iter_mut().enumerate() {
+    for (index, value) in values.iter().enumerate() {
         let index_fmt = format!(" {:>2} ", index + 1);
         let len = max_value.len();
         let tmp_fmt = format!("{:>len$}", format!("{:03}", values[index]));
         let tmp = tmp_fmt.len() - 2;
-        let value_fmt = format!(" {}.{}\u{20ac} ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
-        *line = format!("{index_fmt}{line}{value_fmt}");
+        let value_fmt = format!("{}.{}\u{20ac} ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
+        if let Some(line) = graph.area.get_mut(index * factor) {
+            *line = format!("{index_fmt}{line}{value_fmt}");
+        }
+        for i in 1..factor {
+            if let Some(line) = graph.area.get_mut(index * factor + i) {
+                *line = format!("{cached_left}{line}{cached_right}");
+            }
+        }
     }
     graph.width += label_len as u32;
 
