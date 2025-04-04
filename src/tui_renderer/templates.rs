@@ -39,7 +39,6 @@ fn downscale_to_biggest_factor(
 
     let mut buffer = Vec::<u32>::with_capacity(scaling_factor);
 
-    println!("{final_len} {scaling_factor} {max_length} {values:?}");
     for i in 0..final_len {
         for j in 0..scaling_factor {
             let index = scaling_factor * i + j;
@@ -50,7 +49,6 @@ fn downscale_to_biggest_factor(
             }
         }
 
-        println!("{buffer:?}");
         if buffer.is_empty() {
             compacted_ignored.push(i as u32);
             compacted_values.push(0);
