@@ -94,6 +94,12 @@ pub fn bar_graph_horizontal(
     if values.is_empty() || max_width == 0 || max_height == 0 {
         return simple_rectangle(" ", max_width, max_height);
     }
+
+    if values.len() > max_height as usize {
+        let compacted_data = downscale_to_biggest_factor(values, max_height);
+        return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
+    }
+
     todo!()
 }
 
