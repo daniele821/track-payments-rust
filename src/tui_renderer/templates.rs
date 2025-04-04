@@ -25,10 +25,11 @@ const COLOR_TEXT: Color = Color::White;
 const COLOR_GOOD: Color = Color::DarkGreen;
 const COLOR_BAD: Color = Color::DarkRed;
 const COLOR_EMPTY: Color = Color::DarkGrey;
+const COLOR_CUTOUT: Color = Color::Yellow;
 
 const STR_EMPTY: &str = " ";
-const STR_CUTOUT_VERT: &str = " ";
-const STR_CUTOUT_HORIZ: &str = " ";
+const STR_CUTOUT_VERT: &str = "┃";
+const STR_CUTOUT_HORIZ: &str = "━";
 
 fn downscale_to_biggest_factor(
     values: &[u32],
@@ -148,6 +149,7 @@ pub fn bar_graph_horizontal(
     let actual_height = max_height as usize / len * len;
     let factor = actual_height / len;
     let unit_width = f64::from(max_width) / f64::from(max);
+    let cutout_line = (f64::from(cutout) * unit_width) as usize;
 
     for (index, &val) in values.iter().enumerate() {
         if ignored.contains(&(index as u32)) {
@@ -163,11 +165,33 @@ pub fn bar_graph_horizontal(
         }
         let bar_len = (f64::from(val) * unit_width).trunc() as usize;
         let rem_len = max_width as usize - bar_len;
-        let str = format!(
+        let mut str = format!(
             "{}{}",
             STR_EMPTY.repeat(bar_len).on(color),
             STR_EMPTY.repeat(rem_len)
         );
+        if cutout_line < max_width as usize {
+            match cutout_line.cmp(&bar_len) {
+                std::cmp::Ordering::Less => {
+                    str = format!(
+                        "{}{}{}{}",
+                        STR_EMPTY.repeat(cutout_line).on(color),
+                        STR_CUTOUT_VERT.with(COLOR_CUTOUT).on(color),
+                        STR_EMPTY.repeat(bar_len - cutout_line - 1).on(color),
+                        STR_EMPTY.repeat(rem_len)
+                    );
+                }
+                _ => {
+                    str = format!(
+                        "{}{}{}{}",
+                        STR_EMPTY.repeat(bar_len).on(color),
+                        STR_EMPTY.repeat(cutout_line - bar_len),
+                        STR_CUTOUT_VERT.with(COLOR_CUTOUT),
+                        STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
+                    );
+                }
+            }
+        }
         for i in 0..factor {
             lines.push(str.clone());
         }
