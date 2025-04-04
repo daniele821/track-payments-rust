@@ -1,4 +1,4 @@
-#![allow(unused)]
+#![allow(unused, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 
 use crossterm::style::{Color, Stylize};
 
@@ -25,11 +25,10 @@ fn downscale_to_biggest_factor(values: &[u32], max_length: u32) -> Vec<u32> {
     while scaling_factor * (max_length as usize) < values.len() {
         scaling_factor += 1;
     }
-    #[allow(clippy::cast_possible_truncation)]
-    return values
+    values
         .chunks(scaling_factor)
         .map(|chunk| chunk.iter().sum::<u32>() / chunk.len() as u32)
-        .collect::<Vec<u32>>();
+        .collect::<Vec<u32>>()
 }
 
 #[must_use]
@@ -82,7 +81,6 @@ pub fn bar_graph_vertical(
         }
         lines.push(str);
     }
-    #[allow(clippy::cast_possible_truncation)]
     DrawnArea::new(lines, actual_width as u32, max_height)
 }
 
@@ -114,7 +112,6 @@ pub fn bar_graph_horizontal(
         if val >= cutout {
             color = Color::Red;
         }
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let bar_len = (f64::from(val) * unit_width).trunc() as usize;
         let rem_len = max_width as usize - bar_len;
         let str = format!("{}{}", " ".repeat(bar_len).on(color), " ".repeat(rem_len));
@@ -123,7 +120,38 @@ pub fn bar_graph_horizontal(
         }
     }
 
-    DrawnArea::new(lines, max_width, max_height)
+    DrawnArea::new(lines, max_width, actual_height as u32)
+}
+
+#[must_use]
+pub fn bar_graph_horizontal_label(
+    values: &[u32],
+    max_width: u32,
+    max_height: u32,
+    cutout: u32,
+) -> DrawnArea {
+    const MIN_GRAPH_SIZE: usize = 5;
+    let values = downscale_to_biggest_factor(values, max_height);
+
+    let max_index_len = values.len().to_string().len();
+    let left_len = max_index_len + 2;
+
+    let max_value = format!("{:03}", values.iter().max().unwrap_or(&0));
+    let len = max_value.len();
+    let max_value = format!("{}.{}", &max_value[..len - 2], &max_value[len - 2..]);
+    let max_value_len = max_value.len() + 1;
+    let right_len = max_value_len + 2;
+
+    let mut actual_max_width = max_width as usize;
+    if actual_max_width >= left_len + right_len + MIN_GRAPH_SIZE {
+        actual_max_width -= left_len + right_len;
+    }
+
+    let mut graph = bar_graph_horizontal(&values, actual_max_width as u32, max_height, cutout);
+    // TODO
+    graph.width += (left_len + right_len) as u32;
+
+    graph
 }
 
 #[cfg(test)]
