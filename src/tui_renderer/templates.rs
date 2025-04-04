@@ -22,15 +22,45 @@ impl DrawnArea {
     }
 }
 
-fn downscale_to_biggest_factor(values: &[u32], max_length: u32) -> Vec<u32> {
-    let mut scaling_factor = values.len() / max_length as usize;
-    while scaling_factor * (max_length as usize) < values.len() {
+fn downscale_to_biggest_factor(
+    values: &[u32],
+    ignored: &[u32],
+    max_length: u32,
+) -> (Vec<u32>, Vec<u32>) {
+    let max_length = max_length as usize;
+    let mut scaling_factor = values.len() / max_length;
+    while scaling_factor * max_length < values.len() {
         scaling_factor += 1;
     }
-    values
-        .chunks(scaling_factor)
-        .map(|chunk| chunk.iter().sum::<u32>() / chunk.len() as u32)
-        .collect::<Vec<u32>>()
+
+    let final_len = values.len().div_ceil(scaling_factor);
+    let mut compacted_values = Vec::with_capacity(final_len);
+    let mut compacted_ignored = Vec::with_capacity(final_len);
+
+    let mut buffer = Vec::<u32>::with_capacity(scaling_factor);
+
+    println!("{final_len} {scaling_factor} {max_length} {values:?}");
+    for i in 0..final_len {
+        for j in 0..scaling_factor {
+            let index = scaling_factor * i + j;
+            if !ignored.contains(&(index as u32)) {
+                if let Some(&elem) = values.get(index) {
+                    buffer.push(elem);
+                }
+            }
+        }
+
+        println!("{buffer:?}");
+        if buffer.is_empty() {
+            compacted_ignored.push(i as u32);
+            compacted_values.push(0);
+        } else {
+            compacted_values.push(buffer.iter().sum::<u32>() / buffer.len() as u32);
+        }
+        buffer.clear();
+    }
+
+    (compacted_values, compacted_ignored)
 }
 
 #[must_use]
@@ -55,7 +85,7 @@ pub fn bar_graph_vertical(
     }
 
     if values.len() > max_width as usize {
-        let compacted_data = downscale_to_biggest_factor(values, max_width);
+        let (compacted_data, ignored) = downscale_to_biggest_factor(values, &[], max_width);
         return bar_graph_vertical(&compacted_data, max_width, max_height, cutout);
     }
 
@@ -99,8 +129,15 @@ pub fn bar_graph_horizontal(
     }
 
     if values.len() > max_height as usize {
-        let compacted_data = downscale_to_biggest_factor(values, max_height);
-        return bar_graph_horizontal(&compacted_data, max_width, max_height, cutout, ignored);
+        let (compacted_data, compacted_ignored) =
+            downscale_to_biggest_factor(values, ignored, max_height);
+        return bar_graph_horizontal(
+            &compacted_data,
+            max_width,
+            max_height,
+            cutout,
+            &compacted_ignored,
+        );
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
@@ -204,6 +241,11 @@ mod tests {
     #[test]
     pub fn downscale_data() {
         let data = [1, 3, 5, 9, 10];
-        assert_eq!(vec![2, 7, 10], downscale_to_biggest_factor(&data, 4));
+        assert_eq!(vec![2, 7, 10], downscale_to_biggest_factor(&data, &[], 4).0);
+
+        let data = [1, 3, 5, 0, 0, 7, 10, 0, 1];
+        let ignored = [2, 3, 7];
+        let expected = (vec![2, 0, 3, 10, 1], vec![1]);
+        assert_eq!(expected, downscale_to_biggest_factor(&data, &ignored, 5));
     }
 }
