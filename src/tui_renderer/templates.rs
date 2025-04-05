@@ -223,21 +223,9 @@ pub fn bar_graph_horizontal_label(
     max_height: u32,
     cutout: u32,
     ignored: &[u32],
-    label_shrink: bool,
 ) -> DrawnArea {
     const MIN_GRAPH_SIZE: usize = 3;
     if (max_height as usize) < values.len() {
-        if label_shrink {
-            let (data, ignored) = downscale_to_biggest_factor(values, ignored, max_height);
-            return bar_graph_horizontal_label(
-                &data,
-                max_width,
-                max_height,
-                cutout,
-                &ignored,
-                label_shrink,
-            );
-        }
         return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
     }
 
