@@ -300,7 +300,10 @@ pub fn bar_graph_horizontal_label(
 
 #[cfg(test)]
 mod tests {
-    use super::downscale_to_biggest_factor;
+    use super::{
+        bar_graph_horizontal, bar_graph_horizontal_label, bar_graph_vertical,
+        downscale_to_biggest_factor,
+    };
 
     #[test]
     pub fn downscale_data() {
@@ -311,5 +314,32 @@ mod tests {
         let ignored = [2, 3, 7];
         let expected = (vec![2, 0, 3, 10, 1], vec![1]);
         assert_eq!(expected, downscale_to_biggest_factor(&data, &ignored, 5));
+    }
+
+    #[test]
+    pub fn vertical_bar_chart() {
+        let data = [1, 3, 5, 9, 10, 13, 15];
+        let graph = bar_graph_vertical(&data, 20, 10, 10, &[]);
+        assert_eq!(graph.area.len(), 10);
+        assert_eq!(graph.width, 14);
+        println!("\nVERICAL BAR CHART:\n{}", graph.area.join("\n\r"));
+    }
+
+    #[test]
+    pub fn horizontal_bar_chart() {
+        let data = [1, 3, 5, 9, 10, 13, 15];
+        let graph = bar_graph_horizontal(&data, 20, 10, 10, &[]);
+        assert_eq!(graph.area.len(), 7);
+        assert_eq!(graph.width, 20);
+        println!("\nHORIZONTAL BAR CHART:\n{}", graph.area.join("\n\r"));
+    }
+
+    #[test]
+    pub fn horizontal_bar_chart_label() {
+        let data = [1, 3, 5, 9, 10, 13, 15];
+        let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[], true);
+        assert_eq!(graph.area.len(), 7);
+        assert_eq!(graph.width, 20);
+        println!("\nHORIZONTAL BAR CHART LABEL:\n{}", graph.area.join("\n\r"));
     }
 }
