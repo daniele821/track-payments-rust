@@ -1,3 +1,5 @@
+use atty::Stream;
+use chrono::{Datelike, TimeZone, Utc};
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -9,11 +11,47 @@ use crossterm::{
     },
 };
 use std::{
-    io::{self, Write, stdout},
+    io::{self, Read, Write, stdout},
+    thread::sleep,
     time::Duration,
 };
+use track_payments_rust::payments::{AllPaymentsJsonLegacy, PaymentId};
 
 fn main() -> io::Result<()> {
+    let mut data = vec![
+        0, 752, 707, 2787, 1019, 864, 890, 2853, 0, 0, 841, 989, 678, 990, 1812, 0, 733, 714, 782,
+        931, 1722, 1803, 862, 1278, 1079, 857, 558, 1450, 536, 857, 649,
+    ];
+    let mut ignore = vec![];
+
+    if atty::isnt(Stream::Stdin) {
+        let now = Utc::now();
+        let start_of_month = Utc.ymd(now.year(), now.month(), 1).and_hms(0, 0, 0);
+        let (next_year, next_month) = if now.month() == 12 {
+            (now.year() + 1, 1)
+        } else {
+            (now.year(), now.month() + 1)
+        };
+        let start_of_next_month = Utc.ymd(next_year, next_month, 1).and_hms(0, 0, 0);
+        let mut input = String::new();
+        io::stdin().read_to_string(&mut input).unwrap();
+        let all_payments = AllPaymentsJsonLegacy::from_json(&input).unwrap();
+        let all_payments = all_payments.to_api().unwrap();
+
+        let range = all_payments.payments().range(
+            &PaymentId::new(start_of_month.into())..&PaymentId::new(start_of_next_month.into()),
+        );
+        data = vec![];
+        for (id, det) in range {
+            let orders = all_payments.orders().get(id).unwrap();
+            let mut sum = 0;
+            for (orderid, orderdet) in orders {
+                sum += orderid.unit_price() * orderdet.quantity();
+            }
+            data.push(sum);
+        }
+    }
+
     enable_raw_mode()?;
 
     // Enable mouse capture
@@ -26,7 +64,7 @@ fn main() -> io::Result<()> {
         crossterm::cursor::MoveTo(0, 0),
     )?;
 
-    render();
+    render(&data, &ignore);
 
     let (mut x, mut y) = (0, 0);
     loop {
@@ -38,14 +76,14 @@ fn main() -> io::Result<()> {
                     }
                 }
                 Event::Resize(new_x, new_y) => {
-                    render();
+                    render(&data, &ignore);
                     (x, y) = (new_x, new_y);
                 }
                 _ => {}
             }
         }
         if crossterm::terminal::size().unwrap() != (x, y) {
-            render();
+            render(&data, &ignore);
             (x, y) = crossterm::terminal::size().unwrap();
         }
     }
@@ -61,7 +99,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn render() {
+fn render(data: &[u32], ignore: &[u32]) {
     let white = &" ".on(Color::White).to_string();
     let white2 = &"  ".on(Color::White).to_string();
     let symbols = [
@@ -74,14 +112,11 @@ fn render() {
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
     let graph = track_payments_rust::tui_renderer::templates::bar_graph_horizontal_label(
-        &[
-            0, 752, 707, 2787, 1019, 864, 890, 2853, 0, 0, 841, 989, 678, 990, 1812, 0, 733, 714,
-            782, 931, 1722, 1803, 862, 1278, 1079, 857, 558, 1450, 536, 857, 649,
-        ],
+        data,
         u32::from(width),
         u32::from(height),
         1000,
-        &[1, 2, 3, 4],
+        &ignore,
         true,
     );
     let width = graph.width;
