@@ -1,15 +1,13 @@
-#![allow(unused, clippy::missing_errors_doc, clippy::missing_panics_doc)]
+// #![allow(unused, clippy::missing_errors_doc, clippy::missing_panics_doc)]
 
 mod json_legacy;
 
 use crate::time::FakeUtcTime;
-use derive_getters::Getters;
-use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
-#[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -17,32 +15,37 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderId {
     item: String,
     unit_price: u32,
 }
-#[derive(Getters, Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OrderDetail {
     quantity: u32,
 }
 
-#[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct PayOrdersDetail {
+    payment_details: PaymentDetail,
+    orders: BTreeMap<OrderId, OrderDetail>,
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentId {
     date: FakeUtcTime,
 }
-#[derive(Getters, Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
     method: String,
 }
 
-#[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct AllPayments {
     value_set: ValueSet,
-    payments: BTreeMap<PaymentId, PaymentDetail>,
-    orders: BTreeMap<PaymentId, BTreeMap<OrderId, OrderDetail>>,
+    payments: BTreeMap<PaymentId, PayOrdersDetail>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -56,7 +59,6 @@ pub enum PaymentError {
 }
 
 impl ValueSet {
-    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -78,7 +80,6 @@ impl ValueSet {
         self.add_values(other.cities, other.shops, other.methods, other.items);
     }
 
-    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.cities.is_empty()
             && self.shops.is_empty()
@@ -88,7 +89,6 @@ impl ValueSet {
 }
 
 impl OrderId {
-    #[must_use]
     pub fn new(item: String, unit_price: u32) -> Self {
         Self { item, unit_price }
     }
@@ -103,21 +103,27 @@ impl OrderId {
 }
 
 impl OrderDetail {
-    #[must_use]
     pub fn new(quantity: u32) -> Self {
         Self { quantity }
     }
 }
 
+impl PayOrdersDetail {
+    pub fn new(payment_details: PaymentDetail) -> Self {
+        Self {
+            payment_details,
+            orders: BTreeMap::new(),
+        }
+    }
+}
+
 impl PaymentId {
-    #[must_use]
     pub fn new(date: FakeUtcTime) -> Self {
         Self { date }
     }
 }
 
 impl PaymentDetail {
-    #[must_use]
     pub fn new(city: String, shop: String, method: String) -> Self {
         Self { city, shop, method }
     }
@@ -138,7 +144,6 @@ impl PaymentDetail {
 }
 
 impl AllPayments {
-    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -261,7 +266,7 @@ impl AllPayments {
 #[cfg(test)]
 mod tests {
     use super::{
-        AllPayments, AllPaymentsJsonLegacy, BTreeMap, BTreeSet, Deserialize, FakeUtcTime, Getters,
+        AllPayments, AllPaymentsJsonLegacy, BTreeMap, BTreeSet, Deserialize, FakeUtcTime,
         OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, Serialize, ValueSet,
         json_legacy,
     };

@@ -3,7 +3,6 @@
 use aes_gcm::aead::{Aead, AeadCore, KeyInit, OsRng};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
 
-#[must_use]
 pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
@@ -14,7 +13,6 @@ pub fn encrypt(key_str: &str, plaintext: &str) -> Option<String> {
     Some(hex::encode(encrypted_data))
 }
 
-#[must_use]
 pub fn decrypt(key_str: &str, encrypted_data: &str) -> Option<String> {
     let encrypted_data = hex::decode(encrypted_data).ok()?;
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());

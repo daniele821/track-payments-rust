@@ -9,7 +9,6 @@ pub struct DrawnArea {
 }
 
 impl DrawnArea {
-    #[must_use]
     pub fn new(area: Vec<String>, width: u32) -> Self {
         Self { area, width }
     }
@@ -66,7 +65,6 @@ fn downscale_to_biggest_factor(
     (compacted_values, compacted_ignored)
 }
 
-#[must_use]
 pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> DrawnArea {
     let mut lines = Vec::with_capacity(height as usize);
     let empty_line = elem.repeat(width as usize);
@@ -76,7 +74,6 @@ pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> DrawnArea {
     DrawnArea::new(lines, width)
 }
 
-#[must_use]
 pub fn bar_graph_vertical(
     values: &[u32],
     max_width: u32,
@@ -138,7 +135,6 @@ pub fn bar_graph_vertical(
     DrawnArea::new(lines, actual_width as u32)
 }
 
-#[must_use]
 pub fn bar_graph_horizontal(
     values: &[u32],
     max_width: u32,
@@ -220,7 +216,6 @@ pub fn bar_graph_horizontal(
     DrawnArea::new(lines, max_width)
 }
 
-#[must_use]
 pub fn bar_graph_horizontal_label(
     values: &[u32],
     max_width: u32,

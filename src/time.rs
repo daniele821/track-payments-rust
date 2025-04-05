@@ -1,12 +1,11 @@
 #![allow(unused, clippy::missing_errors_doc)]
 
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
-#[derive(Debug, Getters, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FakeUtcTime {
     timestamp: i64,
 }
@@ -14,17 +13,14 @@ pub struct FakeUtcTime {
 pub type FakeUtcFields = DateTime<Utc>;
 
 impl FakeUtcTime {
-    #[must_use]
     pub fn now() -> Self {
         Local::now().naive_local().and_utc().timestamp().into()
     }
 
-    #[must_use]
     pub fn from_timestamp(timestamp: i64) -> Self {
         timestamp.into()
     }
 
-    #[must_use]
     pub fn from_fields(fields: FakeUtcFields) -> Self {
         fields.into()
     }
