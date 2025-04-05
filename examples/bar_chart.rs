@@ -48,7 +48,7 @@ fn main() -> io::Result<()> {
         data = vec![0; days_in_month as usize];
         ignore = (now.day()..days_in_month as u32).collect::<Vec<u32>>();
         for (id, _det) in range {
-            let orders = all_payments.orders().get(id).unwrap();
+            let orders = all_payments.payments().get(id).unwrap().orders();
             let mut sum = 0;
             for (orderid, orderdet) in orders {
                 sum += orderid.unit_price() * orderdet.quantity();

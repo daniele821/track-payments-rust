@@ -1,13 +1,19 @@
-// #![allow(unused, clippy::missing_errors_doc, clippy::missing_panics_doc)]
+#![allow(
+    unused,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
+    clippy::must_use_candidate
+)]
 
 mod json_legacy;
 
 use crate::time::FakeUtcTime;
 use std::collections::{BTreeMap, BTreeSet};
 
+use derive_getters::Getters;
 pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
 
-#[derive(Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
@@ -15,35 +21,35 @@ pub struct ValueSet {
     items: BTreeSet<String>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderId {
     item: String,
     unit_price: u32,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct OrderDetail {
     quantity: u32,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PayOrdersDetail {
     payment_details: PaymentDetail,
     orders: BTreeMap<OrderId, OrderDetail>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentId {
     date: FakeUtcTime,
 }
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
     city: String,
     shop: String,
     method: String,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct AllPayments {
     value_set: ValueSet,
     payments: BTreeMap<PaymentId, PayOrdersDetail>,
@@ -121,6 +127,13 @@ impl PayOrdersDetail {
             payment_details,
             orders: BTreeMap::new(),
         }
+    }
+
+    pub fn calcualte_total_price(&self) -> u32 {
+        self.orders
+            .iter()
+            .map(|(id, det)| id.unit_price * det.quantity)
+            .sum()
     }
 }
 
@@ -308,38 +321,39 @@ mod tests {
         // insert values
         let mut all_payments = AllPayments::new();
         all_payments.add_values(values.clone());
-        assert_eq!(all_payments.value_set, values);
+        assert_eq!(all_payments.value_set(), &values);
 
         // insert payment
         let res = all_payments.add_payment(payid.clone(), paydetail.clone());
         assert_eq!(res, Ok(()));
-        let newval = all_payments.payments.first_key_value().unwrap().1;
-        assert_eq!(newval, &paydetail);
+        let newval = all_payments.payments().first_key_value().unwrap().1;
+        assert_eq!(newval.payment_details(), &paydetail);
 
         // insert order
         let res = all_payments.add_order(&payid, orderid.clone(), orderdetail.clone());
         assert_eq!(res, Ok(()));
-        let newval = all_payments.orders.first_key_value().unwrap().1;
-        let newval = newval.first_key_value().unwrap().1;
+        let newval = all_payments.payments().first_key_value().unwrap().1;
+        let newval = newval.orders().first_key_value().unwrap().1;
         assert_eq!(newval, &orderdetail);
 
         // modify payment
         let res = all_payments.modify_payment(&payid, paydetail2.clone());
         assert_eq!(res, Ok(()));
         let newval = all_payments.payments.first_key_value().unwrap().1;
-        assert_eq!(newval, &paydetail2);
+        assert_eq!(newval.payment_details(), &paydetail2);
 
         // modify order
         let res = all_payments.modify_order(&payid, &orderid, orderdetail2.clone());
         assert_eq!(res, Ok(()));
-        let newval = all_payments.orders.first_key_value().unwrap().1;
-        let newval = newval.first_key_value().unwrap().1;
+        let newval = all_payments.payments().first_key_value().unwrap().1;
+        let newval = newval.orders().first_key_value().unwrap().1;
         assert_eq!(newval, &orderdetail2);
 
         // remove order
         let res = all_payments.remove_order(&payid, &orderid);
         assert_eq!(res, Ok(()));
-        assert_eq!(all_payments.orders.first_key_value().unwrap().1.len(), 0);
+        let pay1 = all_payments.payments().first_key_value().unwrap();
+        assert_eq!(pay1.1.orders().len(), 0);
 
         // remove payment
         let res = all_payments.remove_payment(&payid);
