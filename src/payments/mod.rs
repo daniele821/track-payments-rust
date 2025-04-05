@@ -20,6 +20,7 @@ pub struct OrderId {
     item: String,
     unit_price: u32,
 }
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OrderDetail {
     quantity: u32,
@@ -108,6 +109,12 @@ impl OrderDetail {
     }
 }
 
+impl From<u32> for OrderDetail {
+    fn from(value: u32) -> Self {
+        Self::new(value)
+    }
+}
+
 impl PayOrdersDetail {
     pub fn new(payment_details: PaymentDetail) -> Self {
         Self {
@@ -117,9 +124,21 @@ impl PayOrdersDetail {
     }
 }
 
+impl From<PaymentDetail> for PayOrdersDetail {
+    fn from(value: PaymentDetail) -> Self {
+        Self::new(value)
+    }
+}
+
 impl PaymentId {
     pub fn new(date: FakeUtcTime) -> Self {
         Self { date }
+    }
+}
+
+impl From<FakeUtcTime> for PaymentId {
+    fn from(value: FakeUtcTime) -> Self {
+        Self::new(value)
     }
 }
 
@@ -166,8 +185,7 @@ impl AllPayments {
             .map_err(PaymentError::MissingElements)?;
 
         // insert payment and empty order list
-        self.orders.entry(payid.clone()).or_default();
-        assert!(self.payments.insert(payid, paydetail).is_none());
+        assert!(self.payments.insert(payid, paydetail.into()).is_none());
 
         Ok(())
     }

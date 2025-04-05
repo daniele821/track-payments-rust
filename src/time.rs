@@ -44,7 +44,7 @@ impl FakeUtcTime {
 
 impl From<i64> for FakeUtcTime {
     fn from(value: i64) -> Self {
-        Self { timestamp: value }
+        Self::from_timestamp(value)
     }
 }
 
