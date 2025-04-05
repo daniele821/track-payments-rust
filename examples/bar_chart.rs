@@ -116,13 +116,13 @@ fn render(data: &[u32], ignore: &[u32]) {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let graph = track_payments_rust::tui_renderer::templates::bar_graph_horizontal_label(
+    let graph = track_payments_rust::tui::bar_graph_horizontal_label(
         data,
         u32::from(width),
         u32::from(height),
         1000,
         ignore,
-        !true,
+        true,
     );
     let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
