@@ -229,6 +229,11 @@ pub fn bar_graph_horizontal_label(
     ignored: &[u32],
 ) -> DrawnArea {
     const MIN_GRAPH_SIZE: usize = 3;
+
+    if values.is_empty() || max_width == 0 || max_height == 0 {
+        return simple_rectangle(STR_EMPTY, max_width, max_height);
+    }
+
     if (max_height as usize) < values.len() {
         return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
     }
