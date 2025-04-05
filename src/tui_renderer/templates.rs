@@ -27,9 +27,10 @@ const COLOR_BAD: Color = Color::DarkRed;
 const COLOR_EMPTY: Color = Color::DarkGrey;
 const COLOR_CUTOUT: Color = Color::Yellow;
 
+// https://en.wikipedia.org/wiki/Box-drawing_characters
 const STR_EMPTY: &str = " ";
-const STR_CUTOUT_VERT: &str = "┃";
-const STR_CUTOUT_HORIZ: &str = "━";
+const STR_CUTOUT_VERT: &str = "╏";
+const STR_CUTOUT_HORIZ: &str = "╍";
 
 fn downscale_to_biggest_factor(
     values: &[u32],
