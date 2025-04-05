@@ -33,6 +33,9 @@ fn main() -> io::Result<()> {
             (now.year(), now.month() + 1)
         };
         let start_of_next_month = Utc.ymd(next_year, next_month, 1).and_hms(0, 0, 0);
+        let duration = start_of_next_month.signed_duration_since(start_of_month);
+        let days_in_month = duration.num_days();
+
         let mut input = String::new();
         io::stdin().read_to_string(&mut input).unwrap();
         let all_payments = AllPaymentsJsonLegacy::from_json(&input).unwrap();
@@ -41,14 +44,14 @@ fn main() -> io::Result<()> {
         let range = all_payments.payments().range(
             &PaymentId::new(start_of_month.into())..&PaymentId::new(start_of_next_month.into()),
         );
-        data = vec![];
+        data = vec![0; days_in_month as usize];
         for (id, det) in range {
             let orders = all_payments.orders().get(id).unwrap();
             let mut sum = 0;
             for (orderid, orderdet) in orders {
                 sum += orderid.unit_price() * orderdet.quantity();
             }
-            data.push(sum);
+            data[id.date().get_fields().unwrap().day0() as usize] += sum;
         }
     }
 
@@ -116,7 +119,7 @@ fn render(data: &[u32], ignore: &[u32]) {
         u32::from(width),
         u32::from(height),
         1000,
-        &ignore,
+        ignore,
         true,
     );
     let width = graph.width;
