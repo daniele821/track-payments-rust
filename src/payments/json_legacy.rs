@@ -147,9 +147,9 @@ impl TryFrom<&AllPaymentsApi> for AllPayments {
             let date = (*payment_api.0.date())
                 .format_str(DATE_FORMAT)
                 .map_err(PaymentErrorApi::GenericError)?;
-            let city = payment_api.1.city().clone();
-            let shop = payment_api.1.shop().clone();
-            let method = payment_api.1.method().clone();
+            let city = payment_api.1.payment_details.city().clone();
+            let shop = payment_api.1.payment_details.shop().clone();
+            let method = payment_api.1.payment_details.method().clone();
             let mut payment = Payment {
                 date,
                 city,
@@ -158,10 +158,7 @@ impl TryFrom<&AllPaymentsApi> for AllPayments {
                 orders: vec![],
             };
 
-            let orders = value
-                .orders()
-                .get(payment_api.0)
-                .expect("order map missing");
+            let orders = payment_api.1.orders();
 
             for order_api in orders {
                 let item = order_api.0.item().clone();
