@@ -6,17 +6,12 @@ use crossterm::style::{Color, Stylize};
 pub struct DrawnArea {
     pub area: Vec<String>,
     pub width: u32,
-    pub height: u32,
 }
 
 impl DrawnArea {
     #[must_use]
-    pub fn new(area: Vec<String>, width: u32, height: u32) -> Self {
-        Self {
-            area,
-            width,
-            height,
-        }
+    pub fn new(area: Vec<String>, width: u32) -> Self {
+        Self { area, width }
     }
 }
 
@@ -78,7 +73,7 @@ pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> DrawnArea {
     for _ in 0..height {
         lines.push(empty_line.clone());
     }
-    DrawnArea::new(lines, width, height)
+    DrawnArea::new(lines, width)
 }
 
 #[must_use]
@@ -140,7 +135,7 @@ pub fn bar_graph_vertical(
         }
         lines.push(str);
     }
-    DrawnArea::new(lines, actual_width as u32, max_height)
+    DrawnArea::new(lines, actual_width as u32)
 }
 
 #[must_use]
@@ -218,7 +213,7 @@ pub fn bar_graph_horizontal(
         }
     }
 
-    DrawnArea::new(lines, max_width, actual_height as u32)
+    DrawnArea::new(lines, max_width)
 }
 
 #[must_use]
