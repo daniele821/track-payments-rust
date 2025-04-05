@@ -161,7 +161,11 @@ pub fn bar_graph_horizontal(
     let actual_height = max_height as usize / len * len;
     let factor = actual_height / len;
     let unit_width = f64::from(max_width) / f64::from(max);
-    let cutout_line = (f64::from(cutout) * unit_width) as usize;
+    let mut cutout_line = (f64::from(cutout) * unit_width) as usize;
+
+    if cutout_line == max_width as usize && max == cutout {
+        cutout_line -= 1;
+    }
 
     for (index, &val) in values.iter().enumerate() {
         if ignored.contains(&(index as u32)) {
