@@ -1,11 +1,9 @@
-#![allow(unused, clippy::missing_errors_doc)]
-
 use super::{
     AllPayments as AllPaymentsApi, OrderDetail as OrderDetailApi, OrderId as OrderIdApi,
     PaymentDetail as PaymentDetailApi, PaymentError as PaymentErrorApi, PaymentId as PaymentIdApi,
     ValueSet as ValueSetApi,
 };
-use crate::time::{CUSTOM_FORMAT, FakeUtcTime};
+use crate::time::FakeUtcTime;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -201,7 +199,7 @@ mod tests {
       ] } ] }
         "#;
         let all_payments = AllPayments::from_json(json_string).unwrap();
-        let parsed_json = all_payments.dump_json(false);
+        let _ = all_payments.dump_json(false);
         let all_payments2 = AllPayments::from_json(json_string).unwrap();
 
         assert_eq!(all_payments, all_payments2);

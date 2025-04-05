@@ -1,7 +1,4 @@
-#![allow(unused, clippy::missing_errors_doc, clippy::must_use_candidate)]
-
-use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
-use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Local, NaiveDateTime, Utc};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
@@ -18,11 +15,13 @@ impl FakeUtcTime {
     }
 
     pub fn from_timestamp(timestamp: i64) -> Self {
-        timestamp.into()
+        Self { timestamp }
     }
 
     pub fn from_fields(fields: FakeUtcFields) -> Self {
-        fields.into()
+        Self {
+            timestamp: fields.timestamp(),
+        }
     }
 
     pub fn parse_str(time_str: &str, format: &str) -> Result<Self, String> {
@@ -44,23 +43,20 @@ impl FakeUtcTime {
 
 impl From<i64> for FakeUtcTime {
     fn from(value: i64) -> Self {
-        Self { timestamp: value }
+        Self::from_timestamp(value)
     }
 }
 
 impl From<FakeUtcFields> for FakeUtcTime {
     fn from(value: FakeUtcFields) -> Self {
-        Self {
-            timestamp: value.timestamp(),
-        }
+        Self::from_fields(value)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{CUSTOM_FORMAT, FakeUtcTime};
-    use chrono::{Datelike, Days, TimeDelta, Timelike};
-    use std::time::Duration;
+    use chrono::{Datelike, Timelike};
 
     #[test]
     pub fn time_fields() {

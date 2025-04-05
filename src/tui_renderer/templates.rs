@@ -1,5 +1,3 @@
-#![allow(unused, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-
 use crossterm::style::{Color, Stylize};
 
 #[derive(Debug)]
@@ -14,7 +12,6 @@ impl DrawnArea {
     }
 }
 
-const COLOR_BORDER: Color = Color::White;
 const COLOR_TEXT: Color = Color::White;
 const COLOR_GOOD: Color = Color::DarkGreen;
 const COLOR_BAD: Color = Color::DarkRed;
@@ -102,7 +99,7 @@ pub fn bar_graph_vertical(
         .with(COLOR_CUTOUT)
         .to_string();
 
-    let mut is_cutout_line = false;
+    let mut is_cutout_line;
 
     for i in (1..=max_height).rev() {
         let mut str = String::with_capacity(actual_width);
@@ -166,7 +163,7 @@ pub fn bar_graph_horizontal(
     for (index, &val) in values.iter().enumerate() {
         if ignored.contains(&(index as u32)) {
             let str = STR_EMPTY.repeat(max_width as usize).on(COLOR_EMPTY);
-            for i in 0..factor {
+            for _ in 0..factor {
                 lines.push(str.to_string());
             }
             continue;
@@ -208,7 +205,7 @@ pub fn bar_graph_horizontal(
                 );
             }
         }
-        for i in 0..factor {
+        for _ in 0..factor {
             lines.push(str.clone());
         }
     }
@@ -286,7 +283,6 @@ pub fn bar_graph_horizontal_label(
         let value_fmt = value_fmt.with(color).bold();
         if let Some(line) = graph.area.get_mut(index * factor) {
             if ignored.contains(&(index as u32)) {
-                let index_len = index_fmt.to_string().len();
                 *line = format!("{e4}{e2}{line}{e3}{e1}");
             } else {
                 *line = format!("{index_fmt}{line}{value_fmt}");

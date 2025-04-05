@@ -1,10 +1,3 @@
-#![allow(
-    unused,
-    clippy::missing_errors_doc,
-    clippy::missing_panics_doc,
-    clippy::must_use_candidate
-)]
-
 mod json_legacy;
 
 use crate::time::FakeUtcTime;
