@@ -57,91 +57,14 @@ impl AllPayments {
     }
 
     pub fn from_api(self_api: &AllPaymentsApi) -> Result<Self, PaymentErrorApi> {
-        Self::try_from(self_api)
-    }
-
-    pub fn to_api(&self) -> Result<AllPaymentsApi, PaymentErrorApi> {
-        AllPaymentsApi::try_from(self)
-    }
-
-    pub fn convert_to_valid_legacy(&mut self) {
-        for payment in &mut self.payments {
-            let mut fixed_orders = BTreeMap::<String, (u32, u32)>::new();
-            for order in &mut payment.orders {
-                let mut final_price = order.unit_price;
-                let mut final_quantity = order.quantity;
-                if let Some(&(price, quant)) = fixed_orders.get(&order.item) {
-                    if final_price == price {
-                        final_quantity += quant;
-                    } else {
-                        final_price = final_price * final_quantity + price * quant;
-                        final_quantity = 1;
-                    }
-                }
-                fixed_orders.insert(order.item.clone(), (final_price, final_quantity));
-            }
-            payment.orders.clear();
-            for (item, (unit_price, quantity)) in fixed_orders {
-                payment.orders.push(Order {
-                    item: item.to_string(),
-                    unit_price,
-                    quantity,
-                });
-            }
-        }
-    }
-}
-
-impl TryFrom<&AllPayments> for AllPaymentsApi {
-    type Error = PaymentErrorApi;
-
-    fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
-        let mut all_payments_api = AllPaymentsApi::new();
-        let mut values_api = ValueSetApi::new();
-        values_api.add_values(
-            value.value_set.cities.clone(),
-            value.value_set.shops.clone(),
-            value.value_set.methods.clone(),
-            value.value_set.items.clone(),
-        );
-        all_payments_api.add_values(values_api);
-
-        for payment in &value.payments {
-            let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)
-                .map_err(PaymentErrorApi::GenericError)?;
-            let payid = PaymentIdApi::new(date);
-            let city = payment.city.clone();
-            let shop = payment.shop.clone();
-            let method = payment.method.clone();
-            let paydetails = PaymentDetailApi::new(city, shop, method);
-            all_payments_api.add_payment(payid, paydetails)?;
-
-            for order in &payment.orders {
-                let payid = PaymentIdApi::new(date);
-                let item = order.item.clone();
-                let unitprice = order.unit_price;
-                let quantity = order.quantity;
-                let orderid = OrderIdApi::new(item, unitprice);
-                let orderdetails = OrderDetailApi::new(quantity);
-                all_payments_api.add_order(&payid, orderid, orderdetails)?;
-            }
-        }
-        Ok(all_payments_api)
-    }
-}
-
-impl TryFrom<&AllPaymentsApi> for AllPayments {
-    type Error = PaymentErrorApi;
-
-    fn try_from(value: &AllPaymentsApi) -> Result<Self, Self::Error> {
         let values = ValueSet {
-            cities: value.value_set().cities().clone(),
-            shops: value.value_set().shops().clone(),
-            methods: value.value_set().methods().clone(),
-            items: value.value_set().items().clone(),
+            cities: self_api.value_set().cities().clone(),
+            shops: self_api.value_set().shops().clone(),
+            methods: self_api.value_set().methods().clone(),
+            items: self_api.value_set().items().clone(),
         };
         let mut payments = vec![];
-        for payment_api in value.payments() {
+        for payment_api in self_api.payments() {
             let date = (*payment_api.0.date())
                 .format_str(DATE_FORMAT)
                 .map_err(PaymentErrorApi::GenericError)?;
@@ -178,6 +101,83 @@ impl TryFrom<&AllPaymentsApi> for AllPayments {
             value_set: values,
             payments,
         })
+    }
+
+    pub fn to_api(&self) -> Result<AllPaymentsApi, PaymentErrorApi> {
+        let mut all_payments_api = AllPaymentsApi::new();
+        let mut values_api = ValueSetApi::new();
+        values_api.add_values(
+            self.value_set.cities.clone(),
+            self.value_set.shops.clone(),
+            self.value_set.methods.clone(),
+            self.value_set.items.clone(),
+        );
+        all_payments_api.add_values(values_api);
+
+        for payment in &self.payments {
+            let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)
+                .map_err(PaymentErrorApi::GenericError)?;
+            let payid = PaymentIdApi::new(date);
+            let city = payment.city.clone();
+            let shop = payment.shop.clone();
+            let method = payment.method.clone();
+            let paydetails = PaymentDetailApi::new(city, shop, method);
+            all_payments_api.add_payment(payid, paydetails)?;
+
+            for order in &payment.orders {
+                let payid = PaymentIdApi::new(date);
+                let item = order.item.clone();
+                let unitprice = order.unit_price;
+                let quantity = order.quantity;
+                let orderid = OrderIdApi::new(item, unitprice);
+                let orderdetails = OrderDetailApi::new(quantity);
+                all_payments_api.add_order(&payid, orderid, orderdetails)?;
+            }
+        }
+        Ok(all_payments_api)
+    }
+
+    pub fn convert_to_valid_legacy(&mut self) {
+        for payment in &mut self.payments {
+            let mut fixed_orders = BTreeMap::<String, (u32, u32)>::new();
+            for order in &mut payment.orders {
+                let mut final_price = order.unit_price;
+                let mut final_quantity = order.quantity;
+                if let Some(&(price, quant)) = fixed_orders.get(&order.item) {
+                    if final_price == price {
+                        final_quantity += quant;
+                    } else {
+                        final_price = final_price * final_quantity + price * quant;
+                        final_quantity = 1;
+                    }
+                }
+                fixed_orders.insert(order.item.clone(), (final_price, final_quantity));
+            }
+            payment.orders.clear();
+            for (item, (unit_price, quantity)) in fixed_orders {
+                payment.orders.push(Order {
+                    item: item.to_string(),
+                    unit_price,
+                    quantity,
+                });
+            }
+        }
+    }
+}
+
+impl TryFrom<&AllPayments> for AllPaymentsApi {
+    type Error = PaymentErrorApi;
+
+    fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
+        value.to_api()
+    }
+}
+
+impl TryFrom<&AllPaymentsApi> for AllPayments {
+    type Error = PaymentErrorApi;
+
+    fn try_from(value: &AllPaymentsApi) -> Result<Self, Self::Error> {
+        AllPayments::from_api(value)
     }
 }
 
