@@ -32,7 +32,7 @@ pub struct PayOrdersDetail {
     orders: BTreeMap<OrderId, OrderDetail>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct PaymentId {
     date: FakeUtcTime,
 }
@@ -176,7 +176,6 @@ impl AllPayments {
         payid: PaymentId,
         paydetail: PaymentDetail,
     ) -> Result<(), PaymentError> {
-        // checks
         if self.payments.contains_key(&payid) {
             return Err(PaymentError::PaymentDuplicated(payid));
         }
@@ -184,7 +183,6 @@ impl AllPayments {
             .check_missing_elements(&self.value_set)
             .map_err(PaymentError::MissingElements)?;
 
-        // insert payment and empty order list
         assert!(self.payments.insert(payid, paydetail.into()).is_none());
 
         Ok(())
@@ -196,7 +194,6 @@ impl AllPayments {
         orderid: OrderId,
         orderdetail: OrderDetail,
     ) -> Result<(), PaymentError> {
-        // checks
         if !self.payments.contains_key(payid) {
             return Err(PaymentError::PaymentNotFound(payid.clone()));
         }
@@ -208,7 +205,6 @@ impl AllPayments {
             .check_missing_elements(&self.value_set)
             .map_err(PaymentError::MissingElements)?;
 
-        // insert order
         assert!(order_map.insert(orderid, orderdetail).is_none());
 
         Ok(())
@@ -219,7 +215,6 @@ impl AllPayments {
         payid: &PaymentId,
         paydetail: PaymentDetail,
     ) -> Result<(), PaymentError> {
-        // checks
         let paydetail_mut = self
             .payments
             .get_mut(payid)
@@ -228,8 +223,7 @@ impl AllPayments {
             .check_missing_elements(&self.value_set)
             .map_err(PaymentError::MissingElements)?;
 
-        // modify payment
-        *paydetail_mut = paydetail;
+        paydetail_mut.payment_details = paydetail;
 
         Ok(())
     }
@@ -240,7 +234,6 @@ impl AllPayments {
         orderid: &OrderId,
         orderdetail: OrderDetail,
     ) -> Result<(), PaymentError> {
-        // checks
         let order_map = self
             .orders
             .get_mut(payid)
@@ -252,7 +245,6 @@ impl AllPayments {
             .check_missing_elements(&self.value_set)
             .map_err(PaymentError::MissingElements)?;
 
-        // modify order
         *orderdetail_mut = orderdetail;
 
         Ok(())
@@ -261,7 +253,7 @@ impl AllPayments {
     pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<(), PaymentError> {
         self.payments
             .remove(payid)
-            .map(|_| assert!(self.orders.remove(payid).is_some()))
+            .map(|_| {})
             .ok_or(PaymentError::PaymentNotFound(payid.clone()))
     }
 
@@ -283,11 +275,7 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        AllPayments, AllPaymentsJsonLegacy, BTreeMap, BTreeSet, Deserialize, FakeUtcTime,
-        OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, Serialize, ValueSet,
-        json_legacy,
-    };
+    use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
 
     #[test]
     fn all_payments_creation() {
