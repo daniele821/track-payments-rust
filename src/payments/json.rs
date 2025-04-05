@@ -3,7 +3,7 @@ use crate::time::FakeUtcTime;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-pub const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
+const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ValueSetJson {
@@ -161,25 +161,9 @@ impl AllPaymentsJson {
     }
 }
 
-impl TryFrom<&AllPaymentsJson> for AllPayments {
-    type Error = PaymentError;
-
-    fn try_from(value: &AllPaymentsJson) -> Result<Self, Self::Error> {
-        value.to_api()
-    }
-}
-
-impl TryFrom<&AllPayments> for AllPaymentsJson {
-    type Error = PaymentError;
-
-    fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
-        AllPaymentsJson::from_api(value)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{AllPayments, AllPaymentsJson};
+    use super::AllPaymentsJson;
 
     #[test]
     fn allpayments_legacy_json() {
@@ -200,8 +184,8 @@ mod tests {
 
         assert_eq!(all_payments, all_payments2);
 
-        let all_payment_api = AllPayments::try_from(&all_payments).unwrap();
-        let all_payments3 = AllPaymentsJson::try_from(&all_payment_api).unwrap();
+        let all_payment_api = all_payments.to_api().unwrap();
+        let all_payments3 = AllPaymentsJson::from_api(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
     }

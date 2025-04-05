@@ -2,9 +2,8 @@ mod json;
 
 use crate::time::FakeUtcTime;
 use derive_getters::Getters;
+use json::AllPaymentsJson;
 use std::collections::{BTreeMap, BTreeSet};
-
-pub use json::AllPaymentsJson;
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
@@ -174,6 +173,22 @@ impl AllPayments {
         Self::default()
     }
 
+    pub fn from_json(json_str: &str) -> Result<Self, PaymentError> {
+        AllPaymentsJson::from_json(json_str)
+            .map_err(PaymentError::GenericError)?
+            .to_api()
+    }
+
+    pub fn to_json(&self, fmt: bool, backcompatible: bool) -> Result<String, PaymentError> {
+        let mut all_payments_json = AllPaymentsJson::from_api(self)?;
+        if backcompatible {
+            all_payments_json.convert_to_valid_legacy();
+        }
+        all_payments_json
+            .dump_json(fmt)
+            .map_err(PaymentError::GenericError)
+    }
+
     pub fn add_values(&mut self, new_values: ValueSet) {
         self.value_set.extend(new_values);
     }
@@ -286,6 +301,8 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
+    use crate::payments::json::AllPaymentsJson;
+
     use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
 
     #[test]
@@ -329,6 +346,11 @@ mod tests {
         let newval = all_payments.payments().first_key_value().unwrap().1;
         let newval = newval.orders().first_key_value().unwrap().1;
         assert_eq!(newval, &orderdetail);
+
+        // json conversion
+        let json = all_payments.to_json(true, true).unwrap();
+        let all_payments2 = AllPayments::from_json(&json).unwrap();
+        assert_eq!(all_payments, all_payments2);
 
         // modify payment
         let res = all_payments.modify_payment(&payid, paydetail2.clone());

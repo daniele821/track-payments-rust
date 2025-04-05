@@ -16,7 +16,7 @@ use std::{
     io::{self, Read, Write, stdout},
     time::Duration,
 };
-use track_payments_rust::payments::{AllPaymentsJson, PaymentId};
+use track_payments_rust::payments::{AllPayments, PaymentId};
 
 fn main() -> io::Result<()> {
     let mut data = vec![
@@ -39,8 +39,7 @@ fn main() -> io::Result<()> {
 
         let mut input = String::new();
         io::stdin().read_to_string(&mut input).unwrap();
-        let all_payments = AllPaymentsJson::from_json(&input).unwrap();
-        let all_payments = all_payments.to_api().unwrap();
+        let all_payments = AllPayments::from_json(&input).unwrap();
 
         let range = all_payments.payments().range(
             &PaymentId::new(start_of_month.into())..&PaymentId::new(start_of_next_month.into()),
