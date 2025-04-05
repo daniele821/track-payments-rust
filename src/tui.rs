@@ -27,7 +27,7 @@ fn downscale_to_biggest_factor(
     values: &[u32],
     ignored: &[u32],
     max_length: u32,
-) -> (Vec<u32>, Vec<u32>) {
+) -> (Vec<u32>, Vec<u32>, u32) {
     let max_length = max_length as usize;
     let mut scaling_factor = values.len() / max_length;
     while scaling_factor * max_length < values.len() {
@@ -58,7 +58,7 @@ fn downscale_to_biggest_factor(
         buffer.clear();
     }
 
-    (compacted_values, compacted_ignored)
+    (compacted_values, compacted_ignored, scaling_factor as u32)
 }
 
 pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> DrawnArea {
@@ -82,7 +82,7 @@ pub fn bar_graph_vertical(
     }
 
     if values.len() > max_width as usize {
-        let (data, ignored) = downscale_to_biggest_factor(values, ignored, max_width);
+        let (data, ignored, _) = downscale_to_biggest_factor(values, ignored, max_width);
         return bar_graph_vertical(&data, max_width, max_height, cutout, &ignored);
     }
 
@@ -143,7 +143,7 @@ pub fn bar_graph_horizontal(
     }
 
     if values.len() > max_height as usize {
-        let (data, ignored) = downscale_to_biggest_factor(values, ignored, max_height);
+        let (data, ignored, _) = downscale_to_biggest_factor(values, ignored, max_height);
         return bar_graph_horizontal(&data, max_width, max_height, cutout, &ignored);
     }
 
@@ -219,6 +219,7 @@ pub fn bar_graph_horizontal_label(
     cutout: u32,
     ignored: &[u32],
     allow_shrink: bool,
+    downscaling_factor: Option<u32>,
 ) -> DrawnArea {
     const MIN_GRAPH_SIZE: usize = 3;
 
@@ -228,7 +229,7 @@ pub fn bar_graph_horizontal_label(
 
     if (max_height as usize) < values.len() {
         if allow_shrink {
-            let (data, ignored) = downscale_to_biggest_factor(values, ignored, max_height);
+            let (data, ignored, _) = downscale_to_biggest_factor(values, ignored, max_height);
             return bar_graph_horizontal_label(
                 &data,
                 max_width,
@@ -236,6 +237,7 @@ pub fn bar_graph_horizontal_label(
                 cutout,
                 &ignored,
                 allow_shrink,
+                downscaling_factor,
             );
         }
         return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
@@ -312,7 +314,7 @@ mod tests {
 
         let data = [1, 3, 5, 0, 0, 7, 10, 0, 1];
         let ignored = [2, 3, 7];
-        let expected = (vec![2, 0, 3, 10, 1], vec![1]);
+        let expected = (vec![2, 0, 3, 10, 1], vec![1], 2);
         assert_eq!(expected, downscale_to_biggest_factor(&data, &ignored, 5));
     }
 
@@ -364,7 +366,7 @@ mod tests {
     #[test]
     pub fn horizontal_bar_chart_label() {
         let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[], true);
+        let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[], true, None);
         assert_eq!(graph.area.len(), 7);
         assert_eq!(graph.width, 20);
         let expected = [
