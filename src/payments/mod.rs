@@ -1,10 +1,10 @@
-mod json_legacy;
+mod json;
 
 use crate::time::FakeUtcTime;
+use derive_getters::Getters;
 use std::collections::{BTreeMap, BTreeSet};
 
-use derive_getters::Getters;
-pub use json_legacy::AllPayments as AllPaymentsJsonLegacy;
+pub use json::AllPaymentsJson;
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {

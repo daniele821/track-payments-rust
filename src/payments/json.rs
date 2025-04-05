@@ -1,8 +1,4 @@
-use super::{
-    AllPayments as AllPaymentsApi, OrderDetail as OrderDetailApi, OrderId as OrderIdApi,
-    PaymentDetail as PaymentDetailApi, PaymentError as PaymentErrorApi, PaymentId as PaymentIdApi,
-    ValueSet as ValueSetApi,
-};
+use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, ValueSet};
 use crate::time::FakeUtcTime;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -10,7 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 pub const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ValueSet {
+pub struct ValueSetJson {
     cities: BTreeSet<String>,
     shops: BTreeSet<String>,
     #[serde(rename = "paymentMethods")]
@@ -19,7 +15,7 @@ pub struct ValueSet {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Order {
+pub struct OrderJson {
     item: String,
     #[serde(rename = "unitPrice")]
     unit_price: u32,
@@ -27,23 +23,23 @@ pub struct Order {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Payment {
+pub struct PaymentJson {
     date: String,
     city: String,
     #[serde(rename = "paymentMethod")]
     method: String,
     shop: String,
-    orders: Vec<Order>,
+    orders: Vec<OrderJson>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct AllPayments {
+pub struct AllPaymentsJson {
     #[serde(rename = "valueSet")]
-    value_set: ValueSet,
-    payments: Vec<Payment>,
+    value_set: ValueSetJson,
+    payments: Vec<PaymentJson>,
 }
 
-impl AllPayments {
+impl AllPaymentsJson {
     pub fn from_json(json_str: &str) -> Result<Self, String> {
         serde_json::from_str(json_str).map_err(|err| err.to_string())
     }
@@ -56,8 +52,8 @@ impl AllPayments {
         }
     }
 
-    pub fn from_api(self_api: &AllPaymentsApi) -> Result<Self, PaymentErrorApi> {
-        let values = ValueSet {
+    pub fn from_api(self_api: &AllPayments) -> Result<Self, PaymentError> {
+        let values = ValueSetJson {
             cities: self_api.value_set().cities().clone(),
             shops: self_api.value_set().shops().clone(),
             methods: self_api.value_set().methods().clone(),
@@ -67,11 +63,11 @@ impl AllPayments {
         for payment_api in self_api.payments() {
             let date = (*payment_api.0.date())
                 .format_str(DATE_FORMAT)
-                .map_err(PaymentErrorApi::GenericError)?;
+                .map_err(PaymentError::GenericError)?;
             let city = payment_api.1.payment_details.city().clone();
             let shop = payment_api.1.payment_details.shop().clone();
             let method = payment_api.1.payment_details.method().clone();
-            let mut payment = Payment {
+            let mut payment = PaymentJson {
                 date,
                 city,
                 shop,
@@ -85,7 +81,7 @@ impl AllPayments {
                 let item = order_api.0.item().clone();
                 let unit_price = *order_api.0.unit_price();
                 let quantity = *order_api.1.quantity();
-                let order = Order {
+                let order = OrderJson {
                     item,
                     unit_price,
                     quantity,
@@ -97,15 +93,15 @@ impl AllPayments {
             payments.push(payment);
         }
 
-        Ok(AllPayments {
+        Ok(AllPaymentsJson {
             value_set: values,
             payments,
         })
     }
 
-    pub fn to_api(&self) -> Result<AllPaymentsApi, PaymentErrorApi> {
-        let mut all_payments_api = AllPaymentsApi::new();
-        let mut values_api = ValueSetApi::new();
+    pub fn to_api(&self) -> Result<AllPayments, PaymentError> {
+        let mut all_payments_api = AllPayments::new();
+        let mut values_api = ValueSet::new();
         values_api.add_values(
             self.value_set.cities.clone(),
             self.value_set.shops.clone(),
@@ -116,21 +112,21 @@ impl AllPayments {
 
         for payment in &self.payments {
             let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)
-                .map_err(PaymentErrorApi::GenericError)?;
-            let payid = PaymentIdApi::new(date);
+                .map_err(PaymentError::GenericError)?;
+            let payid = PaymentId::new(date);
             let city = payment.city.clone();
             let shop = payment.shop.clone();
             let method = payment.method.clone();
-            let paydetails = PaymentDetailApi::new(city, shop, method);
+            let paydetails = PaymentDetail::new(city, shop, method);
             all_payments_api.add_payment(payid, paydetails)?;
 
             for order in &payment.orders {
-                let payid = PaymentIdApi::new(date);
+                let payid = PaymentId::new(date);
                 let item = order.item.clone();
                 let unitprice = order.unit_price;
                 let quantity = order.quantity;
-                let orderid = OrderIdApi::new(item, unitprice);
-                let orderdetails = OrderDetailApi::new(quantity);
+                let orderid = OrderId::new(item, unitprice);
+                let orderdetails = OrderDetail::new(quantity);
                 all_payments_api.add_order(&payid, orderid, orderdetails)?;
             }
         }
@@ -155,7 +151,7 @@ impl AllPayments {
             }
             payment.orders.clear();
             for (item, (unit_price, quantity)) in fixed_orders {
-                payment.orders.push(Order {
+                payment.orders.push(OrderJson {
                     item: item.to_string(),
                     unit_price,
                     quantity,
@@ -165,25 +161,25 @@ impl AllPayments {
     }
 }
 
-impl TryFrom<&AllPayments> for AllPaymentsApi {
-    type Error = PaymentErrorApi;
+impl TryFrom<&AllPaymentsJson> for AllPayments {
+    type Error = PaymentError;
 
-    fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
+    fn try_from(value: &AllPaymentsJson) -> Result<Self, Self::Error> {
         value.to_api()
     }
 }
 
-impl TryFrom<&AllPaymentsApi> for AllPayments {
-    type Error = PaymentErrorApi;
+impl TryFrom<&AllPayments> for AllPaymentsJson {
+    type Error = PaymentError;
 
-    fn try_from(value: &AllPaymentsApi) -> Result<Self, Self::Error> {
-        AllPayments::from_api(value)
+    fn try_from(value: &AllPayments) -> Result<Self, Self::Error> {
+        AllPaymentsJson::from_api(value)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{AllPayments, AllPaymentsApi};
+    use super::{AllPayments, AllPaymentsJson};
 
     #[test]
     fn allpayments_legacy_json() {
@@ -198,14 +194,14 @@ mod tests {
                   { "item": "Banana", "unitPrice": 50, "quantity": 3 }
       ] } ] }
         "#;
-        let all_payments = AllPayments::from_json(json_string).unwrap();
+        let all_payments = AllPaymentsJson::from_json(json_string).unwrap();
         let _ = all_payments.dump_json(false);
-        let all_payments2 = AllPayments::from_json(json_string).unwrap();
+        let all_payments2 = AllPaymentsJson::from_json(json_string).unwrap();
 
         assert_eq!(all_payments, all_payments2);
 
-        let all_payment_api = AllPaymentsApi::try_from(&all_payments).unwrap();
-        let all_payments3 = AllPayments::try_from(&all_payment_api).unwrap();
+        let all_payment_api = AllPayments::try_from(&all_payments).unwrap();
+        let all_payments3 = AllPaymentsJson::try_from(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
     }
@@ -236,9 +232,9 @@ mod tests {
                   { "item": "Banana", "unitPrice": 100, "quantity": 3 }
       ] } ] }
         "#;
-        let mut all_payments = AllPayments::from_json(json_string).unwrap();
+        let mut all_payments = AllPaymentsJson::from_json(json_string).unwrap();
         all_payments.convert_to_valid_legacy();
-        let all_payments_fixed = AllPayments::from_json(json_string_fixed).unwrap();
+        let all_payments_fixed = AllPaymentsJson::from_json(json_string_fixed).unwrap();
 
         assert_eq!(all_payments, all_payments_fixed);
     }
