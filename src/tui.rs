@@ -37,7 +37,6 @@ fn downscale_to_biggest_factor(
     let final_len = values.len().div_ceil(scaling_factor);
     let mut compacted_values = Vec::with_capacity(final_len);
     let mut compacted_ignored = Vec::with_capacity(final_len);
-
     let mut buffer = Vec::<u32>::with_capacity(scaling_factor);
 
     for i in 0..final_len {
