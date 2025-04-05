@@ -35,6 +35,7 @@ pub struct PayOrdersDetail {
 pub struct PaymentId {
     date: FakeUtcTime,
 }
+
 #[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
     city: String,
