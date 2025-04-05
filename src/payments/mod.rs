@@ -32,7 +32,7 @@ pub struct PayOrdersDetail {
     orders: BTreeMap<OrderId, OrderDetail>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct PaymentId {
     date: FakeUtcTime,
 }
@@ -194,10 +194,12 @@ impl AllPayments {
         orderid: OrderId,
         orderdetail: OrderDetail,
     ) -> Result<(), PaymentError> {
-        if !self.payments.contains_key(payid) {
-            return Err(PaymentError::PaymentNotFound(payid.clone()));
-        }
-        let order_map = self.orders.get_mut(payid).expect("order map missing!");
+        let order_map = &mut self
+            .payments
+            .get_mut(payid)
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?
+            .orders;
+
         if order_map.contains_key(&orderid) {
             return Err(PaymentError::OrderDuplicated(orderid.clone()));
         }
@@ -234,10 +236,11 @@ impl AllPayments {
         orderid: &OrderId,
         orderdetail: OrderDetail,
     ) -> Result<(), PaymentError> {
-        let order_map = self
-            .orders
+        let order_map = &mut self
+            .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?
+            .orders;
         let orderdetail_mut = order_map
             .get_mut(orderid)
             .ok_or(PaymentError::OrderNotFound(orderid.clone()))?;
@@ -262,11 +265,12 @@ impl AllPayments {
         payid: &PaymentId,
         orderid: &OrderId,
     ) -> Result<(), PaymentError> {
-        let orders_map = self
-            .orders
+        let order_map = &mut self
+            .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
-        orders_map
+            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?
+            .orders;
+        order_map
             .remove(orderid)
             .map(|_| ())
             .ok_or(PaymentError::OrderNotFound(orderid.clone()))
