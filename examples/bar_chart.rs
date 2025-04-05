@@ -122,7 +122,7 @@ fn render(data: &[u32], ignore: &[u32]) {
         u32::from(height),
         1000,
         ignore,
-        true,
+        !true,
     );
     let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
