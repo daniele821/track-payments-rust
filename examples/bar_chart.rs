@@ -45,6 +45,7 @@ fn main() -> io::Result<()> {
             &PaymentId::new(start_of_month.into())..&PaymentId::new(start_of_next_month.into()),
         );
         data = vec![0; days_in_month as usize];
+        ignore = (now.day()..days_in_month as u32).collect::<Vec<u32>>();
         for (id, det) in range {
             let orders = all_payments.orders().get(id).unwrap();
             let mut sum = 0;
