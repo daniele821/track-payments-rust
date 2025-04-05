@@ -1,4 +1,4 @@
-#![allow(unused, clippy::missing_errors_doc)]
+#![allow(unused, clippy::missing_errors_doc, clippy::must_use_candidate)]
 
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
@@ -27,8 +27,8 @@ impl FakeUtcTime {
 
     pub fn parse_str(time_str: &str, format: &str) -> Result<Self, String> {
         NaiveDateTime::parse_from_str(time_str, format)
-            .map(|res| res.and_utc().timestamp().into())
             .map_err(|err| err.to_string())
+            .map(|res| res.and_utc().timestamp().into())
     }
 
     pub fn get_fields(&self) -> Result<FakeUtcFields, String> {
@@ -44,7 +44,7 @@ impl FakeUtcTime {
 
 impl From<i64> for FakeUtcTime {
     fn from(value: i64) -> Self {
-        Self::from_timestamp(value)
+        Self { timestamp: value }
     }
 }
 
