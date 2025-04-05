@@ -16,8 +16,7 @@ pub fn decrypt(key_str: &[u8], encrypted_data: &[u8]) -> Option<Vec<u8>> {
     let (nonce_arr, ciphered_data) = encrypted_data.split_at(12);
     let nonce = Nonce::from_slice(nonce_arr);
     let cipher = Aes256Gcm::new(key);
-    let plaintext = cipher.decrypt(nonce, ciphered_data).ok()?;
-    Some(plaintext)
+    cipher.decrypt(nonce, ciphered_data).ok()
 }
 
 #[cfg(test)]
