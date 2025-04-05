@@ -1,3 +1,5 @@
+#![allow(clippy::cast_sign_loss, clippy::cast_possible_truncation, deprecated)]
+
 use atty::Stream;
 use chrono::{Datelike, TimeZone, Utc};
 use crossterm::{
@@ -12,7 +14,6 @@ use crossterm::{
 };
 use std::{
     io::{self, Read, Write, stdout},
-    thread::sleep,
     time::Duration,
 };
 use track_payments_rust::payments::{AllPaymentsJsonLegacy, PaymentId};
@@ -46,7 +47,7 @@ fn main() -> io::Result<()> {
         );
         data = vec![0; days_in_month as usize];
         ignore = (now.day()..days_in_month as u32).collect::<Vec<u32>>();
-        for (id, det) in range {
+        for (id, _det) in range {
             let orders = all_payments.orders().get(id).unwrap();
             let mut sum = 0;
             for (orderid, orderdet) in orders {
