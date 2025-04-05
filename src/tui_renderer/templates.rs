@@ -269,7 +269,9 @@ pub fn bar_graph_horizontal_label(
         if value >= cutout {
             color = COLOR_BAD;
         }
-        let index_fmt = format!(" {:>2} ", index + 1).with(COLOR_TEXT).bold();
+        let index_fmt = format!(" {:>max_index_len$} ", index + 1)
+            .with(COLOR_TEXT)
+            .bold();
         let len = max_value.len();
         let tmp_fmt = format!("{:>len$}", format!("{:03}", values[index]));
         let tmp = tmp_fmt.len() - 2;
