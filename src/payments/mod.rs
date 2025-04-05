@@ -301,8 +301,6 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use crate::payments::json::AllPaymentsJson;
-
     use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
 
     #[test]
