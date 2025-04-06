@@ -248,7 +248,7 @@ fn bar_graph_horizontal_label_(
 
     if (max_height as usize) < values.len() {
         if allow_shrink {
-            let (data, ignored, _) = downscale_to_biggest_factor(values, ignored, max_height);
+            let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
             return bar_graph_horizontal_label_(
                 &data,
                 max_width,
@@ -256,13 +256,15 @@ fn bar_graph_horizontal_label_(
                 cutout,
                 &ignored,
                 allow_shrink,
-                downscaling_factor,
+                factor,
             );
         }
         return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
     }
 
-    let max_index_len = values.len().to_string().len();
+    let max_index_len = ((values.len() - 1) * downscaling_factor as usize + 1)
+        .to_string()
+        .len();
     let left_len = max_index_len + 2;
 
     let max_value = format!("{:03}", values.iter().max().unwrap_or(&0));
@@ -293,7 +295,8 @@ fn bar_graph_horizontal_label_(
         if value >= cutout {
             color = COLOR_BAD;
         }
-        let index_fmt = format!(" {:>max_index_len$} ", index + 1)
+        let index_val = index * downscaling_factor as usize + 1;
+        let index_fmt = format!(" {index_val:>max_index_len$} ",)
             .with(COLOR_TEXT)
             .bold();
         let len = max_value.len();
