@@ -218,17 +218,8 @@ pub fn bar_graph_horizontal_label(
     max_height: u32,
     cutout: u32,
     ignored: &[u32],
-    allow_shrink: bool,
 ) -> DrawnArea {
-    bar_graph_horizontal_label_(
-        values,
-        max_width,
-        max_height,
-        cutout,
-        ignored,
-        allow_shrink,
-        1,
-    )
+    bar_graph_horizontal_label_(values, max_width, max_height, cutout, ignored, 1)
 }
 
 fn bar_graph_horizontal_label_(
@@ -237,7 +228,6 @@ fn bar_graph_horizontal_label_(
     max_height: u32,
     cutout: u32,
     ignored: &[u32],
-    allow_shrink: bool,
     downscaling_factor: u32,
 ) -> DrawnArea {
     const MIN_GRAPH_SIZE: usize = 3;
@@ -247,19 +237,8 @@ fn bar_graph_horizontal_label_(
     }
 
     if (max_height as usize) < values.len() {
-        if allow_shrink {
-            let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
-            return bar_graph_horizontal_label_(
-                &data,
-                max_width,
-                max_height,
-                cutout,
-                &ignored,
-                allow_shrink,
-                factor,
-            );
-        }
-        return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
+        let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
+        return bar_graph_horizontal_label_(&data, max_width, max_height, cutout, &ignored, factor);
     }
 
     let max_index_len = (values.len() - 1) * downscaling_factor as usize + 1;
@@ -360,7 +339,7 @@ mod tests {
     #[test]
     pub fn horizontal_bar_chart_label() {
         let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[], true);
+        let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[]);
         assert_eq!(graph.area.len(), 7);
         assert_eq!(graph.width, 20);
         println!("\nHORIZONTAL BAR CHART LABEL:\n{}", graph.area.join("\n\r"));

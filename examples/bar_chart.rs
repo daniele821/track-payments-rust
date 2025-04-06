@@ -16,7 +16,10 @@ use std::{
     io::{self, Read, Write, stdout},
     time::Duration,
 };
-use track_payments_rust::payments::{AllPayments, PaymentId};
+use track_payments_rust::{
+    payments::{AllPayments, PaymentId},
+    tui::bar_graph_horizontal_label,
+};
 
 fn main() -> io::Result<()> {
     let mut data = vec![
@@ -115,14 +118,7 @@ fn render(data: &[u32], ignore: &[u32]) {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let graph = track_payments_rust::tui::bar_graph_horizontal_label(
-        data,
-        u32::from(width),
-        u32::from(height),
-        1000,
-        ignore,
-        true,
-    );
+    let graph = bar_graph_horizontal_label(data, width as u32, height as u32, 1000, ignore);
     let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
     print!("{}", box_sym[2]);
