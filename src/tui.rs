@@ -262,7 +262,7 @@ fn bar_graph_horizontal_label_(
         return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
     }
 
-    let max_index_len = ((values.len() - 1) * downscaling_factor as usize + 1);
+    let max_index_len = (values.len() - 1) * downscaling_factor as usize + 1;
     let max_index_len = max_index_len.to_string().len();
     let left_len = max_index_len + 2;
 
