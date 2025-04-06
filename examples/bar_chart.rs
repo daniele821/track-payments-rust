@@ -123,6 +123,11 @@ fn render(data: &[u32], ignore: &[u32], cutout: u32) {
     let graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
     let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
+    println!(
+        "cutout: {:.2} | length: {}\r",
+        cutout as f64 / 100.,
+        data.len()
+    );
     print!("{}", box_sym[2]);
     for _ in 0..width {
         print!("{}", box_sym[0]);
