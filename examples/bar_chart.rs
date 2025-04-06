@@ -59,6 +59,8 @@ fn main() -> io::Result<()> {
         }
     }
 
+    let cutout = 30_000 / data.len() as u32;
+
     enable_raw_mode()?;
 
     // Enable mouse capture
@@ -71,7 +73,7 @@ fn main() -> io::Result<()> {
         crossterm::cursor::MoveTo(0, 0),
     )?;
 
-    render(&data, &ignore);
+    render(&data, &ignore, cutout);
 
     let (mut x, mut y) = (0, 0);
     loop {
@@ -83,14 +85,14 @@ fn main() -> io::Result<()> {
                     }
                 }
                 Event::Resize(new_x, new_y) => {
-                    render(&data, &ignore);
+                    render(&data, &ignore, cutout);
                     (x, y) = (new_x, new_y);
                 }
                 _ => {}
             }
         }
         if crossterm::terminal::size().unwrap() != (x, y) {
-            render(&data, &ignore);
+            render(&data, &ignore, cutout);
             (x, y) = crossterm::terminal::size().unwrap();
         }
     }
@@ -106,7 +108,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn render(data: &[u32], ignore: &[u32]) {
+fn render(data: &[u32], ignore: &[u32], cutout: u32) {
     let white = &" ".on(Color::White).to_string();
     let white2 = &"  ".on(Color::White).to_string();
     let symbols = [
@@ -118,7 +120,7 @@ fn render(data: &[u32], ignore: &[u32]) {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let graph = bar_graph_horizontal_label(data, width as u32, height as u32, 1000, ignore);
+    let graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
     let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
     print!("{}", box_sym[2]);
