@@ -53,7 +53,7 @@ fn downscale_to_biggest_factor(
             compacted_ignored.push(i as u32);
             compacted_values.push(0);
         } else {
-            compacted_values.push(buffer.iter().sum::<u32>() / buffer.len() as u32);
+            compacted_values.push(buffer.iter().sum());
         }
         buffer.clear();
     }
@@ -82,8 +82,8 @@ pub fn bar_graph_vertical(
     }
 
     if values.len() > max_width as usize {
-        let (data, ignored, _) = downscale_to_biggest_factor(values, ignored, max_width);
-        return bar_graph_vertical(&data, max_width, max_height, cutout, &ignored);
+        let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_width);
+        return bar_graph_vertical(&data, max_width, max_height, cutout * factor, &ignored);
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
@@ -143,8 +143,8 @@ pub fn bar_graph_horizontal(
     }
 
     if values.len() > max_height as usize {
-        let (data, ignored, _) = downscale_to_biggest_factor(values, ignored, max_height);
-        return bar_graph_horizontal(&data, max_width, max_height, cutout, &ignored);
+        let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
+        return bar_graph_horizontal(&data, max_width, max_height, cutout * factor, &ignored);
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
@@ -238,7 +238,14 @@ fn bar_graph_horizontal_label_(
 
     if (max_height as usize) < values.len() {
         let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
-        return bar_graph_horizontal_label_(&data, max_width, max_height, cutout, &ignored, factor);
+        return bar_graph_horizontal_label_(
+            &data,
+            max_width,
+            max_height,
+            cutout * factor,
+            &ignored,
+            factor,
+        );
     }
 
     let max_index_len = (values.len() - 1) * downscaling_factor as usize + 1;
