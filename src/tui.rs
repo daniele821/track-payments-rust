@@ -86,7 +86,7 @@ pub fn bar_graph_horizontal(
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
-    let max = u32::max(1, *values.iter().max().unwrap_or(&0));
+    let max = u32::max(cutout, u32::max(1, *values.iter().max().unwrap_or(&0)));
     let len = values.len();
     let actual_height = max_height as usize / len * len;
     let factor = actual_height / len;
