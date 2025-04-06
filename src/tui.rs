@@ -317,11 +317,14 @@ mod tests {
     #[test]
     pub fn downscale_data() {
         let data = [1, 3, 5, 9, 10];
-        assert_eq!(vec![2, 7, 10], downscale_to_biggest_factor(&data, &[], 4).0);
+        assert_eq!(
+            vec![4, 14, 10],
+            downscale_to_biggest_factor(&data, &[], 4).0
+        );
 
         let data = [1, 3, 5, 0, 0, 7, 10, 0, 1];
         let ignored = [2, 3, 7];
-        let expected = (vec![2, 0, 3, 10, 1], vec![1], 2);
+        let expected = (vec![4, 0, 7, 10, 1], vec![1], 2);
         assert_eq!(expected, downscale_to_biggest_factor(&data, &ignored, 5));
     }
 
