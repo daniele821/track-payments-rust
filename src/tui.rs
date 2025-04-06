@@ -21,7 +21,6 @@ const COLOR_CUTOUT: Color = Color::Yellow;
 // https://en.wikipedia.org/wiki/Box-drawing_characters
 const STR_EMPTY: &str = " ";
 const STR_CUTOUT_VERT: &str = "╏";
-const STR_CUTOUT_HORIZ: &str = "╍";
 
 fn downscale_to_biggest_factor(
     values: &[u32],
@@ -68,67 +67,6 @@ pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> DrawnArea {
         lines.push(empty_line.clone());
     }
     DrawnArea::new(lines, width)
-}
-
-pub fn bar_graph_vertical(
-    values: &[u32],
-    max_width: u32,
-    max_height: u32,
-    cutout: u32,
-    ignored: &[u32],
-) -> DrawnArea {
-    if values.is_empty() || max_width == 0 || max_height == 0 {
-        return simple_rectangle(STR_EMPTY, max_width, max_height);
-    }
-
-    if values.len() > max_width as usize {
-        let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_width);
-        return bar_graph_vertical(&data, max_width, max_height, cutout * factor, &ignored);
-    }
-
-    let mut lines = Vec::with_capacity(max_height as usize);
-    let max = u32::max(1, *values.iter().max().unwrap_or(&0));
-    let len = values.len();
-    let actual_width = usize::max(len, max_width as usize / len * len);
-    let factor = actual_width / len;
-    let unit_heigh = f64::from(max_height) / f64::from(max);
-    let cached_spaces = STR_EMPTY.repeat(factor);
-    let cached_cutout = STR_CUTOUT_HORIZ
-        .repeat(factor)
-        .with(COLOR_CUTOUT)
-        .to_string();
-
-    let mut is_cutout_line;
-
-    for i in (1..=max_height).rev() {
-        let mut str = String::with_capacity(actual_width);
-        for (index, &j) in values.iter().enumerate() {
-            let mut cached = &cached_spaces;
-            is_cutout_line = false;
-            if f64::from(i - 1) >= f64::from(cutout) * unit_heigh
-                && f64::from(i - 2) < f64::from(cutout) * unit_heigh
-            {
-                cached = &cached_cutout;
-                is_cutout_line = true;
-            }
-            if ignored.contains(&(index as u32)) {
-                str.push_str(&cached_spaces.to_string().on(COLOR_EMPTY).to_string());
-            } else if f64::from(i - 1) < f64::from(j) * unit_heigh {
-                let mut color = COLOR_GOOD;
-                if j >= cutout {
-                    color = COLOR_BAD;
-                }
-                let tmp_str = cached.to_string().on(color).to_string();
-                str.push_str(&tmp_str);
-            } else if is_cutout_line && j >= cutout {
-                str.push_str(&cached.clone().on(COLOR_BAD).to_string());
-            } else {
-                str.push_str(cached);
-            }
-        }
-        lines.push(str);
-    }
-    DrawnArea::new(lines, actual_width as u32)
 }
 
 pub fn bar_graph_horizontal(
@@ -309,10 +247,7 @@ fn bar_graph_horizontal_label_(
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        bar_graph_horizontal, bar_graph_horizontal_label, bar_graph_vertical,
-        downscale_to_biggest_factor,
-    };
+    use super::{bar_graph_horizontal, bar_graph_horizontal_label, downscale_to_biggest_factor};
 
     #[test]
     pub fn downscale_data() {
@@ -326,15 +261,6 @@ mod tests {
         let ignored = [2, 3, 7];
         let expected = (vec![4, 0, 7, 10, 1], vec![1], 2);
         assert_eq!(expected, downscale_to_biggest_factor(&data, &ignored, 5));
-    }
-
-    #[test]
-    pub fn vertical_bar_chart() {
-        let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_vertical(&data, 20, 10, 10, &[]);
-        assert_eq!(graph.area.len(), 10);
-        assert_eq!(graph.width, 14);
-        println!("\nVERICAL BAR CHART:\n{}", graph.area.join("\n\r"));
     }
 
     #[test]
