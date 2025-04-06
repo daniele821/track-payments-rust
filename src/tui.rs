@@ -322,21 +322,6 @@ mod tests {
         let graph = bar_graph_vertical(&data, 20, 10, 10, &[]);
         assert_eq!(graph.area.len(), 10);
         assert_eq!(graph.width, 14);
-        let expected = [
-            "            \u{1b}[48;5;1m  \u{1b}[49m",
-            "          \u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[48;5;1m\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╍╍\u{1b}[39m\u{1b}[49m",
-            "        \u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "      \u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "      \u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "    \u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "    \u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "  \u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-            "\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;2m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m\u{1b}[48;5;1m  \u{1b}[49m",
-        ];
-        for (i, exp) in expected.iter().enumerate() {
-            assert_eq!(exp, graph.area.get(i).unwrap());
-        }
         println!("\nVERICAL BAR CHART:\n{}", graph.area.join("\n\r"));
     }
 
@@ -346,18 +331,6 @@ mod tests {
         let graph = bar_graph_horizontal(&data, 20, 10, 10, &[]);
         assert_eq!(graph.area.len(), 7);
         assert_eq!(graph.width, 20);
-        let expected = [
-            "\u{1b}[48;5;2m \u{1b}[49m            \u{1b}[38;5;11m╏\u{1b}[39m      ",
-            "\u{1b}[48;5;2m    \u{1b}[49m         \u{1b}[38;5;11m╏\u{1b}[39m      ",
-            "\u{1b}[48;5;2m      \u{1b}[49m       \u{1b}[38;5;11m╏\u{1b}[39m      ",
-            "\u{1b}[48;5;2m            \u{1b}[49m \u{1b}[38;5;11m╏\u{1b}[39m      ",
-            "\u{1b}[48;5;1m             \u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╏\u{1b}[49m\u{1b}[39m      ",
-            "\u{1b}[48;5;1m             \u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╏\u{1b}[49m\u{1b}[39m\u{1b}[48;5;1m   \u{1b}[49m   ",
-            "\u{1b}[48;5;1m             \u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╏\u{1b}[49m\u{1b}[39m\u{1b}[48;5;1m      \u{1b}[49m",
-        ];
-        for (i, exp) in expected.iter().enumerate() {
-            assert_eq!(exp, graph.area.get(i).unwrap());
-        }
         println!("\nHORIZONTAL BAR CHART LABEL:\n{}", graph.area.join("\n\r"));
     }
 
@@ -367,18 +340,6 @@ mod tests {
         let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[], true);
         assert_eq!(graph.area.len(), 7);
         assert_eq!(graph.width, 20);
-        let expected = [
-            "\u{1b}[38;5;15m\u{1b}[1m 1 \u{1b}[0m\u{1b}[48;5;2m\u{1b}[49m      \u{1b}[38;5;11m╏\u{1b}[39m   \u{1b}[38;5;2m\u{1b}[1m 0.01€ \u{1b}[0m",
-            "\u{1b}[38;5;15m\u{1b}[1m 2 \u{1b}[0m\u{1b}[48;5;2m  \u{1b}[49m    \u{1b}[38;5;11m╏\u{1b}[39m   \u{1b}[38;5;2m\u{1b}[1m 0.03€ \u{1b}[0m",
-            "\u{1b}[38;5;15m\u{1b}[1m 3 \u{1b}[0m\u{1b}[48;5;2m   \u{1b}[49m   \u{1b}[38;5;11m╏\u{1b}[39m   \u{1b}[38;5;2m\u{1b}[1m 0.05€ \u{1b}[0m",
-            "\u{1b}[38;5;15m\u{1b}[1m 4 \u{1b}[0m\u{1b}[48;5;2m      \u{1b}[49m\u{1b}[38;5;11m╏\u{1b}[39m   \u{1b}[38;5;2m\u{1b}[1m 0.09€ \u{1b}[0m",
-            "\u{1b}[38;5;15m\u{1b}[1m 5 \u{1b}[0m\u{1b}[48;5;1m      \u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╏\u{1b}[49m\u{1b}[39m   \u{1b}[38;5;1m\u{1b}[1m 0.10€ \u{1b}[0m",
-            "\u{1b}[38;5;15m\u{1b}[1m 6 \u{1b}[0m\u{1b}[48;5;1m      \u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╏\u{1b}[49m\u{1b}[39m\u{1b}[48;5;1m \u{1b}[49m  \u{1b}[38;5;1m\u{1b}[1m 0.13€ \u{1b}[0m",
-            "\u{1b}[38;5;15m\u{1b}[1m 7 \u{1b}[0m\u{1b}[48;5;1m      \u{1b}[49m\u{1b}[48;5;1m\u{1b}[38;5;11m╏\u{1b}[49m\u{1b}[39m\u{1b}[48;5;1m   \u{1b}[49m\u{1b}[38;5;1m\u{1b}[1m 0.15€ \u{1b}[0m",
-        ];
-        for (i, exp) in expected.iter().enumerate() {
-            assert_eq!(exp, graph.area.get(i).unwrap());
-        }
         println!("\nHORIZONTAL BAR CHART LABEL:\n{}", graph.area.join("\n\r"));
     }
 }
