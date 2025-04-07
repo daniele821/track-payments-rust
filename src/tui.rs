@@ -261,7 +261,7 @@ mod tests {
     #[test]
     pub fn horizontal_bar_chart() {
         let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_horizontal(&data, 20, 10, 0.1, &[]);
+        let graph = bar_graph_horizontal(&data, 20, 10, 10.0, &[]);
         assert_eq!(graph.len(), 7);
         println!("\n{}", graph.join("\n\r"));
     }
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     pub fn horizontal_bar_chart_label() {
         let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_horizontal_label(&data, 20, 10, 0.10, &[]);
+        let graph = bar_graph_horizontal_label(&data, 20, 10, 10.0, &[]);
         assert_eq!(graph.len(), 7);
         println!("\n{}", graph.join("\n\r"));
     }
