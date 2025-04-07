@@ -121,7 +121,6 @@ fn render(data: &[u32], ignore: &[u32], cutout: u32) {
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
     let graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
-    let width = graph.width;
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
     println!(
         "cutout: {:.2} | length: {}\r",
@@ -133,8 +132,8 @@ fn render(data: &[u32], ignore: &[u32], cutout: u32) {
         print!("{}", box_sym[0]);
     }
     print!("{}\n\r", box_sym[3]);
-    (0..graph.area.len()).for_each(|line| {
-        print!("{}{}{}\n\r", box_sym[1], graph.area[line], box_sym[1]);
+    (0..graph.len()).for_each(|line| {
+        print!("{}{}{}\n\r", box_sym[1], graph[line], box_sym[1]);
     });
     print!("{}", box_sym[4]);
     for _ in 0..width {
