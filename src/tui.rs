@@ -255,7 +255,7 @@ mod tests {
         let data = [1, 3, 5, 9, 10, 13, 15];
         let graph = bar_graph_horizontal(&data, 20, 10, 10, &[]);
         assert_eq!(graph.len(), 7);
-        println!("\nHORIZONTAL BAR CHART LABEL:\n{}", graph.join("\n\r"));
+        println!("\n{}", graph.join("\n\r"));
     }
 
     #[test]
@@ -263,6 +263,6 @@ mod tests {
         let data = [1, 3, 5, 9, 10, 13, 15];
         let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[]);
         assert_eq!(graph.len(), 7);
-        println!("\nHORIZONTAL BAR CHART LABEL:\n{}", graph.join("\n\r"));
+        println!("\n{}", graph.join("\n\r"));
     }
 }
