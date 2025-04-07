@@ -61,7 +61,7 @@ pub fn bar_graph_horizontal(
     values: &[u32],
     max_width: u32,
     max_height: u32,
-    cutout: u32,
+    cutout: f64,
     ignored: &[u32],
 ) -> Vec<String> {
     if values.is_empty() || max_width == 0 || max_height == 0 {
@@ -70,18 +70,25 @@ pub fn bar_graph_horizontal(
 
     if values.len() > max_height as usize {
         let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
-        return bar_graph_horizontal(&data, max_width, max_height, cutout * factor, &ignored);
+        return bar_graph_horizontal(
+            &data,
+            max_width,
+            max_height,
+            cutout * factor as f64,
+            &ignored,
+        );
     }
 
     let mut lines = Vec::with_capacity(max_height as usize);
-    let max = u32::max(cutout, u32::max(1, *values.iter().max().unwrap_or(&0)));
+    let cutout_u32 = cutout as u32;
+    let max = u32::max(cutout_u32, u32::max(1, *values.iter().max().unwrap_or(&0)));
     let len = values.len();
     let actual_height = max_height as usize / len * len;
     let factor = actual_height / len;
     let unit_width = f64::from(max_width) / f64::from(max);
-    let mut cutout_line = (f64::from(cutout) * unit_width) as usize;
+    let mut cutout_line = (cutout * unit_width) as usize;
 
-    if cutout_line == max_width as usize && max == cutout {
+    if cutout_line == max_width as usize && max == cutout_u32 {
         cutout_line -= 1;
     }
 
@@ -94,7 +101,7 @@ pub fn bar_graph_horizontal(
             continue;
         }
         let mut color = COLOR_GOOD;
-        if val >= cutout {
+        if val >= cutout_u32 {
             color = COLOR_BAD;
         }
         let bar_len = (f64::from(val) * unit_width).trunc() as usize;
@@ -142,7 +149,7 @@ pub fn bar_graph_horizontal_label(
     values: &[u32],
     max_width: u32,
     max_height: u32,
-    cutout: u32,
+    cutout: f64,
     ignored: &[u32],
 ) -> Vec<String> {
     bar_graph_horizontal_label_(values, max_width, max_height, cutout, ignored, 1)
@@ -152,7 +159,7 @@ fn bar_graph_horizontal_label_(
     values: &[u32],
     max_width: u32,
     max_height: u32,
-    cutout: u32,
+    cutout: f64,
     ignored: &[u32],
     downscaling_factor: u32,
 ) -> Vec<String> {
@@ -168,7 +175,7 @@ fn bar_graph_horizontal_label_(
             &data,
             max_width,
             max_height,
-            cutout * factor,
+            cutout * factor as f64,
             &ignored,
             factor,
         );
@@ -185,6 +192,7 @@ fn bar_graph_horizontal_label_(
     let right_len = max_value_len + 2;
 
     let label_len = left_len + right_len;
+    let cutout_u32 = cutout as u32;
 
     if (max_width as usize) < label_len + MIN_GRAPH_SIZE {
         return bar_graph_horizontal(values, max_width, max_height, cutout, ignored);
@@ -203,7 +211,7 @@ fn bar_graph_horizontal_label_(
     let e4 = STR_EMPTY.repeat(left_len - 2);
     for (index, &value) in values.iter().enumerate() {
         let mut color = COLOR_GOOD;
-        if value >= cutout {
+        if value >= cutout_u32 {
             color = COLOR_BAD;
         }
         let index_val = index * downscaling_factor as usize + 1;
@@ -253,7 +261,7 @@ mod tests {
     #[test]
     pub fn horizontal_bar_chart() {
         let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_horizontal(&data, 20, 10, 10, &[]);
+        let graph = bar_graph_horizontal(&data, 20, 10, 0.1, &[]);
         assert_eq!(graph.len(), 7);
         println!("\n{}", graph.join("\n\r"));
     }
@@ -261,7 +269,7 @@ mod tests {
     #[test]
     pub fn horizontal_bar_chart_label() {
         let data = [1, 3, 5, 9, 10, 13, 15];
-        let graph = bar_graph_horizontal_label(&data, 20, 10, 10, &[]);
+        let graph = bar_graph_horizontal_label(&data, 20, 10, 0.10, &[]);
         assert_eq!(graph.len(), 7);
         println!("\n{}", graph.join("\n\r"));
     }

@@ -59,7 +59,7 @@ fn main() -> io::Result<()> {
         }
     }
 
-    let cutout = 30_000 / data.len() as u32;
+    let cutout = 30_000.0 / data.len() as f64;
 
     enable_raw_mode()?;
 
@@ -108,7 +108,7 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn render(data: &[u32], ignore: &[u32], cutout: u32) {
+fn render(data: &[u32], ignore: &[u32], cutout: f64) {
     let white = &" ".on(Color::White).to_string();
     let white2 = &"  ".on(Color::White).to_string();
     let symbols = [
