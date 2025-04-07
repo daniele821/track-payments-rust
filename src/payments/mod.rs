@@ -52,8 +52,8 @@ pub struct AllPayments {
 pub enum PaymentError {
     PaymentDuplicated(PaymentId),
     PaymentNotFound(PaymentId),
-    OrderDuplicated(OrderId),
-    OrderNotFound(OrderId),
+    OrderDuplicated(PaymentId, OrderId),
+    OrderNotFound(PaymentId, OrderId),
     MissingElements(ValueSet),
     GenericError(String),
 }
@@ -218,11 +218,14 @@ impl AllPayments {
         let order_map = &mut self
             .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?
+            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?
             .orders;
 
         if order_map.contains_key(&orderid) {
-            return Err(PaymentError::OrderDuplicated(orderid.clone()));
+            return Err(PaymentError::OrderDuplicated(
+                payid.clone(),
+                orderid.clone(),
+            ));
         }
         orderid
             .check_missing_elements(&self.value_set)
@@ -241,7 +244,7 @@ impl AllPayments {
         let paydetail_mut = self
             .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?;
+            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?;
         paydetail
             .check_missing_elements(&self.value_set)
             .map_err(PaymentError::MissingElements)?;
@@ -260,11 +263,11 @@ impl AllPayments {
         let order_map = &mut self
             .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?
+            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?
             .orders;
         let orderdetail_mut = order_map
             .get_mut(orderid)
-            .ok_or(PaymentError::OrderNotFound(orderid.clone()))?;
+            .ok_or_else(|| PaymentError::OrderNotFound(payid.clone(), orderid.clone()))?;
         orderid
             .check_missing_elements(&self.value_set)
             .map_err(PaymentError::MissingElements)?;
@@ -278,7 +281,7 @@ impl AllPayments {
         self.payments
             .remove(payid)
             .map(|_| {})
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))
+            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))
     }
 
     pub fn remove_order(
@@ -289,12 +292,12 @@ impl AllPayments {
         let order_map = &mut self
             .payments
             .get_mut(payid)
-            .ok_or(PaymentError::PaymentNotFound(payid.clone()))?
+            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?
             .orders;
         order_map
             .remove(orderid)
             .map(|_| ())
-            .ok_or(PaymentError::OrderNotFound(orderid.clone()))
+            .ok_or_else(|| PaymentError::OrderNotFound(payid.clone(), orderid.clone()))
     }
 }
 
