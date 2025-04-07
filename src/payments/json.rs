@@ -1,7 +1,7 @@
 use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, ValueSet};
 use crate::time::FakeUtcTime;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
 
@@ -79,7 +79,7 @@ impl AllPaymentsJson {
 
             for order_api in orders {
                 let item = order_api.0.item().clone();
-                let unit_price = *order_api.0.unit_price();
+                let unit_price = *order_api.1.unit_price();
                 let quantity = *order_api.1.quantity();
                 let order = OrderJson {
                     item,
@@ -125,39 +125,12 @@ impl AllPaymentsJson {
                 let item = order.item.clone();
                 let unitprice = order.unit_price;
                 let quantity = order.quantity;
-                let orderid = OrderId::new(item, unitprice);
-                let orderdetails = OrderDetail::new(quantity);
+                let orderid = OrderId::new(item);
+                let orderdetails = OrderDetail::new(unitprice, quantity);
                 all_payments_api.add_order(&payid, orderid, orderdetails)?;
             }
         }
         Ok(all_payments_api)
-    }
-
-    pub fn convert_to_valid_legacy(&mut self) {
-        for payment in &mut self.payments {
-            let mut fixed_orders = BTreeMap::<String, (u32, u32)>::new();
-            for order in &mut payment.orders {
-                let mut final_price = order.unit_price;
-                let mut final_quantity = order.quantity;
-                if let Some(&(price, quant)) = fixed_orders.get(&order.item) {
-                    if final_price == price {
-                        final_quantity += quant;
-                    } else {
-                        final_price = final_price * final_quantity + price * quant;
-                        final_quantity = 1;
-                    }
-                }
-                fixed_orders.insert(order.item.clone(), (final_price, final_quantity));
-            }
-            payment.orders.clear();
-            for (item, (unit_price, quantity)) in fixed_orders {
-                payment.orders.push(OrderJson {
-                    item: item.to_string(),
-                    unit_price,
-                    quantity,
-                });
-            }
-        }
     }
 }
 
@@ -188,38 +161,5 @@ mod tests {
         let all_payments3 = AllPaymentsJson::from_api(&all_payment_api).unwrap();
 
         assert_eq!(all_payments2, all_payments3);
-    }
-
-    #[test]
-    fn allpayments_legacy_json_fixed() {
-        let json_string = r#"
-{ "valueSet": { "cities": ["New York", "London"], "shops": ["Shop A", "Shop B"],
-    "paymentMethods": ["Credit Card", "Cash"], "items": ["Apple", "Banana"] },
-  "payments": [
-    { "date": "2024/03/27 12:34", "city": "New York", "paymentMethod": "Credit Card", "shop": "Shop A",
-      "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
-    { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
-      "orders": [ { "item": "Apples", "unitPrice": 150, "quantity": 1 },
-                  { "item": "Apples", "unitPrice": 50, "quantity": 3 },
-                  { "item": "Banana", "unitPrice": 100, "quantity": 2 },
-                  { "item": "Banana", "unitPrice": 100, "quantity": 1 }
-      ] } ] }
-        "#;
-        let json_string_fixed = r#"
-{ "valueSet": { "cities": ["New York", "London"], "shops": ["Shop A", "Shop B"],
-    "paymentMethods": ["Credit Card", "Cash"], "items": ["Apple", "Banana"] },
-  "payments": [
-    { "date": "2024/03/27 12:34", "city": "New York", "paymentMethod": "Credit Card", "shop": "Shop A",
-      "orders": [ { "item": "Apple", "unitPrice": 100, "quantity": 2 } ] },
-    { "date": "2024/03/28 09:15", "city": "London", "paymentMethod": "Cash", "shop": "Shop B",
-      "orders": [ { "item": "Apples", "unitPrice": 300, "quantity": 1 },
-                  { "item": "Banana", "unitPrice": 100, "quantity": 3 }
-      ] } ] }
-        "#;
-        let mut all_payments = AllPaymentsJson::from_json(json_string).unwrap();
-        all_payments.convert_to_valid_legacy();
-        let all_payments_fixed = AllPaymentsJson::from_json(json_string_fixed).unwrap();
-
-        assert_eq!(all_payments, all_payments_fixed);
     }
 }

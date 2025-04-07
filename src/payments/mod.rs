@@ -16,11 +16,11 @@ pub struct ValueSet {
 #[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderId {
     item: String,
-    unit_price: u32,
 }
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct OrderDetail {
+    unit_price: u32,
     quantity: u32,
 }
 
@@ -89,8 +89,8 @@ impl ValueSet {
 }
 
 impl OrderId {
-    pub fn new(item: String, unit_price: u32) -> Self {
-        Self { item, unit_price }
+    pub fn new(item: String) -> Self {
+        Self { item }
     }
 
     pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<(), ValueSet> {
@@ -102,15 +102,18 @@ impl OrderId {
     }
 }
 
-impl OrderDetail {
-    pub fn new(quantity: u32) -> Self {
-        Self { quantity }
+impl From<String> for OrderId {
+    fn from(value: String) -> Self {
+        Self::new(value)
     }
 }
 
-impl From<u32> for OrderDetail {
-    fn from(value: u32) -> Self {
-        Self::new(value)
+impl OrderDetail {
+    pub fn new(unit_price: u32, quantity: u32) -> Self {
+        Self {
+            unit_price,
+            quantity,
+        }
     }
 }
 
@@ -124,8 +127,8 @@ impl PayOrdersDetail {
 
     pub fn calcualte_total_price(&self) -> u32 {
         self.orders
-            .iter()
-            .map(|(id, det)| id.unit_price * det.quantity)
+            .values()
+            .map(|det| det.unit_price * det.quantity)
             .sum()
     }
 }
@@ -179,12 +182,8 @@ impl AllPayments {
             .to_api()
     }
 
-    pub fn to_json(&self, fmt: bool, backcompatible: bool) -> Result<String, PaymentError> {
-        let mut all_payments_json = AllPaymentsJson::from_api(self)?;
-        if backcompatible {
-            all_payments_json.convert_to_valid_legacy();
-        }
-        all_payments_json
+    pub fn to_json(&self, fmt: bool) -> Result<String, PaymentError> {
+        AllPaymentsJson::from_api(self)?
             .dump_json(fmt)
             .map_err(PaymentError::GenericError)
     }
@@ -316,9 +315,9 @@ mod tests {
             String::from("Market"),
             String::from("Cash"),
         );
-        let orderid = OrderId::new(String::from("Apple"), 120);
-        let orderdetail = OrderDetail::new(2);
-        let orderdetail2 = OrderDetail::new(3);
+        let orderid = OrderId::new(String::from("Apple"));
+        let orderdetail = OrderDetail::new(120, 2);
+        let orderdetail2 = OrderDetail::new(120, 3);
         let mut values = ValueSet::new();
         values.add_values(
             vec![String::from("London"), String::from("Paris")],
@@ -349,7 +348,7 @@ mod tests {
         println!("INSERT ORDER: {all_payments:?}");
 
         // json conversion
-        let json = all_payments.to_json(false, true).unwrap();
+        let json = all_payments.to_json(false).unwrap();
         let all_payments2 = AllPayments::from_json(&json).unwrap();
         assert_eq!(all_payments, all_payments2);
         println!("JSON: {json}");

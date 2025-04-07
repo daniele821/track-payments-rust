@@ -52,8 +52,8 @@ fn main() -> io::Result<()> {
         for (id, _det) in range {
             let orders = all_payments.payments().get(id).unwrap().orders();
             let mut sum = 0;
-            for (orderid, orderdet) in orders {
-                sum += orderid.unit_price() * orderdet.quantity();
+            for orderdet in orders.values() {
+                sum += orderdet.unit_price() * orderdet.quantity();
             }
             data[id.date().get_fields().unwrap().day0() as usize] += sum;
         }
