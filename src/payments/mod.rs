@@ -50,10 +50,10 @@ pub struct AllPayments {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum PaymentError {
-    OrderDuplicated(OrderId),
-    OrderNotFound(OrderId),
     PaymentDuplicated(PaymentId),
     PaymentNotFound(PaymentId),
+    OrderDuplicated(OrderId),
+    OrderNotFound(OrderId),
     MissingElements(ValueSet),
     GenericError(String),
 }
