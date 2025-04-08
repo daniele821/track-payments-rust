@@ -1,7 +1,10 @@
 #![deprecated]
 
-use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, ValueSet};
-use crate::time::FakeUtcTime;
+use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
+use crate::{
+    error::{Error, Result},
+    time::FakeUtcTime,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -42,19 +45,19 @@ pub struct AllPaymentsJson {
 }
 
 impl AllPaymentsJson {
-    pub fn from_json(json_str: &str) -> Result<Self, String> {
-        serde_json::from_str(json_str).map_err(|err| err.to_string())
+    pub fn from_json(json_str: &str) -> Result<Self> {
+        serde_json::from_str(json_str).map_err(Error::from_generic)
     }
 
-    pub fn dump_json(&self, fmt: bool) -> Result<String, String> {
+    pub fn dump_json(&self, fmt: bool) -> Result<String> {
         if fmt {
-            serde_json::to_string_pretty(self).map_err(|err| err.to_string())
+            serde_json::to_string_pretty(self).map_err(Error::from_generic)
         } else {
-            serde_json::to_string(self).map_err(|err| err.to_string())
+            serde_json::to_string(self).map_err(Error::from_generic)
         }
     }
 
-    pub fn from_api(self_api: &AllPayments) -> Result<Self, PaymentError> {
+    pub fn from_api(self_api: &AllPayments) -> Result<Self> {
         let values = ValueSetJson {
             cities: self_api.value_set().cities().clone(),
             shops: self_api.value_set().shops().clone(),
@@ -63,10 +66,7 @@ impl AllPaymentsJson {
         };
         let mut payments = vec![];
         for payment_api in self_api.payments() {
-            let date = (*payment_api.0.date())
-                .format_str(DATE_FORMAT)
-                .map_err(|err| err.to_string())
-                .map_err(PaymentError::GenericError)?;
+            let date = (*payment_api.0.date()).format_str(DATE_FORMAT)?;
             let city = payment_api.1.payment_details.city().clone();
             let shop = payment_api.1.payment_details.shop().clone();
             let method = payment_api.1.payment_details.method().clone();
@@ -102,7 +102,7 @@ impl AllPaymentsJson {
         })
     }
 
-    pub fn to_api(&self) -> Result<AllPayments, PaymentError> {
+    pub fn to_api(&self) -> Result<AllPayments> {
         let mut all_payments_api = AllPayments::new();
         let mut values_api = ValueSet::new();
         values_api.add_values(
@@ -114,9 +114,7 @@ impl AllPaymentsJson {
         all_payments_api.add_values(values_api);
 
         for payment in &self.payments {
-            let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)
-                .map_err(|err| err.to_string())
-                .map_err(PaymentError::GenericError)?;
+            let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)?;
             let payid = PaymentId::new(date);
             let city = payment.city.clone();
             let shop = payment.shop.clone();

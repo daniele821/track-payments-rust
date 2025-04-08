@@ -1,6 +1,9 @@
 mod json;
 
-use crate::time::FakeUtcTime;
+use crate::{
+    error::{Error, Result},
+    time::FakeUtcTime,
+};
 use derive_getters::Getters;
 use json::AllPaymentsJson;
 use std::collections::{BTreeMap, BTreeSet};
@@ -48,16 +51,6 @@ pub struct AllPayments {
     payments: BTreeMap<PaymentId, PayOrdersDetail>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum PaymentError {
-    PaymentDuplicated(PaymentId),
-    PaymentNotFound(PaymentId),
-    OrderDuplicated(PaymentId, OrderId),
-    OrderNotFound(PaymentId, OrderId),
-    MissingElements(ValueSet),
-    GenericError(String),
-}
-
 impl ValueSet {
     pub fn new() -> Self {
         Self::default()
@@ -93,12 +86,16 @@ impl OrderId {
         Self { item }
     }
 
-    pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<(), ValueSet> {
+    pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<()> {
         let mut values = ValueSet::new();
         if !valid_values.items.contains(&self.item) {
             values.add_values(vec![], vec![], vec![], vec![self.item.clone()]);
         }
-        values.is_empty().then_some(()).ok_or(values)
+        values
+            .is_empty()
+            .then_some(())
+            .ok_or(values)
+            .map_err(Error::MissingElements)
     }
 }
 
@@ -156,7 +153,7 @@ impl PaymentDetail {
         Self { city, shop, method }
     }
 
-    pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<(), ValueSet> {
+    pub fn check_missing_elements(&self, valid_values: &ValueSet) -> Result<()> {
         let mut values = ValueSet::new();
         if !valid_values.cities.contains(&self.city) {
             values.add_values(vec![self.city.clone()], vec![], vec![], vec![]);
@@ -167,7 +164,11 @@ impl PaymentDetail {
         if !valid_values.methods.contains(&self.method) {
             values.add_values(vec![], vec![], vec![self.method.clone()], vec![]);
         }
-        values.is_empty().then_some(()).ok_or(values)
+        values
+            .is_empty()
+            .then_some(())
+            .ok_or(values)
+            .map_err(Error::MissingElements)
     }
 }
 
@@ -176,33 +177,23 @@ impl AllPayments {
         Self::default()
     }
 
-    pub fn from_json(json_str: &str) -> Result<Self, PaymentError> {
-        AllPaymentsJson::from_json(json_str)
-            .map_err(PaymentError::GenericError)?
-            .to_api()
+    pub fn from_json(json_str: &str) -> Result<Self> {
+        AllPaymentsJson::from_json(json_str)?.to_api()
     }
 
-    pub fn to_json(&self, fmt: bool) -> Result<String, PaymentError> {
-        AllPaymentsJson::from_api(self)?
-            .dump_json(fmt)
-            .map_err(PaymentError::GenericError)
+    pub fn to_json(&self, fmt: bool) -> Result<String> {
+        AllPaymentsJson::from_api(self)?.dump_json(fmt)
     }
 
     pub fn add_values(&mut self, new_values: ValueSet) {
         self.value_set.extend(new_values);
     }
 
-    pub fn add_payment(
-        &mut self,
-        payid: PaymentId,
-        paydetail: PaymentDetail,
-    ) -> Result<(), PaymentError> {
+    pub fn add_payment(&mut self, payid: PaymentId, paydetail: PaymentDetail) -> Result<()> {
         if self.payments.contains_key(&payid) {
-            return Err(PaymentError::PaymentDuplicated(payid));
+            return Err(Error::PaymentDuplicated(payid));
         }
-        paydetail
-            .check_missing_elements(&self.value_set)
-            .map_err(PaymentError::MissingElements)?;
+        paydetail.check_missing_elements(&self.value_set)?;
 
         assert!(self.payments.insert(payid, paydetail.into()).is_none());
 
@@ -214,40 +205,29 @@ impl AllPayments {
         payid: &PaymentId,
         orderid: OrderId,
         orderdetail: OrderDetail,
-    ) -> Result<(), PaymentError> {
+    ) -> Result<()> {
         let order_map = &mut self
             .payments
             .get_mut(payid)
-            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?
+            .ok_or_else(|| Error::PaymentNotFound(payid.clone()))?
             .orders;
 
         if order_map.contains_key(&orderid) {
-            return Err(PaymentError::OrderDuplicated(
-                payid.clone(),
-                orderid.clone(),
-            ));
+            return Err(Error::OrderDuplicated(payid.clone(), orderid.clone()));
         }
-        orderid
-            .check_missing_elements(&self.value_set)
-            .map_err(PaymentError::MissingElements)?;
+        orderid.check_missing_elements(&self.value_set)?;
 
         assert!(order_map.insert(orderid, orderdetail).is_none());
 
         Ok(())
     }
 
-    pub fn modify_payment(
-        &mut self,
-        payid: &PaymentId,
-        paydetail: PaymentDetail,
-    ) -> Result<(), PaymentError> {
+    pub fn modify_payment(&mut self, payid: &PaymentId, paydetail: PaymentDetail) -> Result<()> {
         let paydetail_mut = self
             .payments
             .get_mut(payid)
-            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?;
-        paydetail
-            .check_missing_elements(&self.value_set)
-            .map_err(PaymentError::MissingElements)?;
+            .ok_or_else(|| Error::PaymentNotFound(payid.clone()))?;
+        paydetail.check_missing_elements(&self.value_set)?;
 
         paydetail_mut.payment_details = paydetail;
 
@@ -259,45 +239,39 @@ impl AllPayments {
         payid: &PaymentId,
         orderid: &OrderId,
         orderdetail: OrderDetail,
-    ) -> Result<(), PaymentError> {
+    ) -> Result<()> {
         let order_map = &mut self
             .payments
             .get_mut(payid)
-            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?
+            .ok_or_else(|| Error::PaymentNotFound(payid.clone()))?
             .orders;
         let orderdetail_mut = order_map
             .get_mut(orderid)
-            .ok_or_else(|| PaymentError::OrderNotFound(payid.clone(), orderid.clone()))?;
-        orderid
-            .check_missing_elements(&self.value_set)
-            .map_err(PaymentError::MissingElements)?;
+            .ok_or_else(|| Error::OrderNotFound(payid.clone(), orderid.clone()))?;
+        orderid.check_missing_elements(&self.value_set)?;
 
         *orderdetail_mut = orderdetail;
 
         Ok(())
     }
 
-    pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<(), PaymentError> {
+    pub fn remove_payment(&mut self, payid: &PaymentId) -> Result<()> {
         self.payments
             .remove(payid)
             .map(|_| {})
-            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))
+            .ok_or_else(|| Error::PaymentNotFound(payid.clone()))
     }
 
-    pub fn remove_order(
-        &mut self,
-        payid: &PaymentId,
-        orderid: &OrderId,
-    ) -> Result<(), PaymentError> {
+    pub fn remove_order(&mut self, payid: &PaymentId, orderid: &OrderId) -> Result<()> {
         let order_map = &mut self
             .payments
             .get_mut(payid)
-            .ok_or_else(|| PaymentError::PaymentNotFound(payid.clone()))?
+            .ok_or_else(|| Error::PaymentNotFound(payid.clone()))?
             .orders;
         order_map
             .remove(orderid)
             .map(|_| ())
-            .ok_or_else(|| PaymentError::OrderNotFound(payid.clone(), orderid.clone()))
+            .ok_or_else(|| Error::OrderNotFound(payid.clone(), orderid.clone()))
     }
 }
 
