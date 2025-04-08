@@ -221,7 +221,7 @@ fn bar_graph_horizontal_label_(
         let len = max_value.len();
         let tmp_fmt = format!("{:>len$}", format!("{:03}", values[index]));
         let tmp = tmp_fmt.len() - 2;
-        let value_fmt = format!("{}.{}\u{20ac} ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
+        let value_fmt = format!("{}.{}€ ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
         let value_fmt = value_fmt.with(color).bold();
         if let Some(line) = graph.get_mut(index * factor) {
             if ignored.contains(&(index as u32)) {
