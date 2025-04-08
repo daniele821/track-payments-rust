@@ -1,3 +1,5 @@
+#![deprecated]
+
 use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentError, PaymentId, ValueSet};
 use crate::time::FakeUtcTime;
 use serde::{Deserialize, Serialize};

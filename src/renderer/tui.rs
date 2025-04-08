@@ -1,3 +1,5 @@
+#![deprecated]
+
 use crossterm::style::{Color, Stylize};
 use derive_getters::Getters;
 
