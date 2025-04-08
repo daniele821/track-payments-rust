@@ -13,12 +13,12 @@ use crossterm::{
     },
 };
 use std::{
-    io::{self, Read, Write, stdout},
+    io::{self, Read, stdout},
     time::Duration,
 };
 use track_payments_rust::{
     payments::{AllPayments, PaymentId},
-    tui::bar_graph_horizontal_label,
+    renderer::{render_lines, tui::bar_graph_horizontal_label},
 };
 
 fn main() -> io::Result<()> {
@@ -120,21 +120,25 @@ fn render(data: &[u32], ignore: &[u32], cutout: f64) {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
+    let mut graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
+
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
-    println!("cutout: {:.2} | length: {}\r", cutout / 100., data.len());
-    print!("{}", box_sym[2]);
-    for _ in 0..width {
-        print!("{}", box_sym[0]);
-    }
-    print!("{}\n\r", box_sym[3]);
-    (0..graph.len()).for_each(|line| {
-        print!("{}{}{}\n\r", box_sym[1], graph[line], box_sym[1]);
+
+    graph.iter_mut().for_each(|elem| {
+        *elem = format!("{}{elem}{}", box_sym[1], box_sym[1]);
     });
-    print!("{}", box_sym[4]);
-    for _ in 0..width {
-        print!("{}", box_sym[0]);
-    }
-    print!("{}", box_sym[5]);
-    std::io::stdout().flush().unwrap();
+    graph.insert(0, String::new());
+    graph.push(String::new());
+
+    let first = graph.first_mut().unwrap();
+    first.push_str(box_sym[2]);
+    first.push_str(&box_sym[0].repeat(width.into()));
+    first.push_str(box_sym[3]);
+
+    let last = graph.last_mut().unwrap();
+    last.push_str(box_sym[4]);
+    last.push_str(&box_sym[0].repeat(width.into()));
+    last.push_str(box_sym[5]);
+
+    render_lines(&graph).unwrap();
 }

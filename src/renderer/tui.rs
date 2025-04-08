@@ -242,6 +242,8 @@ fn bar_graph_horizontal_label_(
 
 #[cfg(test)]
 mod tests {
+    use crate::renderer::render_lines;
+
     use super::{bar_graph_horizontal, bar_graph_horizontal_label, downscale_to_biggest_factor};
 
     #[test]
@@ -263,7 +265,7 @@ mod tests {
         let data = [1, 3, 5, 9, 10, 13, 15];
         let graph = bar_graph_horizontal(&data, 20, 10, 10.0, &[]);
         assert_eq!(graph.len(), 7);
-        println!("\n{}", graph.join("\r\n"));
+        render_lines(&graph).unwrap();
     }
 
     #[test]
@@ -271,6 +273,6 @@ mod tests {
         let data = [1, 3, 5, 9, 10, 13, 15];
         let graph = bar_graph_horizontal_label(&data, 20, 10, 10.0, &[]);
         assert_eq!(graph.len(), 7);
-        println!("\n{}", graph.join("\r\n"));
+        render_lines(&graph).unwrap();
     }
 }
