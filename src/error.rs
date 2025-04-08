@@ -16,7 +16,7 @@ pub enum Error {
     EncryptionFailed,
     DecryptionFailed,
     JsonParseFailed(String),
-    JsonStringifyFailed(String),
+    JsonDumpFailed(String),
     Generic(String),
 }
 
@@ -50,7 +50,7 @@ impl Display for Error {
             Error::EncryptionFailed => String::from("encryption failed"),
             Error::DecryptionFailed => String::from("decryption failed"),
             Error::JsonParseFailed(err) => format!("json parsing failed: {err}"),
-            Error::JsonStringifyFailed(err) => format!("json stringify failed: {err}"),
+            Error::JsonDumpFailed(err) => format!("json dumping failed: {err}"),
             Error::Generic(err) => err.to_string(),
         };
         writeln!(f, "{fmt}")
