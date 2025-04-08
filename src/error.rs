@@ -1,4 +1,7 @@
-use crate::payments::{OrderId, PaymentId, ValueSet};
+use crate::{
+    payments::{OrderId, PaymentId, ValueSet},
+    time::CUSTOM_FORMAT,
+};
 use chrono::ParseError;
 use std::fmt::Display;
 
@@ -25,11 +28,21 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let fmt = |pay: &PaymentId| {
+            format!(
+                "PaymentId {{ date: {} }}",
+                pay.date()
+                    .format_str(CUSTOM_FORMAT)
+                    .unwrap_or(pay.date().timestamp().to_string())
+            )
+        };
         let fmt = match self {
-            Error::PaymentDuplicated(pay) => format!("payment already present: {pay:?}"),
-            Error::PaymentNotFound(pay) => format!("payment not found: {pay:?}"),
-            Error::OrderDuplicated(pay, order) => format!("order not found: {pay:?}, {order:?}"),
-            Error::OrderNotFound(pay, order) => format!("order not found: {pay:?}, {order:?}"),
+            Error::PaymentDuplicated(pay) => format!("payment already present: {}", fmt(pay)),
+            Error::PaymentNotFound(pay) => format!("payment not found: {}", fmt(pay)),
+            Error::OrderDuplicated(pay, order) => {
+                format!("order not found: {}, {order:?}", fmt(pay))
+            }
+            Error::OrderNotFound(pay, order) => format!("order not found: {}, {order:?}", fmt(pay)),
             Error::MissingElements(value_set) => format!("missing values: {value_set:?}"),
             Error::EncryptionFailed => String::from("encryption failed"),
             Error::DecryptionFailed => String::from("decryption failed"),

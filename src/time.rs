@@ -1,9 +1,10 @@
 use crate::error::{Error, Result};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
+use derive_getters::Getters;
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Getters, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FakeUtcTime {
     timestamp: i64,
 }
