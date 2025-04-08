@@ -15,10 +15,10 @@ pub enum Error {
     Generic(String),
 }
 
+pub type Result<T> = StdResult<T, Error>;
+
 impl Error {
     pub fn from_generic<T: Display>(err: T) -> Self {
         Self::Generic(err.to_string())
     }
 }
-
-pub type Result<T> = StdResult<T, Error>;
