@@ -120,25 +120,26 @@ fn render(data: &[u32], ignore: &[u32], cutout: f64) {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let mut graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
+    let graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
+    let mut area = graph.area().clone();
 
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
 
-    graph.iter_mut().for_each(|elem| {
+    area.iter_mut().for_each(|elem| {
         *elem = format!("{}{elem}{}", box_sym[1], box_sym[1]);
     });
-    graph.insert(0, String::new());
-    graph.push(String::new());
+    area.insert(0, String::new());
+    area.push(String::new());
 
-    let first = graph.first_mut().unwrap();
+    let first = area.first_mut().unwrap();
     first.push_str(box_sym[2]);
     first.push_str(&box_sym[0].repeat(width.into()));
     first.push_str(box_sym[3]);
 
-    let last = graph.last_mut().unwrap();
+    let last = area.last_mut().unwrap();
     last.push_str(box_sym[4]);
     last.push_str(&box_sym[0].repeat(width.into()));
     last.push_str(box_sym[5]);
 
-    render_lines(&graph).unwrap();
+    render_lines(&area).unwrap();
 }

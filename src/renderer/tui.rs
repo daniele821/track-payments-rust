@@ -64,24 +64,20 @@ fn downscale_to_biggest_factor(values: &[u32], ignored: &[u32], max_length: u32)
     }
 }
 
-pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> Vec<String> {
-    let mut lines = Vec::with_capacity(height as usize);
-    let empty_line = elem.repeat(width as usize);
-    for _ in 0..height {
-        lines.push(empty_line.clone());
-    }
-    lines
-}
-
 pub fn bar_graph_horizontal(
     values: &[u32],
     max_width: u32,
     max_height: u32,
     cutout: f64,
     ignored: &[u32],
-) -> Vec<String> {
+) -> Graph {
     if values.is_empty() || max_width == 0 || max_height == 0 {
-        return simple_rectangle(STR_EMPTY, max_width, max_height);
+        return Graph {
+            area: vec![],
+            cutout: 0,
+            factor: 0,
+            unit_length: 0.,
+        };
     }
 
     if values.len() > max_height as usize {
@@ -158,7 +154,12 @@ pub fn bar_graph_horizontal(
         }
     }
 
-    lines
+    Graph {
+        area: lines,
+        cutout: cutout_u32,
+        factor: factor as u32,
+        unit_length: unit_width,
+    }
 }
 
 pub fn bar_graph_horizontal_label(
@@ -167,11 +168,16 @@ pub fn bar_graph_horizontal_label(
     max_height: u32,
     cutout: f64,
     ignored: &[u32],
-) -> Vec<String> {
+) -> Graph {
     const MIN_GRAPH_SIZE: usize = 3;
 
     if values.is_empty() || max_width == 0 || max_height == 0 {
-        return simple_rectangle(STR_EMPTY, max_width, max_height);
+        return Graph {
+            area: vec![],
+            cutout: 0,
+            factor: 0,
+            unit_length: 0.,
+        };
     }
 
     if (max_height as usize) < values.len() {
@@ -225,7 +231,7 @@ pub fn bar_graph_horizontal_label(
         let tmp = tmp_fmt.len() - 2;
         let value_fmt = format!("{}.{}€ ", &tmp_fmt[..tmp], &tmp_fmt[tmp..]);
         let value_fmt = value_fmt.with(color).bold();
-        if let Some(line) = graph.get_mut(index * factor) {
+        if let Some(line) = graph.area.get_mut(index * factor) {
             if ignored.contains(&(index as u32)) {
                 *line = format!("{e4}{e2}{line}{e3}{e1}");
             } else {
@@ -233,7 +239,7 @@ pub fn bar_graph_horizontal_label(
             }
         }
         for i in 1..factor {
-            if let Some(line) = graph.get_mut(index * factor + i) {
+            if let Some(line) = graph.area.get_mut(index * factor + i) {
                 *line = format!("{cached_left}{line}{cached_right}");
             }
         }
@@ -270,15 +276,15 @@ mod tests {
     pub fn horizontal_bar_chart() {
         let data = [1, 3, 5, 9, 10, 13, 15];
         let graph = bar_graph_horizontal(&data, 20, 10, 10.0, &[]);
-        assert_eq!(graph.len(), 7);
-        println!("\n{}", graph.join("\n"));
+        assert_eq!(graph.area.len(), 7);
+        println!("\n{}", graph.area.join("\n"));
     }
 
     #[test]
     pub fn horizontal_bar_chart_label() {
         let data = [1, 3, 5, 9, 10, 13, 15];
         let graph = bar_graph_horizontal_label(&data, 20, 10, 10.0, &[]);
-        assert_eq!(graph.len(), 7);
-        println!("\n{}", graph.join("\n"));
+        assert_eq!(graph.area.len(), 7);
+        println!("\n{}", graph.area.join("\n"));
     }
 }
