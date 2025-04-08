@@ -8,8 +8,6 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-const DATE_FORMAT: &str = crate::time::CUSTOM_FORMAT;
-
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ValueSetJson {
     cities: BTreeSet<String>,
@@ -66,7 +64,7 @@ impl AllPaymentsJson {
         };
         let mut payments = vec![];
         for payment_api in self_api.payments() {
-            let date = (*payment_api.0.date()).format_str(DATE_FORMAT)?;
+            let date = (*payment_api.0.date()).format_str()?;
             let city = payment_api.1.payment_details.city().clone();
             let shop = payment_api.1.payment_details.shop().clone();
             let method = payment_api.1.payment_details.method().clone();
@@ -114,7 +112,7 @@ impl AllPaymentsJson {
         all_payments_api.add_values(values_api);
 
         for payment in &self.payments {
-            let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)?;
+            let date = FakeUtcTime::parse_str(&payment.date)?;
             let payid = PaymentId::new(date);
             let city = payment.city.clone();
             let shop = payment.shop.clone();

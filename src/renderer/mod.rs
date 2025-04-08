@@ -1,8 +1,8 @@
+pub mod tui;
+
 use crate::error::{Error, Result};
 use crossterm::{cursor::MoveToNextLine, queue, style::Print};
 use std::io::{Write, stdout};
-
-pub mod tui;
 
 pub fn render_lines(lines: &[String]) -> Result<()> {
     let mut stdout = stdout();

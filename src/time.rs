@@ -2,7 +2,7 @@ use crate::error::{Error, Result};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use derive_getters::Getters;
 
-pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
+pub const DEFAULT_FORMAT: &str = "%Y/%m/%d %H:%M";
 
 #[derive(Debug, Getters, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FakeUtcTime {
@@ -26,7 +26,13 @@ impl FakeUtcTime {
         }
     }
 
-    pub fn parse_str(time_str: &str, format: &str) -> Result<Self> {
+    pub fn get_fields(&self) -> Result<FakeUtcFields> {
+        DateTime::from_timestamp(self.timestamp, 0)
+            .ok_or_else(|| format!("unable to convert timestamp: {}", self.timestamp))
+            .map_err(Error::from_generic)
+    }
+
+    pub fn parse_str_fmt(time_str: &str, format: &str) -> Result<Self> {
         Ok(NaiveDateTime::parse_from_str(time_str, format)
             .map_err(Error::TimeParseFailed)?
             .and_utc()
@@ -34,15 +40,17 @@ impl FakeUtcTime {
             .into())
     }
 
-    pub fn get_fields(&self) -> Result<FakeUtcFields> {
-        DateTime::from_timestamp(self.timestamp, 0)
-            .ok_or_else(|| format!("unable to convert timestamp: {}", self.timestamp))
-            .map_err(Error::from_generic)
+    pub fn parse_str(time_str: &str) -> Result<Self> {
+        FakeUtcTime::parse_str_fmt(time_str, DEFAULT_FORMAT)
     }
 
-    pub fn format_str(&self, format: &str) -> Result<String> {
+    pub fn format_str_fmt(&self, format: &str) -> Result<String> {
         self.get_fields()
             .map(|date| date.format(format).to_string())
+    }
+
+    pub fn format_str(&self) -> Result<String> {
+        self.format_str_fmt(DEFAULT_FORMAT)
     }
 }
 
@@ -60,7 +68,7 @@ impl From<FakeUtcFields> for FakeUtcTime {
 
 #[cfg(test)]
 mod tests {
-    use super::{CUSTOM_FORMAT, FakeUtcTime};
+    use super::FakeUtcTime;
     use chrono::{Datelike, Timelike};
 
     #[test]
@@ -77,9 +85,9 @@ mod tests {
     #[test]
     pub fn parse_format_time() {
         let fake_utc_time = FakeUtcTime::from_timestamp(1_743_044_280);
-        let date_str = fake_utc_time.format_str(CUSTOM_FORMAT).unwrap();
+        let date_str = fake_utc_time.format_str().unwrap();
         assert_eq!(date_str, "2025/03/27 02:58");
-        let fake_utc_time2 = FakeUtcTime::parse_str(&date_str, CUSTOM_FORMAT).unwrap();
+        let fake_utc_time2 = FakeUtcTime::parse_str(&date_str).unwrap();
         assert_eq!(fake_utc_time, fake_utc_time2);
     }
 }

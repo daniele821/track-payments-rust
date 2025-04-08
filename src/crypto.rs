@@ -1,7 +1,6 @@
+use crate::error::{Error, Result};
 use aes_gcm::aead::{Aead, AeadCore, KeyInit, OsRng};
 use aes_gcm::{Aes256Gcm, Key, Nonce};
-
-use crate::error::{Error, Result};
 
 pub fn encrypt(key_str: &[u8], plaintext: &[u8]) -> Result<Vec<u8>> {
     let key = Key::<Aes256Gcm>::from_slice(key_str);

@@ -1,7 +1,4 @@
-use crate::{
-    payments::{OrderId, PaymentId, ValueSet},
-    time::CUSTOM_FORMAT,
-};
+use crate::payments::{OrderId, PaymentId, ValueSet};
 use chrono::ParseError;
 use std::fmt::Display;
 
@@ -34,7 +31,7 @@ impl Display for Error {
             format!(
                 "PaymentId {{ date: {} }}",
                 pay.date()
-                    .format_str(CUSTOM_FORMAT)
+                    .format_str()
                     .unwrap_or(pay.date().timestamp().to_string())
             )
         };
