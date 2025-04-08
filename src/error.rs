@@ -5,6 +5,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("encryption failed")]
+    EncryptionFailed,
+    #[error("decryption failed")]
+    DecryptionFailed,
     #[error(transparent)]
     TimeParseFailed(#[from] ParseError),
     #[error("{0}")]
