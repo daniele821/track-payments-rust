@@ -26,7 +26,8 @@ impl FakeUtcTime {
     }
 
     pub fn parse_str(time_str: &str, format: &str) -> Result<Self> {
-        Ok(NaiveDateTime::parse_from_str(time_str, format)?
+        Ok(NaiveDateTime::parse_from_str(time_str, format)
+            .map_err(Error::TimeParseFailed)?
             .and_utc()
             .timestamp()
             .into())
