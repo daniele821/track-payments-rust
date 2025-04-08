@@ -38,10 +38,8 @@ impl Display for Error {
         let fmt = match self {
             Error::PaymentDuplicated(pay) => format!("payment already present: {}", fmt(pay)),
             Error::PaymentNotFound(pay) => format!("payment not found: {}", fmt(pay)),
-            Error::OrderDuplicated(pay, order) => {
-                format!("order not found: {}, {order:?}", fmt(pay))
-            }
-            Error::OrderNotFound(pay, order) => format!("order not found: {}, {order:?}", fmt(pay)),
+            Error::OrderDuplicated(pay, ord) => format!("order not found: {}, {ord:?}", fmt(pay)),
+            Error::OrderNotFound(pay, ord) => format!("order not found: {}, {ord:?}", fmt(pay)),
             Error::MissingElements(value_set) => format!("missing values: {value_set:?}"),
             Error::TimeParseFailed(parse_error) => format!("parsing time failed: {parse_error}"),
             Error::EncryptionFailed => String::from("encryption failed"),
