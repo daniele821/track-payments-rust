@@ -1,4 +1,5 @@
 use crossterm::style::{Color, Stylize};
+use derive_getters::Getters;
 
 const COLOR_TEXT: Color = Color::White;
 const COLOR_GOOD: Color = Color::DarkGreen;
@@ -10,11 +11,22 @@ const COLOR_CUTOUT: Color = Color::Yellow;
 const STR_EMPTY: &str = " ";
 const STR_CUTOUT_VERT: &str = "╏";
 
-fn downscale_to_biggest_factor(
-    values: &[u32],
-    ignored: &[u32],
-    max_length: u32,
-) -> (Vec<u32>, Vec<u32>, u32) {
+#[derive(Getters, Debug)]
+pub struct Graph {
+    area: Vec<String>,
+    cutout: u32,
+    factor: u32,
+    unit_length: f64,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct Downscaled {
+    values: Vec<u32>,
+    ignored: Vec<u32>,
+    factor: u32,
+}
+
+fn downscale_to_biggest_factor(values: &[u32], ignored: &[u32], max_length: u32) -> Downscaled {
     let max_length = max_length as usize;
     let mut scaling_factor = values.len() / max_length;
     while scaling_factor * max_length < values.len() {
@@ -45,7 +57,11 @@ fn downscale_to_biggest_factor(
         buffer.clear();
     }
 
-    (compacted_values, compacted_ignored, scaling_factor as u32)
+    Downscaled {
+        values: compacted_values,
+        ignored: compacted_ignored,
+        factor: scaling_factor as u32,
+    }
 }
 
 pub fn simple_rectangle(elem: &str, width: u32, height: u32) -> Vec<String> {
@@ -69,13 +85,13 @@ pub fn bar_graph_horizontal(
     }
 
     if values.len() > max_height as usize {
-        let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
+        let downscaled = downscale_to_biggest_factor(values, ignored, max_height);
         return bar_graph_horizontal(
-            &data,
+            &downscaled.values,
             max_width,
             max_height,
-            cutout * factor as f64,
-            &ignored,
+            cutout * downscaled.factor as f64,
+            &downscaled.ignored,
         );
     }
 
@@ -170,14 +186,14 @@ fn bar_graph_horizontal_label_(
     }
 
     if (max_height as usize) < values.len() {
-        let (data, ignored, factor) = downscale_to_biggest_factor(values, ignored, max_height);
+        let downscaled = downscale_to_biggest_factor(values, ignored, max_height);
         return bar_graph_horizontal_label_(
-            &data,
+            &downscaled.values,
             max_width,
             max_height,
-            cutout * factor as f64,
-            &ignored,
-            factor,
+            cutout * downscaled.factor as f64,
+            &downscaled.ignored,
+            downscaled.factor,
         );
     }
 
@@ -242,19 +258,25 @@ fn bar_graph_horizontal_label_(
 
 #[cfg(test)]
 mod tests {
-    use super::{bar_graph_horizontal, bar_graph_horizontal_label, downscale_to_biggest_factor};
+    use super::{
+        Downscaled, bar_graph_horizontal, bar_graph_horizontal_label, downscale_to_biggest_factor,
+    };
 
     #[test]
     pub fn downscale_data() {
         let data = [1, 3, 5, 9, 10];
         assert_eq!(
             vec![4, 14, 10],
-            downscale_to_biggest_factor(&data, &[], 4).0
+            downscale_to_biggest_factor(&data, &[], 4).values
         );
 
         let data = [1, 3, 5, 0, 0, 7, 10, 0, 1];
         let ignored = [2, 3, 7];
-        let expected = (vec![4, 0, 7, 10, 1], vec![1], 2);
+        let expected = Downscaled {
+            values: vec![4, 0, 7, 10, 1],
+            ignored: vec![1],
+            factor: 2,
+        };
         assert_eq!(expected, downscale_to_biggest_factor(&data, &ignored, 5));
     }
 
