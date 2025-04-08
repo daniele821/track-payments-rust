@@ -168,17 +168,6 @@ pub fn bar_graph_horizontal_label(
     cutout: f64,
     ignored: &[u32],
 ) -> Vec<String> {
-    bar_graph_horizontal_label_(values, max_width, max_height, cutout, ignored, 1)
-}
-
-fn bar_graph_horizontal_label_(
-    values: &[u32],
-    max_width: u32,
-    max_height: u32,
-    cutout: f64,
-    ignored: &[u32],
-    downscaling_factor: u32,
-) -> Vec<String> {
     const MIN_GRAPH_SIZE: usize = 3;
 
     if values.is_empty() || max_width == 0 || max_height == 0 {
@@ -187,18 +176,16 @@ fn bar_graph_horizontal_label_(
 
     if (max_height as usize) < values.len() {
         let downscaled = downscale_to_biggest_factor(values, ignored, max_height);
-        return bar_graph_horizontal_label_(
+        return bar_graph_horizontal_label(
             &downscaled.values,
             max_width,
             max_height,
             cutout * downscaled.factor as f64,
             &downscaled.ignored,
-            downscaled.factor,
         );
     }
 
-    let max_index_len = (values.len() - 1) * downscaling_factor as usize + 1;
-    let max_index_len = max_index_len.to_string().len();
+    let max_index_len = values.len().to_string().len();
     let left_len = max_index_len + 2;
 
     let max_value = format!("{:03}", values.iter().max().unwrap_or(&0));
@@ -230,8 +217,7 @@ fn bar_graph_horizontal_label_(
         if value >= cutout_u32 {
             color = COLOR_BAD;
         }
-        let index_val = index * downscaling_factor as usize + 1;
-        let index_fmt = format!(" {index_val:>max_index_len$} ",)
+        let index_fmt = format!(" {index:>max_index_len$} ",)
             .with(COLOR_TEXT)
             .bold();
         let len = max_value.len();
