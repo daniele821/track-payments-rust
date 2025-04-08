@@ -12,9 +12,11 @@ pub enum Error {
     OrderDuplicated(PaymentId, OrderId),
     OrderNotFound(PaymentId, OrderId),
     MissingElements(ValueSet),
+    TimeParseFailed(ParseError),
     EncryptionFailed,
     DecryptionFailed,
-    TimeParseFailed(ParseError),
+    JsonParseFailed(String),
+    JsonStringifyFailed(String),
     Generic(String),
 }
 
@@ -44,9 +46,11 @@ impl Display for Error {
             }
             Error::OrderNotFound(pay, order) => format!("order not found: {}, {order:?}", fmt(pay)),
             Error::MissingElements(value_set) => format!("missing values: {value_set:?}"),
+            Error::TimeParseFailed(parse_error) => format!("parsing time failed: {parse_error}"),
             Error::EncryptionFailed => String::from("encryption failed"),
             Error::DecryptionFailed => String::from("decryption failed"),
-            Error::TimeParseFailed(parse_error) => format!("parsing time failed: {parse_error}"),
+            Error::JsonParseFailed(err) => format!("json parsing failed: {err}"),
+            Error::JsonStringifyFailed(err) => format!("json stringify failed: {err}"),
             Error::Generic(err) => err.to_string(),
         };
         writeln!(f, "{fmt}")
