@@ -3,17 +3,20 @@ use std::{
     path::{Path, PathBuf},
 };
 
-fn get_dir(path: &Path) -> Result<PathBuf, String> {
+use crate::error::{Error, Result};
+
+fn get_dir(path: &Path) -> Result<PathBuf> {
     path.parent()
         .map(|dir| dir.to_path_buf())
         .ok_or_else(|| format!("unable to get parent of {}", path.to_string_lossy()))
+        .map_err(Error::from_generic)
 }
 
-pub fn get_exe_path() -> Result<PathBuf, String> {
-    current_exe().map_err(|err| err.to_string())
+pub fn get_exe_path() -> Result<PathBuf> {
+    current_exe().map_err(Error::from_generic)
 }
 
-pub fn get_exe_dir() -> Result<PathBuf, String> {
+pub fn get_exe_dir() -> Result<PathBuf> {
     get_dir(&get_exe_path()?)
 }
 

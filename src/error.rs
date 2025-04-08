@@ -1,16 +1,16 @@
-use std::error::Error as StdError;
+use std::fmt::Display;
 use std::result::Result as StdResult;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error(transparent)]
-    Generic(Box<dyn StdError>),
+    #[error("{0}")]
+    Generic(String),
 }
 
 impl Error {
-    pub fn from_generic<T: StdError + 'static>(err: T) -> Self {
-        Self::Generic(Box::new(err))
+    pub fn from_generic<T: Display>(err: T) -> Self {
+        Self::Generic(err.to_string())
     }
 }
 
