@@ -1,15 +1,15 @@
-use std::io::{Write, stdout};
-
+use crate::error::{Error, Result};
 use crossterm::{cursor::MoveToNextLine, queue, style::Print};
+use std::io::{Write, stdout};
 
 pub mod tui;
 
-pub fn render_lines(lines: &[String]) -> Result<(), String> {
+pub fn render_lines(lines: &[String]) -> Result<()> {
     let mut stdout = stdout();
     for line in lines {
-        queue!(stdout, Print(line)).map_err(|err| err.to_string())?;
-        queue!(stdout, MoveToNextLine(0)).map_err(|err| err.to_string())?;
+        queue!(stdout, Print(line)).map_err(Error::from_generic)?;
+        queue!(stdout, MoveToNextLine(0)).map_err(Error::from_generic)?;
     }
-    stdout.flush().map_err(|err| err.to_string())?;
+    stdout.flush().map_err(Error::from_generic)?;
     Ok(())
 }
