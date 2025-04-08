@@ -63,6 +63,7 @@ impl AllPaymentsJson {
         for payment_api in self_api.payments() {
             let date = (*payment_api.0.date())
                 .format_str(DATE_FORMAT)
+                .map_err(|err| err.to_string())
                 .map_err(PaymentError::GenericError)?;
             let city = payment_api.1.payment_details.city().clone();
             let shop = payment_api.1.payment_details.shop().clone();
@@ -112,6 +113,7 @@ impl AllPaymentsJson {
 
         for payment in &self.payments {
             let date = FakeUtcTime::parse_str(&payment.date, DATE_FORMAT)
+                .map_err(|err| err.to_string())
                 .map_err(PaymentError::GenericError)?;
             let payid = PaymentId::new(date);
             let city = payment.city.clone();

@@ -1,9 +1,12 @@
+use chrono::ParseError;
 use std::fmt::Display;
 use std::result::Result as StdResult;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error(transparent)]
+    TimeParseFailed(#[from] ParseError),
     #[error("{0}")]
     Generic(String),
 }

@@ -1,3 +1,4 @@
+use crate::error::{Error, Result};
 use chrono::{DateTime, Local, NaiveDateTime, Utc};
 
 pub const CUSTOM_FORMAT: &str = "%Y/%m/%d %H:%M";
@@ -24,18 +25,20 @@ impl FakeUtcTime {
         }
     }
 
-    pub fn parse_str(time_str: &str, format: &str) -> Result<Self, String> {
-        NaiveDateTime::parse_from_str(time_str, format)
-            .map_err(|err| err.to_string())
-            .map(|res| res.and_utc().timestamp().into())
+    pub fn parse_str(time_str: &str, format: &str) -> Result<Self> {
+        Ok(NaiveDateTime::parse_from_str(time_str, format)?
+            .and_utc()
+            .timestamp()
+            .into())
     }
 
-    pub fn get_fields(&self) -> Result<FakeUtcFields, String> {
+    pub fn get_fields(&self) -> Result<FakeUtcFields> {
         DateTime::from_timestamp(self.timestamp, 0)
-            .ok_or(format!("unable to parse timestamp: {}", self.timestamp))
+            .ok_or_else(|| format!("unable to convert timestamp: {}", self.timestamp))
+            .map_err(Error::from_generic)
     }
 
-    pub fn format_str(&self, format: &str) -> Result<String, String> {
+    pub fn format_str(&self, format: &str) -> Result<String> {
         self.get_fields()
             .map(|date| date.format(format).to_string())
     }
