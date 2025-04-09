@@ -1,4 +1,7 @@
-use crate::payments::{OrderId, PaymentId, ValueSet};
+use crate::{
+    payments::{OrderId, PaymentId, ValueSet},
+    time::FakeUtcTime,
+};
 use chrono::ParseError;
 use std::fmt::Display;
 
@@ -10,6 +13,7 @@ pub enum Error {
     OrderNotFound(PaymentId, OrderId),
     MissingElements(ValueSet),
     TimeParseFailed(ParseError),
+    TimeFormatFailed(FakeUtcTime),
     EncryptionFailed,
     DecryptionFailed,
     JsonParseFailed(String),
@@ -27,7 +31,7 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let fmt = |pay: &PaymentId| {
+        let fmt1 = |pay: &PaymentId| {
             format!(
                 "PaymentId {{ date: {} }}",
                 pay.date()
@@ -35,13 +39,15 @@ impl Display for Error {
                     .unwrap_or(pay.date().timestamp().to_string())
             )
         };
+        let fmt2 = |time: &FakeUtcTime| time.format_str().unwrap_or(format!("{time:?}"));
         let fmt = match self {
-            Error::PaymentDuplicated(pay) => format!("payment already present: {}", fmt(pay)),
-            Error::PaymentNotFound(pay) => format!("payment not found: {}", fmt(pay)),
-            Error::OrderDuplicated(pay, ord) => format!("order not found: {}, {ord:?}", fmt(pay)),
-            Error::OrderNotFound(pay, ord) => format!("order not found: {}, {ord:?}", fmt(pay)),
+            Error::PaymentDuplicated(pay) => format!("payment already present: {}", fmt1(pay)),
+            Error::PaymentNotFound(pay) => format!("payment not found: {}", fmt1(pay)),
+            Error::OrderDuplicated(pay, ord) => format!("order not found: {}, {ord:?}", fmt1(pay)),
+            Error::OrderNotFound(pay, ord) => format!("order not found: {}, {ord:?}", fmt1(pay)),
             Error::MissingElements(value_set) => format!("missing values: {value_set:?}"),
             Error::TimeParseFailed(parse_error) => format!("parsing time failed: {parse_error}"),
+            Error::TimeFormatFailed(time) => format!("formatting time failed: {}", fmt2(time)),
             Error::EncryptionFailed => String::from("encryption failed"),
             Error::DecryptionFailed => String::from("decryption failed"),
             Error::JsonParseFailed(err) => format!("json parsing failed: {err}"),

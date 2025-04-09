@@ -28,8 +28,8 @@ impl FakeUtcTime {
 
     pub fn get_fields(&self) -> Result<FakeUtcFields> {
         DateTime::from_timestamp(self.timestamp, 0)
-            .ok_or_else(|| format!("unable to convert timestamp: {}", self.timestamp))
-            .map_err(Error::from_generic)
+            .ok_or_else(|| FakeUtcTime::from_timestamp(self.timestamp))
+            .map_err(Error::TimeFormatFailed)
     }
 
     pub fn parse_str_fmt(time_str: &str, format: &str) -> Result<Self> {
