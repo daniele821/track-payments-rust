@@ -1,6 +1,7 @@
 use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
 use crate::{
     error::{Error, Result},
+    internment::CustomString,
     time::FakeUtcTime,
 };
 use serde::{Deserialize, Serialize};
@@ -8,16 +9,16 @@ use std::collections::BTreeSet;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ValueSetJson {
-    cities: BTreeSet<String>,
-    shops: BTreeSet<String>,
+    cities: BTreeSet<CustomString>,
+    shops: BTreeSet<CustomString>,
     #[serde(rename = "paymentMethods")]
-    methods: BTreeSet<String>,
-    items: BTreeSet<String>,
+    methods: BTreeSet<CustomString>,
+    items: BTreeSet<CustomString>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct OrderJson {
-    item: String,
+    item: CustomString,
     #[serde(rename = "unitPrice")]
     unit_price: u32,
     quantity: u32,
@@ -25,11 +26,11 @@ pub struct OrderJson {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PaymentJson {
-    date: String,
-    city: String,
+    date: CustomString,
+    city: CustomString,
     #[serde(rename = "paymentMethod")]
-    method: String,
-    shop: String,
+    method: CustomString,
+    shop: CustomString,
     orders: Vec<OrderJson>,
 }
 
@@ -67,7 +68,7 @@ impl AllPaymentsJson {
             let shop = payment_api.1.payment_details.shop().clone();
             let method = payment_api.1.payment_details.method().clone();
             let mut payment = PaymentJson {
-                date,
+                date: date.into(),
                 city,
                 shop,
                 method,
@@ -110,7 +111,7 @@ impl AllPaymentsJson {
         all_payments_api.add_values(values_api);
 
         for payment in &self.payments {
-            let date = FakeUtcTime::parse_str(&payment.date)?;
+            let date = FakeUtcTime::parse_str(payment.date.as_str())?;
             let payid = PaymentId::new(date);
             let city = payment.city.clone();
             let shop = payment.shop.clone();

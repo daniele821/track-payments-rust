@@ -2,6 +2,7 @@ mod json;
 
 use crate::{
     error::{Error, Result},
+    internment::CustomString,
     time::FakeUtcTime,
 };
 use derive_getters::Getters;
@@ -10,15 +11,15 @@ use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
 pub struct ValueSet {
-    cities: BTreeSet<String>,
-    shops: BTreeSet<String>,
-    methods: BTreeSet<String>,
-    items: BTreeSet<String>,
+    cities: BTreeSet<CustomString>,
+    shops: BTreeSet<CustomString>,
+    methods: BTreeSet<CustomString>,
+    items: BTreeSet<CustomString>,
 }
 
 #[derive(Getters, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct OrderId {
-    item: String,
+    item: CustomString,
 }
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone)]
@@ -40,9 +41,9 @@ pub struct PaymentId {
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone)]
 pub struct PaymentDetail {
-    city: String,
-    shop: String,
-    method: String,
+    city: CustomString,
+    shop: CustomString,
+    method: CustomString,
 }
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
@@ -56,7 +57,7 @@ impl ValueSet {
         Self::default()
     }
 
-    pub fn add_values<Iter: IntoIterator<Item = String>>(
+    pub fn add_values<Iter: IntoIterator<Item = CustomString>>(
         &mut self,
         cities: Iter,
         shops: Iter,
@@ -82,7 +83,7 @@ impl ValueSet {
 }
 
 impl OrderId {
-    pub fn new(item: String) -> Self {
+    pub fn new(item: CustomString) -> Self {
         Self { item }
     }
 
@@ -99,8 +100,8 @@ impl OrderId {
     }
 }
 
-impl From<String> for OrderId {
-    fn from(value: String) -> Self {
+impl From<CustomString> for OrderId {
+    fn from(value: CustomString) -> Self {
         Self::new(value)
     }
 }
@@ -149,7 +150,7 @@ impl From<FakeUtcTime> for PaymentId {
 }
 
 impl PaymentDetail {
-    pub fn new(city: String, shop: String, method: String) -> Self {
+    pub fn new(city: CustomString, shop: CustomString, method: CustomString) -> Self {
         Self { city, shop, method }
     }
 
@@ -277,30 +278,32 @@ impl AllPayments {
 
 #[cfg(test)]
 mod tests {
-    use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
+    use super::{
+        AllPayments, CustomString, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet,
+    };
 
     #[test]
     fn all_payments_creation() {
         let payid = PaymentId::new(0.into());
         let paydetail = PaymentDetail::new(
-            String::from("London"),
-            String::from("Pub"),
-            String::from("Card"),
+            CustomString::from("London"),
+            CustomString::from("Pub"),
+            CustomString::from("Card"),
         );
         let paydetail2 = PaymentDetail::new(
-            String::from("Paris"),
-            String::from("Market"),
-            String::from("Cash"),
+            CustomString::from("Paris"),
+            CustomString::from("Market"),
+            CustomString::from("Cash"),
         );
-        let orderid = OrderId::new(String::from("Apple"));
+        let orderid = OrderId::new(CustomString::from("Apple"));
         let orderdetail = OrderDetail::new(120, 2);
         let orderdetail2 = OrderDetail::new(120, 3);
         let mut values = ValueSet::new();
         values.add_values(
-            vec![String::from("London"), String::from("Paris")],
-            vec![String::from("Market"), String::from("Pub")],
-            vec![String::from("Card"), String::from("Cash")],
-            vec![String::from("Apple"), String::from("Banana")],
+            vec![CustomString::from("London"), CustomString::from("Paris")],
+            vec![CustomString::from("Market"), CustomString::from("Pub")],
+            vec![CustomString::from("Card"), CustomString::from("Cash")],
+            vec![CustomString::from("Apple"), CustomString::from("Banana")],
         );
 
         // insert values

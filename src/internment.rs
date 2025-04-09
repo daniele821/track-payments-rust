@@ -13,6 +13,10 @@ impl CustomString {
         }
     }
 
+    pub fn new_str(value: &str) -> Self {
+        Self::new(value.to_string())
+    }
+
     pub fn as_str(&self) -> &str {
         self.value.as_str()
     }
@@ -21,6 +25,12 @@ impl CustomString {
 impl From<String> for CustomString {
     fn from(value: String) -> Self {
         Self::new(value)
+    }
+}
+
+impl From<&str> for CustomString {
+    fn from(value: &str) -> Self {
+        Self::new_str(value)
     }
 }
 
