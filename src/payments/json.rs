@@ -1,5 +1,3 @@
-// #![deprecated]
-
 use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
 use crate::{
     error::{Error, Result},
