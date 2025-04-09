@@ -37,10 +37,30 @@ impl<'de> Deserialize<'de> for ValueSet {
 
                 while let Some(key) = map.next_key()? {
                     match key {
-                        "cities" => cities = Some(map.next_value()?),
-                        "shops" => shops = Some(map.next_value()?),
-                        "paymentMethods" => methods = Some(map.next_value()?),
-                        "items" => items = Some(map.next_value()?),
+                        "cities" => {
+                            if cities.is_some() {
+                                return Err(de::Error::duplicate_field("cities"));
+                            }
+                            cities = Some(map.next_value()?);
+                        }
+                        "shops" => {
+                            if shops.is_some() {
+                                return Err(de::Error::duplicate_field("shops"));
+                            }
+                            shops = Some(map.next_value()?);
+                        }
+                        "paymentMethods" => {
+                            if methods.is_some() {
+                                return Err(de::Error::duplicate_field("paymentMethods"));
+                            }
+                            methods = Some(map.next_value()?);
+                        }
+                        "items" => {
+                            if items.is_some() {
+                                return Err(de::Error::duplicate_field("items"));
+                            }
+                            items = Some(map.next_value()?);
+                        }
                         _ => {
                             let _: de::IgnoredAny = map.next_value()?;
                         }
