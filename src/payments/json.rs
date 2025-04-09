@@ -19,10 +19,7 @@ impl Serialize for ValueSet {
 
 impl<'de> Deserialize<'de> for ValueSet {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        // Define the expected fields
         const FIELDS: &[&str] = &["cities", "shops", "paymentMethods", "items"];
-
-        // Custom visitor to handle the struct
         struct ValueSetVisitor;
 
         impl<'de> Visitor<'de> for ValueSetVisitor {
@@ -32,10 +29,7 @@ impl<'de> Deserialize<'de> for ValueSet {
                 formatter.write_str("struct ValueSet")
             }
 
-            fn visit_map<V>(self, mut map: V) -> Result<ValueSet, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
+            fn visit_map<V: MapAccess<'de>>(self, mut map: V) -> Result<ValueSet, V::Error> {
                 let mut cities = None;
                 let mut shops = None;
                 let mut methods = None;
@@ -43,32 +37,11 @@ impl<'de> Deserialize<'de> for ValueSet {
 
                 while let Some(key) = map.next_key()? {
                     match key {
-                        "cities" => {
-                            if cities.is_some() {
-                                return Err(de::Error::duplicate_field("cities"));
-                            }
-                            cities = Some(map.next_value()?);
-                        }
-                        "shops" => {
-                            if shops.is_some() {
-                                return Err(de::Error::duplicate_field("shops"));
-                            }
-                            shops = Some(map.next_value()?);
-                        }
-                        "paymentMethods" => {
-                            if methods.is_some() {
-                                return Err(de::Error::duplicate_field("paymentMethods"));
-                            }
-                            methods = Some(map.next_value()?);
-                        }
-                        "items" => {
-                            if items.is_some() {
-                                return Err(de::Error::duplicate_field("items"));
-                            }
-                            items = Some(map.next_value()?);
-                        }
+                        "cities" => cities = Some(map.next_value()?),
+                        "shops" => shops = Some(map.next_value()?),
+                        "paymentMethods" => methods = Some(map.next_value()?),
+                        "items" => items = Some(map.next_value()?),
                         _ => {
-                            // Ignore unknown fields
                             let _: de::IgnoredAny = map.next_value()?;
                         }
                     }
