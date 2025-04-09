@@ -18,7 +18,7 @@ use std::{
 };
 use track_payments_rust::{
     payments::{AllPayments, PaymentId},
-    renderer::{render_lines, tui::bar_graph_horizontal},
+    renderer::{render_lines, tui::bar_graph_horizontal_label},
 };
 
 fn main() -> io::Result<()> {
@@ -120,7 +120,7 @@ fn render(data: &[u32], ignore: &[u32], cutout: f64) {
     let box_sym = symbols[3];
     let width = crossterm::terminal::size().unwrap().0 - 4;
     let height = crossterm::terminal::size().unwrap().1 - 2;
-    let graph = bar_graph_horizontal(data, width as u32, height as u32, cutout, ignore);
+    let graph = bar_graph_horizontal_label(data, width as u32, height as u32, cutout, ignore);
     let mut area = graph.area().clone();
 
     execute!(std::io::stdout(), Clear(ClearType::All), MoveTo(0, 0)).unwrap();
