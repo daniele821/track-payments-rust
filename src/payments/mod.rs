@@ -1,12 +1,11 @@
 mod json;
-mod json_;
 
 use crate::{
     error::{Error, Result},
     time::FakeUtcTime,
 };
 use derive_getters::Getters;
-use json_::AllPaymentsJson;
+use json::AllPaymentsJson;
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Getters, Debug, PartialEq, Eq, Clone, Default)]
