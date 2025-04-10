@@ -12,7 +12,7 @@ const COLOR_CUTOUT: Color = Color::Yellow;
 // https://en.wikipedia.org/wiki/Box-drawing_characters
 const STR_EMPTY: &str = " ";
 const TEST: &str = "▂";
-const STR_CUTOUT_VERT: &str = "╏";
+// const STR_CUTOUT_VERT: &str = "╏";
 
 #[derive(Getters, Debug)]
 pub struct Graph {
