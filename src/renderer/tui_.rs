@@ -11,6 +11,7 @@ const COLOR_CUTOUT: Color = Color::Yellow;
 
 // https://en.wikipedia.org/wiki/Box-drawing_characters
 const STR_EMPTY: &str = " ";
+const TEST: &str = "🮀";
 const STR_CUTOUT_VERT: &str = "╏";
 
 #[derive(Getters, Debug)]
@@ -130,7 +131,7 @@ pub fn bar_graph_horizontal(
             if cutout_line.cmp(&bar_len) == std::cmp::Ordering::Less {
                 str = format!(
                     "{}{}{}{}",
-                    STR_EMPTY.repeat(cutout_line).on(color),
+                    TEST.repeat(cutout_line).on(color).with(Color::Black),
                     STR_EMPTY.with(COLOR_CUTOUT).on(Color::Yellow),
                     STR_EMPTY.repeat(bar_len - cutout_line - 1).on(color),
                     STR_EMPTY.repeat(rem_len)
@@ -140,7 +141,7 @@ pub fn bar_graph_horizontal(
                 // bar to not go over the cutout line!
                 str = format!(
                     "{}{}{}{}",
-                    STR_EMPTY.repeat(bar_len).on(color),
+                    TEST.repeat(bar_len).on(color).with(Color::Black),
                     STR_EMPTY.repeat(cutout_line - bar_len),
                     STR_EMPTY.on(Color::Yellow),
                     STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
