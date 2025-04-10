@@ -133,7 +133,9 @@ pub fn bar_graph_horizontal(
                     "{}{}{}{}",
                     TEST.repeat(cutout_line).on(color).with(Color::Black),
                     STR_EMPTY.with(COLOR_CUTOUT).on(Color::Yellow),
-                    STR_EMPTY.repeat(bar_len - cutout_line - 1).on(color),
+                    TEST.repeat(bar_len - cutout_line - 1)
+                        .on(color)
+                        .with(Color::Black),
                     STR_EMPTY.repeat(rem_len)
                 );
             } else {
