@@ -131,22 +131,18 @@ pub fn bar_graph_horizontal(
                 str = format!(
                     "{}{}{}{}",
                     STR_EMPTY.repeat(cutout_line).on(color),
-                    STR_CUTOUT_VERT.with(COLOR_CUTOUT).on(color),
+                    STR_EMPTY.with(COLOR_CUTOUT).on(Color::Yellow),
                     STR_EMPTY.repeat(bar_len - cutout_line - 1).on(color),
                     STR_EMPTY.repeat(rem_len)
                 );
             } else {
                 // fix with floating point math problem, which causes a bad
                 // bar to not go over the cutout line!
-                let mut cutout_str = STR_CUTOUT_VERT.with(COLOR_CUTOUT);
-                if color == COLOR_BAD {
-                    cutout_str = cutout_str.on(color);
-                }
                 str = format!(
                     "{}{}{}{}",
                     STR_EMPTY.repeat(bar_len).on(color),
                     STR_EMPTY.repeat(cutout_line - bar_len),
-                    cutout_str,
+                    STR_EMPTY.on(Color::Yellow),
                     STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
                 );
             }
