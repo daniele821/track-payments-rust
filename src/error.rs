@@ -32,9 +32,9 @@ impl Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let fmt = match self {
-            Error::PaymentDuplicated(pay) => format!("payment already present: {:?}", pay),
+            Error::PaymentDuplicated(pay) => format!("payment duplicated: {:?}", pay),
             Error::PaymentNotFound(pay) => format!("payment not found: {:?}", pay),
-            Error::OrderDuplicated(pay, ord) => format!("order not found: {:?}, {ord:?}", pay),
+            Error::OrderDuplicated(pay, ord) => format!("order duplicated: {:?}, {ord:?}", pay),
             Error::OrderNotFound(pay, ord) => format!("order not found: {:?}, {ord:?}", pay),
             Error::MissingElements(value_set) => format!("missing values: {value_set:?}"),
             Error::TimeParseFailed(parse_error) => format!("parsing time failed: {parse_error}"),
