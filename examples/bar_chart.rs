@@ -18,7 +18,7 @@ use std::{
 };
 use track_payments_rust::{
     payments::{AllPayments, PaymentId},
-    renderer::{render_lines, tui::bar_graph_horizontal_label},
+    renderer::{render_lines, tui_::bar_graph_horizontal_label},
 };
 
 fn main() -> io::Result<()> {

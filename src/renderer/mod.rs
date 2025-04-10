@@ -1,4 +1,5 @@
 pub mod tui;
+pub mod tui_;
 
 use crate::error::{Error, Result};
 use crossterm::{cursor::MoveToNextLine, queue, style::Print};
