@@ -22,8 +22,7 @@ pub fn decrypt(key_str: &[u8], encrypted_data: &[u8]) -> Result<Vec<u8>> {
     let key = Key::<Aes256Gcm>::from_slice(key_str);
     let (nonce_arr, ciphered_data) = encrypted_data.split_at(12);
     let nonce = Nonce::from_slice(nonce_arr);
-    let cipher = Aes256Gcm::new(key);
-    cipher
+    Aes256Gcm::new(key)
         .decrypt(nonce, ciphered_data)
         .map_err(|_| Error::DecryptionFailed)
 }
