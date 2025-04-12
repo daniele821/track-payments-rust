@@ -121,36 +121,44 @@ pub fn bar_graph_horizontal(
         }
         let bar_len = (f64::from(val) * unit_width).trunc() as usize;
         let rem_len = max_width as usize - bar_len;
-        let mut str = format!(
-            "{}{}",
-            STR_EMPTY.repeat(bar_len).on(color),
-            STR_EMPTY.repeat(rem_len)
-        );
-        // add cutout line
-        if cutout_line < max_width as usize {
-            if cutout_line.cmp(&bar_len) == std::cmp::Ordering::Less {
-                str = format!(
-                    "{}{}{}{}",
-                    TEST.repeat(cutout_line).on(color).with(Color::Black),
-                    STR_EMPTY.with(COLOR_CUTOUT).on(Color::Yellow),
-                    TEST.repeat(bar_len - cutout_line - 1)
-                        .on(color)
-                        .with(Color::Black),
-                    STR_EMPTY.repeat(rem_len)
-                );
-            } else {
-                // fix with floating point math problem, which causes a bad
-                // bar to not go over the cutout line!
-                str = format!(
-                    "{}{}{}{}",
-                    TEST.repeat(bar_len).on(color).with(Color::Black),
-                    STR_EMPTY.repeat(cutout_line - bar_len),
-                    STR_EMPTY.on(Color::Yellow),
-                    STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
-                );
+        for index in 0..factor {
+            let mut tmp: &str = " ";
+            if factor == 1 {
+                tmp = TEST;
+            } else if index == factor - 1 {
+                tmp = "▁";
+            } else if index == 0 {
+                tmp = "▔";
             }
-        }
-        for _ in 0..factor {
+            let mut str = format!(
+                "{}{}",
+                STR_EMPTY.repeat(bar_len).on(color),
+                STR_EMPTY.repeat(rem_len)
+            );
+            // add cutout line
+            if cutout_line < max_width as usize {
+                if cutout_line.cmp(&bar_len) == std::cmp::Ordering::Less {
+                    str = format!(
+                        "{}{}{}{}",
+                        tmp.repeat(cutout_line).on(color).with(Color::Black),
+                        STR_EMPTY.with(COLOR_CUTOUT).on(Color::Yellow),
+                        tmp.repeat(bar_len - cutout_line - 1)
+                            .on(color)
+                            .with(Color::Black),
+                        STR_EMPTY.repeat(rem_len)
+                    );
+                } else {
+                    // fix with floating point math problem, which causes a bad
+                    // bar to not go over the cutout line!
+                    str = format!(
+                        "{}{}{}{}",
+                        tmp.repeat(bar_len).on(color).with(Color::Black),
+                        STR_EMPTY.repeat(cutout_line - bar_len),
+                        STR_EMPTY.on(Color::Yellow),
+                        STR_EMPTY.repeat(rem_len - (cutout_line - bar_len) - 1),
+                    );
+                }
+            }
             lines.push(str.clone());
         }
     }
