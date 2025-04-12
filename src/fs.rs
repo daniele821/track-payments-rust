@@ -2,6 +2,7 @@ use crate::error::{Error, Result};
 use std::{
     env::current_exe,
     fs::read,
+    fs::write,
     path::{Path, PathBuf},
 };
 
@@ -24,7 +25,7 @@ pub fn read_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>> {
 }
 
 pub fn write_file<P: AsRef<Path>>(path: P, contents: Vec<u8>) -> Result<()> {
-    std::fs::write(path, contents).map_err(Error::FileError)
+    write(path, contents).map_err(Error::FileError)
 }
 
 #[cfg(test)]
