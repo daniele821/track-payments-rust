@@ -121,15 +121,15 @@ pub fn bar_graph_horizontal(
         }
         let bar_len = (f64::from(val) * unit_width).trunc() as usize;
         let rem_len = max_width as usize - bar_len;
-        for index in 0..factor {
-            let mut tmp: &str = " ";
-            if factor == 1 {
-                tmp = TEST;
-            } else if index == factor - 1 {
-                tmp = "▁";
-            } else if index == 0 {
-                tmp = "▔";
-            }
+        for _ in 0..factor {
+            let tmp: &str = " ";
+            // if factor == 1 {
+            //     tmp = TEST;
+            // } else if index == factor - 1 {
+            //     tmp = "▁";
+            // } else if index == 0 {
+            //     tmp = "▔";
+            // }
             let mut str = format!(
                 "{}{}",
                 STR_EMPTY.repeat(bar_len).on(color),
