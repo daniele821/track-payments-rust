@@ -3,6 +3,7 @@ use crate::{
     time::FakeUtcTime,
 };
 use chrono::ParseError;
+use serde_json::Error as JsonError;
 use std::fmt::Display;
 use std::io::Error as IoError;
 
@@ -17,8 +18,8 @@ pub enum Error {
     TimeFormatFailed(FakeUtcTime),
     EncryptionFailed,
     DecryptionFailed,
-    JsonParseFailed(String),
-    JsonDumpFailed(String),
+    JsonParseFailed(JsonError),
+    JsonDumpFailed(JsonError),
     FileError(IoError),
     Generic(String),
 }

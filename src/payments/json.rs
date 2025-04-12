@@ -43,14 +43,14 @@ pub struct AllPaymentsJson {
 
 impl AllPaymentsJson {
     pub fn from_json(json_str: &str) -> Result<Self> {
-        serde_json::from_str(json_str).map_err(|err| Error::JsonParseFailed(err.to_string()))
+        serde_json::from_str(json_str).map_err(Error::JsonDumpFailed)
     }
 
     pub fn dump_json(&self, fmt: bool) -> Result<String> {
         if fmt {
-            serde_json::to_string_pretty(self).map_err(|err| Error::JsonDumpFailed(err.to_string()))
+            serde_json::to_string_pretty(self).map_err(Error::JsonDumpFailed)
         } else {
-            serde_json::to_string(self).map_err(|err| Error::JsonDumpFailed(err.to_string()))
+            serde_json::to_string(self).map_err(Error::JsonDumpFailed)
         }
     }
 
