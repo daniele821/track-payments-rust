@@ -46,8 +46,8 @@ impl Display for Error {
             Error::DecryptionFailed => String::from("decryption failed"),
             Error::JsonParseFailed(err) => format!("json parsing failed: {err}"),
             Error::JsonDumpFailed(err) => format!("json dumping failed: {err}"),
-            Error::FileError(err) => err.to_string(),
-            Error::Generic(err) => err.to_string(),
+            Error::FileError(err) => format!("file error: {err}"),
+            Error::Generic(err) => format!("generic error: {err}"),
         };
         writeln!(f, "{fmt}")
     }
