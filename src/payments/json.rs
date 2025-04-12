@@ -1,8 +1,8 @@
 use super::{AllPayments, OrderDetail, OrderId, PaymentDetail, PaymentId, ValueSet};
 use crate::{
     error::{Error, Result},
-    internment::CustomString,
     time::FakeUtcTime,
+    types::internment::CustomString,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;

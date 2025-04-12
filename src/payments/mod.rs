@@ -2,8 +2,8 @@ mod json;
 
 use crate::{
     error::{Error, Result},
-    internment::CustomString,
     time::FakeUtcTime,
+    types::internment::CustomString,
 };
 use derive_getters::Getters;
 use json::AllPaymentsJson;
