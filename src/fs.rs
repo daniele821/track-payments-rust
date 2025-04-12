@@ -1,6 +1,7 @@
 use crate::error::{Error, Result};
 use std::{
     env::current_exe,
+    fs::read,
     path::{Path, PathBuf},
 };
 
@@ -16,6 +17,14 @@ pub fn get_exe_dir() -> Result<PathBuf> {
     get_dir(&get_exe_path()?)
         .ok_or_else(|| String::from("failed to get executable directory"))
         .map_err(Error::from_generic)
+}
+
+pub fn read_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>> {
+    read(path).map_err(Error::FileError)
+}
+
+pub fn write_file<P: AsRef<Path>>(path: P, contents: Vec<u8>) -> Result<()> {
+    std::fs::write(path, contents).map_err(Error::FileError)
 }
 
 #[cfg(test)]

@@ -4,8 +4,9 @@ use crate::{
 };
 use chrono::ParseError;
 use std::fmt::Display;
+use std::io::Error as IoError;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum Error {
     PaymentDuplicated(PaymentId),
     PaymentNotFound(PaymentId),
@@ -18,6 +19,7 @@ pub enum Error {
     DecryptionFailed,
     JsonParseFailed(String),
     JsonDumpFailed(String),
+    FileError(IoError),
     Generic(String),
 }
 
@@ -43,6 +45,7 @@ impl Display for Error {
             Error::DecryptionFailed => String::from("decryption failed"),
             Error::JsonParseFailed(err) => format!("json parsing failed: {err}"),
             Error::JsonDumpFailed(err) => format!("json dumping failed: {err}"),
+            Error::FileError(err) => err.to_string(),
             Error::Generic(err) => err.to_string(),
         };
         writeln!(f, "{fmt}")

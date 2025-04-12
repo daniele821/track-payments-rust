@@ -314,14 +314,14 @@ mod tests {
 
         // insert payment
         let res = all_payments.add_payment(payid.clone(), paydetail.clone());
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         let newval = all_payments.payments().first_key_value().unwrap().1;
         assert_eq!(newval.payment_details(), &paydetail);
         println!("INSERT PAYMENT: {all_payments:?}");
 
         // insert order
         let res = all_payments.add_order(&payid, orderid.clone(), orderdetail.clone());
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         let newval = all_payments.payments().first_key_value().unwrap().1;
         let newval = newval.orders().first_key_value().unwrap().1;
         assert_eq!(newval, &orderdetail);
@@ -335,14 +335,14 @@ mod tests {
 
         // modify payment
         let res = all_payments.modify_payment(&payid, paydetail2.clone());
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         let newval = all_payments.payments.first_key_value().unwrap().1;
         assert_eq!(newval.payment_details(), &paydetail2);
         println!("MODIFIED PAYMENT: {all_payments:?}");
 
         // modify order
         let res = all_payments.modify_order(&payid, &orderid, orderdetail2.clone());
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         let newval = all_payments.payments().first_key_value().unwrap().1;
         let newval = newval.orders().first_key_value().unwrap().1;
         assert_eq!(newval, &orderdetail2);
@@ -350,14 +350,14 @@ mod tests {
 
         // remove order
         let res = all_payments.remove_order(&payid, &orderid);
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         let pay1 = all_payments.payments().first_key_value().unwrap();
         assert_eq!(pay1.1.orders().len(), 0);
         println!("REMOVED ORDER: {all_payments:?}");
 
         // remove payment
         let res = all_payments.remove_payment(&payid);
-        assert_eq!(res, Ok(()));
+        assert!(res.is_ok());
         assert_eq!(all_payments.payments.len(), 0);
         println!("REMOVED PAYMENT: {all_payments:?}");
     }
